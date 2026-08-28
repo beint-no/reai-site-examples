@@ -1,6 +1,6 @@
 # Security
 
-Report a suspected vulnerability privately to security@reai.no. Do not open a public issue containing credentials, personal data or exploit details.
+Report a suspected vulnerability privately to post@reai.no. Do not open a public issue containing credentials, personal data or exploit details.
 
 Site credentials authenticate one Site and belong only in Cloudflare Worker secrets or an ignored local `.dev.vars` file. Browser code calls same-origin Worker routes; it never calls the authenticated Site API directly.
 
