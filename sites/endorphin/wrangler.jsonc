@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "endorphin",
+  "compatibility_date": "2026-08-08",
+  "workers_dev": true,
+  "main": "worker.js",
+  "routes": [
+    {
+      "pattern": "endorphin.no",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.endorphin.no",
+      "custom_domain": true
+    }
+  ],
+  "vars": {
+    "REAI_BASE_URL": "https://app.reai.no"
+  },
+  // REAI_SITE_TOKEN is a Cloudflare secret scoped to the Endorphin Site.
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": true
+  },
+  "observability": {
+    "enabled": true
+  }
+}
