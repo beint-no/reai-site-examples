@@ -1,17 +1,16 @@
 # ReAI Site API storefronts
 
-Production e-commerce storefronts built with semantic HTML, modern CSS, small browser-side JavaScript, Cloudflare Workers and the [ReAI Site API](https://app.reai.no/openapi/site/ui).
+Cloudflare storefront implementations for the [ReAI Site API](https://app.reai.no/openapi/site/ui), built with semantic HTML, modern CSS and small browser-side JavaScript.
 
-These are real stores rather than disposable demos:
+The repository keeps the reusable API and Cloudflare integration separate from each storefront's rendering, content and visual system. Adding a storefront does not require changing the shared Worker or the validation workflow.
 
-| Storefront | Live site | Character |
-| --- | --- | --- |
-| [Budmates](sites/budmates/) | [budmates.respiro.workers.dev](https://budmates.respiro.workers.dev) | Product-rich Norwegian specialist retailer |
-| [Endorphin](sites/endorphin/) | [endorphin.no](https://endorphin.no) | Editorial footwear storefront |
+## Repository layout
 
-Both sites use the shared [`reai-cloudflare-storefront`](packages/reai-cloudflare-storefront/) Worker integration. Their renderers, content and visual systems remain separate to show that the API does not impose a storefront theme.
+- `packages/reai-cloudflare-storefront/` — authentication, API routing, checkout validation, caching, security headers and static asset fallback
+- `sites/` — independently runnable and deployable storefronts
+- `docs/` — integration and deployment guides
 
-## What the examples cover
+## What the repository covers
 
 - Server-rendered products, collections and sitemap content
 - Site-scoped bearer credentials that never reach browser code
@@ -22,30 +21,32 @@ Both sites use the shared [`reai-cloudflare-storefront`](packages/reai-cloudflar
 
 ## Run locally
 
-Requirements: Node.js 20 or newer, a ReAI Site credential and a Cloudflare account for deployment.
+Requirements: Node.js 26 or newer, npm 11 or newer, a ReAI Site credential and a Cloudflare account for deployment.
 
 ```sh
 npm ci
-cp sites/budmates/.dev.vars.example sites/budmates/.dev.vars
-# Add a preview Site credential to the ignored .dev.vars file.
-npx wrangler dev --cwd sites/budmates
-```
+./site.sh list
 
-Use `sites/endorphin` instead to run the other storefront.
+# Select a storefront from the list.
+storefront_name=your-storefront
+cp "sites/$storefront_name/.dev.vars.example" "sites/$storefront_name/.dev.vars"
+# Add a Site credential to the ignored .dev.vars file.
+./site.sh dev "$storefront_name"
+```
 
 ## Check and deploy
 
 ```sh
 ./site.sh list
 ./site.sh check all
-./site.sh deploy budmates
+./site.sh check-workers all
+./site.sh deploy storefront-name
 ```
 
-Deployment is intentionally local. GitHub Actions validates the examples but does not hold production credentials or deploy either store.
+Deployment is local. GitHub Actions validates the repository but does not hold production credentials or deploy storefronts.
 
 Start with [the quickstart](docs/quickstart.md), then read the [architecture](docs/architecture.md), [authentication](docs/authentication.md), [catalog and image](docs/catalog-and-images.md), [checkout](docs/checkout.md) and [Cloudflare deployment](docs/cloudflare-deployment.md) guides.
 
 ## Licensing
 
 Reusable source code is MIT licensed. Customer names, trademarks, logos, photography, product data and editorial content are not granted for reuse; see [ASSETS.md](ASSETS.md).
-Production Cloudflare storefronts built with the ReAI Site API

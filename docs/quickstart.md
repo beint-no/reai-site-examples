@@ -4,9 +4,13 @@
 
 Create a Site in ReAI, publish at least one product and create a Site credential with the scopes listed in [authentication](authentication.md). Copy the token when it is created; it is not browser configuration.
 
-## 2. Choose a production example
+## 2. Choose an implementation
 
-Budmates is a compact, product-dense implementation. Endorphin demonstrates richer product options, lifestyle media and legacy redirects. Copy the closer starting point, then replace all brand assets and customer content as required by [ASSETS.md](../ASSETS.md).
+List the available storefront directories and choose the implementation closest to the desired catalog, navigation and product-option structure. Replace all brand assets and customer content as required by [ASSETS.md](../ASSETS.md).
+
+```sh
+./site.sh list
+```
 
 ## 3. Configure local development
 
@@ -14,7 +18,8 @@ From the repository root:
 
 ```sh
 npm ci
-cp sites/budmates/.dev.vars.example sites/budmates/.dev.vars
+storefront_name=your-storefront
+cp "sites/$storefront_name/.dev.vars.example" "sites/$storefront_name/.dev.vars"
 ```
 
 Put the preview Site token in the ignored file:
@@ -26,7 +31,7 @@ REAI_SITE_TOKEN=replace-with-your-site-credential
 Then run the Worker:
 
 ```sh
-npx wrangler dev --cwd sites/budmates
+./site.sh dev "$storefront_name"
 ```
 
 The Worker reads catalog content from ReAI and serves static files from the site's `public/` directory.
@@ -40,8 +45,8 @@ Set the Site preview domain to the expected `workers.dev` hostname. Before custo
 Store the Site credential as a Cloudflare secret and deploy locally:
 
 ```sh
-printf '%s' "$REAI_SITE_TOKEN" | npx wrangler secret put REAI_SITE_TOKEN --cwd sites/budmates
-./site.sh deploy budmates
+printf '%s' "$REAI_SITE_TOKEN" | ./site.sh secret "$storefront_name"
+./site.sh deploy "$storefront_name"
 ```
 
 Verify the homepage, a collection, a product with multiple variants, availability, cart, hosted checkout and successful return path.

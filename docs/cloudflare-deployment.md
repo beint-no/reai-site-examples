@@ -13,14 +13,16 @@ export REAI_SITE_TOKEN=...
 Store the ReAI token for one Worker:
 
 ```sh
-printf '%s' "$REAI_SITE_TOKEN" | npx wrangler secret put REAI_SITE_TOKEN --cwd sites/budmates
+storefront_name=your-storefront
+printf '%s' "$REAI_SITE_TOKEN" | ./site.sh secret "$storefront_name"
 ```
 
 Validate and deploy:
 
 ```sh
-./site.sh check budmates
-./site.sh deploy budmates
+./site.sh check "$storefront_name"
+./site.sh check-workers "$storefront_name"
+./site.sh deploy "$storefront_name"
 ```
 
 Custom domains belong in that site's Wrangler configuration. Coordinate DNS cutover separately and preserve unrelated mail and verification records. The Worker configuration contains only the public ReAI base URL; the Site credential is always a secret.
