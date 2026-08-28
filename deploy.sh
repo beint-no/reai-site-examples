@@ -10,14 +10,10 @@ if [ -z "$site" ]; then
   exit 64
 fi
 require_site "$site"
+require_wrangler
 
 : "${CLOUDFLARE_API_TOKEN:?CLOUDFLARE_API_TOKEN is required}"
 : "${CLOUDFLARE_ACCOUNT_ID:?CLOUDFLARE_ACCOUNT_ID is required}"
 
-if [ ! -x "$root_dir/node_modules/.bin/wrangler" ]; then
-  echo "Wrangler is not installed; run 'npm ci' in $root_dir" >&2
-  exit 1
-fi
-
 "$root_dir/validate.sh" "$site"
-(cd "$root_dir/sites/$site" && "$root_dir/node_modules/.bin/wrangler" deploy)
+(cd "$root_dir/sites/$site" && "$wrangler_bin" deploy)

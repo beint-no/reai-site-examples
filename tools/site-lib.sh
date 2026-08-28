@@ -3,6 +3,7 @@ set -euo pipefail
 
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 sites_root="$repository_root/sites"
+wrangler_bin="$repository_root/node_modules/.bin/wrangler"
 
 list_sites() {
   find "$sites_root" -mindepth 1 -maxdepth 1 -type d -print0 |
@@ -26,5 +27,12 @@ require_site() {
     echo "unknown site '$site'; available sites:" >&2
     list_sites >&2
     return 64
+  fi
+}
+
+require_wrangler() {
+  if [ ! -x "$wrangler_bin" ]; then
+    echo "Wrangler is not installed; run 'npm ci' in $repository_root" >&2
+    return 1
   fi
 }

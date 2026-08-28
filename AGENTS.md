@@ -1,6 +1,6 @@
 # ReAI Site API examples
 
-This public repository contains production Cloudflare storefronts powered by the ReAI Site API. Every storefront under `sites/` is independently deployable and is also maintained as readable reference code.
+This repository contains Cloudflare storefronts powered by the ReAI Site API. Every storefront under `sites/` is independently runnable and deployable.
 
 ## Repository contract
 
