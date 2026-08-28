@@ -1,0 +1,9 @@
+{
+  "name": "BudMates",
+  "short_name": "BudMates",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0b0a",
+  "theme_color": "#caff59",
+  "icons": []
+}
