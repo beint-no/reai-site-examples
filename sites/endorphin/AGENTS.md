@@ -16,11 +16,11 @@
 
 ## Site direction
 
-- Norwegian-language storefront. Light cream chrome, dark Endorphin wordmark, coral accent. Distinct from Budmates.
+- The current storefront route is `nb-NO` in market `NO`. Keep source-owned translations under `locales/` or locale-specific static folders and catalog translations in ReAI; follow `docs/localization.md` for new folder, domain or currency-market routes. Keep the light cream chrome, dark Endorphin wordmark and coral accent distinct from Budmates.
 - Catalog, images, prices, availability, collections, sitemap and checkout come from the ReAI Site API at request time.
 - Product image masters and 320/480/640/960/1280/1600/1920 AVIF renditions come from each catalog image's `url` and `renditions` fields. Render width-based `srcset`/`sizes` with intrinsic dimensions; do not reconstruct media URLs or send masters to thumbnail slots.
 - Editorial pages stay static: `om/`, `kontakt/`, `frakt/`, `retur/`, `storrelse/`, `faq/`, `vilkar/`, `personvern/`.
-- Cart state lives in `endorphin-cart-v1`. Checkout posts variant UUIDs to `/reai/checkout/start` and redirects to ReAI hosted checkout. Success return is `/bestilling/fullfort/`.
+- Cart state is scoped by market. Checkout posts variant UUIDs to the locale route's `/reai/checkout/start` and redirects to ReAI hosted checkout. Success return is the localized `/bestilling/fullfort/`.
 - Contact form opens the visitor's mail app to `post@famme.no`. It does not collect data.
 - The Site reuses Famme's existing products. The storefront must treat API prices, variants and availability as authoritative.
 

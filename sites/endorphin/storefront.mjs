@@ -1,7 +1,7 @@
 export const SITE_ORIGIN = "https://endorphin.no";
 export const HANDLE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const CONTACT_EMAIL = "post@famme.no";
-export const STORE_SCRIPT = "/assets/store.js?v=13";
+export const STORE_SCRIPT = "/assets/store.js?v=14";
 export const STORE_STYLE = "/assets/store.css?v=11";
 export const SHIPPING_THRESHOLD = 899;
 
@@ -207,10 +207,10 @@ export const stripHtml = (value = "") => String(value)
   .replace(/\s+/g, " ")
   .trim();
 
-export const formatMoney = (value) => new Intl.NumberFormat("nb-NO", {
-  minimumFractionDigits: Number(value) % 1 ? 2 : 0,
-  maximumFractionDigits: 2,
-}).format(Number(value)) + " kr";
+export const formatMoney = (value, currency = "NOK", locale = "nb-NO") => new Intl.NumberFormat(locale, {
+  style: "currency",
+  currency,
+}).format(Number(value));
 
 export const optionTypes = (variants = []) => {
   const names = [];
@@ -284,12 +284,14 @@ export function renderOptionPills(variants = [], availability = {}) {
   return `<div class="product-options" data-product-options>${groups}</div><script type="application/json" data-product-variant-map>${JSON.stringify(payload).replaceAll("<", "\\u003c")}</script>`;
 }
 
-export const priceRange = (variants = []) => {
+export const priceRange = (variants = [], currency = "NOK", locale = "nb-NO") => {
   const prices = variants.map((variant) => Number(variant.price)).filter((price) => Number.isFinite(price));
-  if (!prices.length) return "0 kr";
+  if (!prices.length) return formatMoney(0, currency, locale);
   const minimum = Math.min(...prices);
   const maximum = Math.max(...prices);
-  return minimum === maximum ? formatMoney(minimum) : `${formatMoney(minimum)} – ${formatMoney(maximum)}`;
+  return minimum === maximum
+    ? formatMoney(minimum, currency, locale)
+    : `${formatMoney(minimum, currency, locale)} – ${formatMoney(maximum, currency, locale)}`;
 };
 
 export const siteImage = (product) => product?.images?.[0] || null;
@@ -575,7 +577,7 @@ function lifestyleSection(handle) {
   return `<section class="product-lifestyle"><div class="shop-shell product-lifestyle-grid"><figure>${localPicture(lifestyle.src, { alt: lifestyle.alt, sizes: "(max-width: 860px) calc(100vw - 28px), 520px", loading: "lazy" })}</figure><div><p class="shop-kicker">${escapeHtml(lifestyle.kicker)}</p><h2>${escapeHtml(lifestyle.title)}</h2><p>${escapeHtml(lifestyle.text)}</p><ul><li>Fri frakt over ${SHIPPING_THRESHOLD} kr</li><li>Gratis bytte i 30 dager</li><li>Etikettløs retur</li></ul></div></div></section>`;
 }
 
-export function productCard(product, label = "") {
+export function productCard(product, label = "", currency = "NOK", locale = "nb-NO") {
   if (!product?.handle) return "";
   const image = siteImage(product);
   const hover = product.images?.[1];
@@ -586,11 +588,11 @@ export function productCard(product, label = "") {
   const media = image
     ? `${responsiveImage(image, { alt: image.alt || title, preferredWidth: 480, sizes: CARD_IMAGE_SIZES, loading: "lazy" })}${hover ? deferredHoverImage(hover, CARD_IMAGE_SIZES) : ""}`
     : '<span class="product-image-fallback">E</span>';
-  return `<article class="product-card"><a class="product-card-media" href="/products/${escapeHtml(product.handle)}/">${label ? `<span class="product-badge">${escapeHtml(label)}</span>` : ""}${media}</a><div class="product-card-copy"><p>${escapeHtml(displayBrand(product))}</p><h3><a href="/products/${escapeHtml(product.handle)}/">${escapeHtml(title)}</a></h3>${ratingMarkup(product.handle, "product-card-rating")}<div class="product-card-price"><strong>${formatMoney(from)}</strong>${compare > from ? `<del>${formatMoney(compare)}</del>` : ""}</div></div></article>`;
+  return `<article class="product-card"><a class="product-card-media" href="/products/${escapeHtml(product.handle)}/">${label ? `<span class="product-badge">${escapeHtml(label)}</span>` : ""}${media}</a><div class="product-card-copy"><p>${escapeHtml(displayBrand(product))}</p><h3><a href="/products/${escapeHtml(product.handle)}/">${escapeHtml(title)}</a></h3>${ratingMarkup(product.handle, "product-card-rating")}<div class="product-card-price"><strong>${formatMoney(from, currency, locale)}</strong>${compare > from ? `<del>${formatMoney(compare, currency, locale)}</del>` : ""}</div></div></article>`;
 }
 
-export function productGrid(products, label = "") {
-  const cards = (products || []).map((product) => productCard(product, label)).filter(Boolean);
+export function productGrid(products, label = "", currency = "NOK", locale = "nb-NO") {
+  const cards = (products || []).map((product) => productCard(product, label, currency, locale)).filter(Boolean);
   return cards.length
     ? `<div class="product-grid" data-collection-grid data-server-rendered="true">${cards.join("")}</div>`
     : '<div class="empty-state"><h2>Ingen produkter akkurat nå</h2><p>Utvalget oppdateres fortløpende.</p></div>';
@@ -616,13 +618,20 @@ function breadcrumbs(items) {
   }).join("")}</ol></nav>`;
 }
 
-function chrome(store, active = "") {
+function chrome(store, active = "", renderContext, canonicalPath = "/") {
   const items = navItems(store);
   const nav = [
     `<a href="/"${active === "home" ? ' aria-current="page"' : ""}>Hjem</a>`,
     ...items.map((item) => `<a href="/collections/${item.handle}/"${active === item.handle ? ' aria-current="page"' : ""}>${escapeHtml(item.label)}</a>`),
     `<a href="/collections/all/"${active === "all" ? ' aria-current="page"' : ""}>Alle</a>`,
   ].join("");
+  const localeLinks = renderContext?.alternateLinks(canonicalPath) || [];
+  const languageNavigation = localeLinks.length > 1
+    ? `<nav aria-label="${escapeHtml(renderContext.messages?.site?.languageNavigation || "Language")}">${localeLinks.map((alternate) => {
+        const label = new Intl.DisplayNames([renderContext.locale], { type: "language" }).of(alternate.locale) || alternate.locale;
+        return `<a href="${escapeHtml(alternate.url)}" lang="${escapeHtml(alternate.locale)}"${alternate.locale === renderContext.locale ? ' aria-current="page"' : ""}>${escapeHtml(label)}</a>`;
+      }).join("")}</nav>`
+    : "";
   const year = new Date().getFullYear();
   return {
     header: `<a class="skip-link" href="#main">Hopp til innhold</a>
@@ -631,7 +640,7 @@ function chrome(store, active = "") {
     <a class="shop-logo" href="/" aria-label="Endorphin, forside"><img src="/assets/brand/endorphin-logo.png" alt="Endorphin" width="800" height="95" decoding="async"></a>
     <button class="shop-menu-toggle" type="button" aria-label="Åpne meny" aria-expanded="false" aria-controls="shop-navigation" data-nav-toggle><span></span></button>
     <nav class="shop-nav" id="shop-navigation" aria-label="Hovedmeny" data-nav-links>${nav}</nav>
-    <div class="shop-tools"><a href="/sok/" aria-label="Søk">Søk</a><a href="/handlekurv/" aria-label="Handlekurv">Kurv <span class="cart-count" data-cart-count>0</span></a></div>
+    <div class="shop-tools">${languageNavigation}<a href="/sok/" aria-label="Søk">Søk</a><a href="/handlekurv/" aria-label="Handlekurv">Kurv <span class="cart-count" data-cart-count>0</span></a></div>
   </div></header>`,
     footer: `<footer class="shop-footer"><div class="shop-shell shop-footer-grid"><div><a class="shop-logo shop-logo--footer" href="/"><img src="/assets/brand/endorphin-logo.png" alt="Endorphin" width="800" height="95" loading="lazy" decoding="async"></a><p>Joggesko fra Famme med demping til trening, jobb og hverdag. Fri frakt over ${SHIPPING_THRESHOLD} kr.</p></div><div><h2>Handle</h2><a href="/collections/joggesko/">Joggesko</a><a href="/collections/sokker/">Sokker</a><a href="/collections/all/">Alle produkter</a></div><div><h2>Informasjon</h2><a href="/frakt/">Frakt og levering</a><a href="/storrelse/">Størrelsesguide</a><a href="/om/">Om oss</a><a href="/kontakt/">Kontakt</a><a href="/faq/">Ofte stilte spørsmål</a></div><div><h2>Vilkår</h2><a href="/vilkar/">Kjøpsvilkår</a><a href="/retur/">Retur og bytte</a><a href="/personvern/">Personvern</a></div></div><div class="shop-footer-bottom shop-shell"><span>© ${year} Endorphin</span><div><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></div></div></footer><div class="cart-toast" role="status" aria-live="polite" data-cart-toast hidden></div>`,
   };
@@ -648,14 +657,25 @@ export function documentHtml({
   ogType = "website",
   ogImage = `${SITE_ORIGIN}/assets/hero.webp`,
   robots = "",
+  renderContext,
 }) {
-  const { header, footer } = chrome(store, active);
-  const url = `${SITE_ORIGIN}${canonicalPath}`;
+  const { header, footer } = chrome(store, active, renderContext, canonicalPath);
+  const url = renderContext?.canonicalUrl(canonicalPath) || `${SITE_ORIGIN}${canonicalPath}`;
+  const locale = renderContext?.locale || "nb-NO";
+  const alternates = renderContext?.alternateLinks(canonicalPath)
+    .map((alternate) => `<link rel="alternate" hreflang="${escapeHtml(alternate.locale)}" href="${escapeHtml(alternate.url)}">`)
+    .join("") || "";
   const robotsTag = robots ? `<meta name="robots" content="${escapeHtml(robots)}">` : "";
-  return `<!doctype html><html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}">${robotsTag}<meta name="theme-color" content="#f7f4ef"><link rel="canonical" href="${escapeHtml(url)}"><link rel="icon" href="/assets/favicon.png" type="image/png"><link rel="preconnect" href="https://app.reai.no" crossorigin><meta property="og:title" content="${escapeHtml(title)}"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:url" content="${escapeHtml(url)}"><meta property="og:type" content="${escapeHtml(ogType)}"><meta property="og:image" content="${escapeHtml(ogImage)}"><meta property="og:locale" content="nb_NO"><meta property="og:site_name" content="Endorphin"><link rel="stylesheet" href="/assets/site.css"><link rel="stylesheet" href="${STORE_STYLE}"><script src="${STORE_SCRIPT}" defer></script>${schema}</head><body>${header}<noscript><p class="noscript-banner">JavaScript må være aktivert for handlekurv og utsjekk.</p></noscript><main id="main">${body}</main>${footer}</body></html>`;
+  const apiBase = renderContext?.publicPath("/reai") || "/reai";
+  const currency = store?.currency || "NOK";
+  const market = renderContext?.market || "NO";
+  const html = `<!doctype html><html lang="${escapeHtml(locale)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}">${robotsTag}<meta name="theme-color" content="#f7f4ef"><meta name="reai-api-base" content="${escapeHtml(apiBase)}"><meta name="reai-market" content="${escapeHtml(market)}"><meta name="reai-currency" content="${escapeHtml(currency)}"><link rel="canonical" href="${escapeHtml(url)}">${alternates}<link rel="icon" href="/assets/favicon.png" type="image/png"><link rel="preconnect" href="https://app.reai.no" crossorigin><meta property="og:title" content="${escapeHtml(title)}"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:url" content="${escapeHtml(url)}"><meta property="og:type" content="${escapeHtml(ogType)}"><meta property="og:image" content="${escapeHtml(ogImage)}"><meta property="og:locale" content="${escapeHtml(locale.replaceAll("-", "_"))}"><meta property="og:site_name" content="Endorphin"><link rel="stylesheet" href="/assets/site.css"><link rel="stylesheet" href="${STORE_STYLE}"><script src="${STORE_SCRIPT}" defer></script>${schema}</head><body>${header}<noscript><p class="noscript-banner">JavaScript må være aktivert for handlekurv og utsjekk.</p></noscript><main id="main">${body}</main>${footer}</body></html>`;
+  return renderContext
+    ? html.replace(/href="(\/(?!assets\/)[^"]*)"/g, (_, path) => `href="${escapeHtml(renderContext.publicPath(path))}"`)
+    : html;
 }
 
-export function renderHomePage(store) {
+export function renderHomePage(store, renderContext) {
   const shoes = (collectionByHandle(store, "joggesko")?.products || [])
     .map((member) => productByHandle(store, member.handle))
     .filter(Boolean);
@@ -677,11 +697,11 @@ export function renderHomePage(store) {
   }).join("");
   const body = `<section class="store-hero store-hero--lifestyle" data-storefront="home"><div class="shop-shell store-hero-grid"><div class="store-hero-copy"><p class="shop-kicker">Endorphin by Famme</p><h1>Demping du<br><span>merker.</span></h1><p>Lette sko utviklet for løpeturen, arbeidsdagen og alt imellom. Finn modellen som passer steget ditt.</p><div class="store-actions"><a class="store-button" href="/collections/joggesko/">Finn dine sko</a><a class="store-button store-button--ghost" href="/storrelse/">Størrelsesguide</a></div><ul class="hero-trust"><li>Fri frakt over ${SHIPPING_THRESHOLD} kr</li><li>Gratis bytte i 30 dager</li><li>Vipps, kort og mobilbetaling</li></ul></div><a class="hero-photo hero-photo--lifestyle" href="/products/endorphin-rx2-shoes/">${localPicture("/assets/lifestyle/rx2-city.webp", { alt: "Løper som knyter hvite Endorphin RX2 utendørs", sizes: "(max-width: 760px) calc(100vw - 28px), 500px", fetchPriority: "high" })}<span class="hero-photo-caption"><strong>Endorphin RX2</strong><small>Responsiv demping · hver eneste kilometer</small></span></a></div></section>
 <section class="service-band" aria-label="Kjøpsfordeler"><ul class="shop-shell"><li><strong>Fri frakt</strong><span>På ordre over ${SHIPPING_THRESHOLD} kr</span></li><li><strong>Gratis bytte</strong><span>Innen 30 dager</span></li><li><strong>Etikettløs retur</strong><span>Enkelt og oversiktlig</span></li><li><strong>Trygg betaling</strong><span>Vipps, kort og mobilbetaling</span></li></ul></section>
-${shoes.length ? `<section class="shop-section shop-section--light"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">Sko fra Famme</p><h2>Velg din følelse.</h2></div><a class="shop-text-link" href="/collections/joggesko/">Se alle joggesko →</a></div>${productGrid(shoes)}</div></section>` : ""}
+${shoes.length ? `<section class="shop-section shop-section--light"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">Sko fra Famme</p><h2>Velg din følelse.</h2></div><a class="shop-text-link" href="/collections/joggesko/">Se alle joggesko →</a></div>${productGrid(shoes, "", store.currency, renderContext?.locale)}</div></section>` : ""}
 <section class="home-campaign"><div class="shop-shell home-campaign-grid"><div class="home-campaign-copy"><p class="shop-kicker">Komfort i bevegelse</p><h2>Fra første kilometer til siste vakt.</h2><p>Endorphin-serien samler lette, dempede sko for ulike behov — fra den responsive RX2 til myke AirStep og retroinspirerte 90S Trainers.</p><a class="store-button" href="/collections/joggesko/">Sammenlign modellene</a><dl><div><dt>4 modeller</dt><dd>Ulike uttrykk og demping</dd></div><div><dt>35–42</dt><dd>Størrelser i utvalget</dd></div></dl></div><div class="home-campaign-visual">${localPicture("/assets/lifestyle/rx1-white.webp", { alt: "Kvinne i sort treningstøy med hvite Endorphin RX1", sizes: "(max-width: 860px) 52vw, 390px", loading: "lazy" })}${localPicture("/assets/lifestyle/rx1-black.webp", { alt: "Løper med sorte Endorphin RX1 i byen", sizes: "(max-width: 860px) 42vw, 330px", loading: "lazy" })}</div></div></section>
 <section class="reviews-section reviews-section--home"><div class="shop-shell"><div class="reviews-heading"><div><p class="shop-kicker">Prøvd i hverdagen</p><h2>Kunder som kjenner forskjellen.</h2></div><div class="reviews-intro"><p>Verifiserte omtaler hentet fra Endorphin-skoene på Famme.no.</p><a href="https://famme.no/search?q=Endorphin&amp;type=product" target="_blank" rel="noreferrer">Finn skoene hos Famme →</a></div></div>${renderReviewGrid(["endorphin-rx2-shoes", "endorphin-rx1-shoes", "airstep-shoes"])}</div></section>
 ${categoryCards ? `<section class="shop-section shop-section--light"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">Hele utvalget</p><h2>Fullfør steget.</h2></div><a class="shop-text-link" href="/collections/all/">Se alt →</a></div><div class="category-feature-grid">${categoryCards}</div></div></section>` : ""}
-${socks.length ? `<section class="brand-feature"><div class="shop-shell brand-feature-grid"><div><p class="shop-kicker">Tilbehør</p><h2>Sokker som<br>hører med.</h2><p>Tennissokker og no-show i bomull — til trening og hverdag.</p><a class="store-button" href="/collections/sokker/">Se sokker</a></div><div class="brand-feature-products">${socks.slice(0, 2).map((product) => productCard(product)).join("")}</div></div></section>` : ""}`;
+${socks.length ? `<section class="brand-feature"><div class="shop-shell brand-feature-grid"><div><p class="shop-kicker">Tilbehør</p><h2>Sokker som<br>hører med.</h2><p>Tennissokker og no-show i bomull — til trening og hverdag.</p><a class="store-button" href="/collections/sokker/">Se sokker</a></div><div class="brand-feature-products">${socks.slice(0, 2).map((product) => productCard(product, "", store.currency, renderContext?.locale)).join("")}</div></div></section>` : ""}`;
   return documentHtml({
     title: "Endorphin — Joggesko med god demping",
     description: `Joggesko fra Famme med god demping til trening, jobb og hverdag. Fri frakt over ${SHIPPING_THRESHOLD} kr, gratis bytte og betaling med Vipps, kort eller mobilbetaling.`,
@@ -689,10 +709,11 @@ ${socks.length ? `<section class="brand-feature"><div class="shop-shell brand-fe
     active: "home",
     body,
     store,
+    renderContext,
   });
 }
 
-export function renderCollectionPage(store, handle) {
+export function renderCollectionPage(store, handle, renderContext) {
   const isAll = handle === "all";
   const collection = isAll ? null : collectionByHandle(store, handle);
   if (!isAll && !collection) return null;
@@ -718,7 +739,7 @@ export function renderCollectionPage(store, handle) {
     ? `<header class="collection-hero collection-hero--campaign" data-storefront="collection"><div class="shop-shell collection-hero-grid"><div>${trail}<p class="shop-kicker">${escapeHtml(countLabel)} · Fra Famme</p><h1>${escapeHtml(isAll ? "Hele steget." : "Sko for hele dagen.")}</h1><p>${escapeHtml(description)} Fire modeller, ulike uttrykk — samme fokus på komfort.</p></div><figure>${localPicture(campaignImage, { alt: campaignAlt, sizes: "(max-width: 760px) calc(100vw - 28px), 440px", fetchPriority: "high" })}</figure></div></header>`
     : `<header class="collection-hero" data-storefront="collection"><div class="shop-shell">${trail}<p class="shop-kicker">${escapeHtml(countLabel)}</p><h1>${escapeHtml(title)}</h1><p>${escapeHtml(description)}</p></div></header>`;
   const proof = campaign ? `<section class="reviews-section reviews-section--collection"><div class="shop-shell"><div class="reviews-heading"><div><p class="shop-kicker">Verifiserte omtaler</p><h2>Komfort, bekreftet.</h2></div><div class="reviews-intro"><p>Erfaringer fra kunder som har brukt skoene til løping, jobb og lange dager.</p></div></div>${renderReviewGrid(["endorphin-rx2-shoes", "endorphin-rx1-shoes", "airstep-shoes"])}</div></section>` : "";
-  const body = `${hero}<section class="shop-section shop-section--light" aria-labelledby="collection-products"><div class="shop-shell"><h2 class="sr-only" id="collection-products">Produkter i ${escapeHtml(title)}</h2><div class="catalog-toolbar"><strong>${escapeHtml(countLabel)}</strong><a href="/sok/">${isAll ? "Søk i utvalget" : "Søk i hele butikken"}</a></div>${productGrid(members)}</div></section>${proof}`;
+  const body = `${hero}<section class="shop-section shop-section--light" aria-labelledby="collection-products"><div class="shop-shell"><h2 class="sr-only" id="collection-products">Produkter i ${escapeHtml(title)}</h2><div class="catalog-toolbar"><strong>${escapeHtml(countLabel)}</strong><a href="/sok/">${isAll ? "Søk i utvalget" : "Søk i hele butikken"}</a></div>${productGrid(members, "", store.currency, renderContext?.locale)}</div></section>${proof}`;
   return documentHtml({
     title: `${title} | Endorphin`,
     description: metaDescription(collection?.seoDescription || description, description),
@@ -727,10 +748,11 @@ export function renderCollectionPage(store, handle) {
     body,
     store,
     ogImage: image?.url || undefined,
+    renderContext,
   });
 }
 
-export function renderProductPage(store, product, availability = {}) {
+export function renderProductPage(store, product, availability = {}, renderContext) {
   const image = siteImage(product);
   const images = product.images || [];
   const variants = product.variants || [];
@@ -758,10 +780,10 @@ export function renderProductPage(store, product, availability = {}) {
     brand: { "@type": "Brand", name: displayBrand(product) },
     offers: variants.map((variant) => ({
       "@type": "Offer",
-      priceCurrency: "NOK",
+      priceCurrency: store.currency,
       price: String(variant.price),
       availability: availability[variant.id] === true ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-      url: `${SITE_ORIGIN}/products/${product.handle}/`,
+      url: renderContext?.canonicalUrl(`/products/${product.handle}/`) || `${SITE_ORIGIN}/products/${product.handle}/`,
     })),
   });
   const descriptionHtml = formatDescription(product.description) || `<p>${escapeHtml(product.seoDescription || "")}</p>`;
@@ -772,9 +794,9 @@ export function renderProductPage(store, product, availability = {}) {
     { label: title },
   ]);
   const relatedSection = related.length
-    ? `<section class="shop-section shop-section--related"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">Fortsett å shoppe</p><h2>Du liker kanskje også.</h2></div></div>${productGrid(related)}</div></section>`
+    ? `<section class="shop-section shop-section--related"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">Fortsett å shoppe</p><h2>Du liker kanskje også.</h2></div></div>${productGrid(related, "", store.currency, renderContext?.locale)}</div></section>`
     : "";
-  const body = `<section class="product-page shop-section--light" data-storefront="product"><div class="shop-shell">${trail}<div class="product-layout">${gallery}<div class="product-info"><p class="product-vendor">${escapeHtml(displayBrand(product))} · Fra Famme</p><h1>${escapeHtml(title)}</h1>${ratingMarkup(product.handle, "product-page-rating")}<div class="product-price" data-product-price aria-live="polite">${formatMoney(selectedVariant?.price ?? firstVariant?.price ?? 0)}</div><p class="product-shipping-note">Fri frakt over ${SHIPPING_THRESHOLD} kr. Frakt beregnes i kassen.</p><form class="product-purchase" data-product-form>${optionPills}<div class="product-buy-row"><label>Antall<span class="quantity-control"><button type="button" data-quantity-minus aria-label="Reduser antall">−</button><input type="number" value="1" min="1" max="20" inputmode="numeric" aria-label="Antall" data-quantity><button type="button" data-quantity-plus aria-label="Øk antall">+</button></span></label><button class="store-button store-button--buy" type="button" data-add-to-cart data-id="${escapeHtml(product.id)}" data-title="${escapeHtml(title)}" data-price="${escapeHtml(selectedVariant?.price ?? firstVariant?.price ?? "")}" data-image="${escapeHtml(imageUrl(image, 320))}" data-handle="${escapeHtml(product.handle)}" data-variant="${escapeHtml(selectedVariant?.id || firstVariant?.id || "")}" data-site-available="${available}"${available ? "" : " disabled"}>${available ? "Legg i handlekurven" : "Utsolgt"}</button></div></form><ul class="product-reassure"><li>Fri frakt over ${SHIPPING_THRESHOLD} kr</li><li>Gratis bytte i 30 dager</li><li>Etikettløs retur</li><li>Vipps, kort og mobilbetaling</li></ul><p class="product-help-links"><a href="/storrelse/">Størrelsesguide</a><a href="/frakt/">Frakt og levering</a><a href="/retur/">Retur og bytte</a></p><section class="product-description" aria-label="Produktinformasjon">${descriptionHtml}</section></div></div></div></section>${lifestyleSection(product.handle)}${reviewSection(product.handle)}${relatedSection}`;
+  const body = `<section class="product-page shop-section--light" data-storefront="product"><div class="shop-shell">${trail}<div class="product-layout">${gallery}<div class="product-info"><p class="product-vendor">${escapeHtml(displayBrand(product))} · Fra Famme</p><h1>${escapeHtml(title)}</h1>${ratingMarkup(product.handle, "product-page-rating")}<div class="product-price" data-product-price aria-live="polite">${formatMoney(selectedVariant?.price ?? firstVariant?.price ?? 0, store.currency, renderContext?.locale)}</div><p class="product-shipping-note">Fri frakt over ${SHIPPING_THRESHOLD} kr. Frakt beregnes i kassen.</p><form class="product-purchase" data-product-form>${optionPills}<div class="product-buy-row"><label>Antall<span class="quantity-control"><button type="button" data-quantity-minus aria-label="Reduser antall">−</button><input type="number" value="1" min="1" max="20" inputmode="numeric" aria-label="Antall" data-quantity><button type="button" data-quantity-plus aria-label="Øk antall">+</button></span></label><button class="store-button store-button--buy" type="button" data-add-to-cart data-id="${escapeHtml(product.id)}" data-title="${escapeHtml(title)}" data-price="${escapeHtml(selectedVariant?.price ?? firstVariant?.price ?? "")}" data-image="${escapeHtml(imageUrl(image, 320))}" data-handle="${escapeHtml(product.handle)}" data-variant="${escapeHtml(selectedVariant?.id || firstVariant?.id || "")}" data-site-available="${available}"${available ? "" : " disabled"}>${available ? "Legg i handlekurven" : "Utsolgt"}</button></div></form><ul class="product-reassure"><li>Fri frakt over ${SHIPPING_THRESHOLD} kr</li><li>Gratis bytte i 30 dager</li><li>Etikettløs retur</li><li>Vipps, kort og mobilbetaling</li></ul><p class="product-help-links"><a href="/storrelse/">Størrelsesguide</a><a href="/frakt/">Frakt og levering</a><a href="/retur/">Retur og bytte</a></p><section class="product-description" aria-label="Produktinformasjon">${descriptionHtml}</section></div></div></div></section>${lifestyleSection(product.handle)}${reviewSection(product.handle)}${relatedSection}`;
   return documentHtml({
     title: `${product.seoTitle || product.title} | Endorphin`.replace(" | Endorphin | Endorphin", " | Endorphin"),
     description: metaDescription(product.seoDescription || product.description, product.title),
@@ -785,39 +807,44 @@ export function renderProductPage(store, product, availability = {}) {
     schema,
     ogType: "product",
     ogImage: image?.url || `${SITE_ORIGIN}/assets/hero.webp`,
+    renderContext,
   });
 }
 
-export function renderMessagePage(store, { title, heading, text, kicker = "Endorphin" }) {
-  const body = `<section class="simple-hero"><div class="shop-shell" style="min-height:60vh;display:flex;flex-direction:column;justify-content:center"><p class="shop-kicker">${escapeHtml(kicker)}</p><h1>${escapeHtml(heading)}</h1><p style="color:#5c5a56">${escapeHtml(text)}</p><p><a class="store-button" href="/">Til forsiden</a></p></div></section>`;
+export function renderMessagePage(store, { title, heading, text, kicker = "Endorphin" }, renderContext) {
+  const homeLink = renderContext?.messages?.site?.homeLink || "Til forsiden";
+  const body = `<section class="simple-hero"><div class="shop-shell" style="min-height:60vh;display:flex;flex-direction:column;justify-content:center"><p class="shop-kicker">${escapeHtml(kicker)}</p><h1>${escapeHtml(heading)}</h1><p style="color:#5c5a56">${escapeHtml(text)}</p><p><a class="store-button" href="/">${escapeHtml(homeLink)}</a></p></div></section>`;
   return documentHtml({
     title,
     description: text,
     canonicalPath: "/404.html",
     body,
     store,
+    renderContext,
   });
 }
 
-export function renderNotFoundPage(store) {
+export function renderNotFoundPage(store, renderContext) {
+  const messages = renderContext?.messages?.site;
   return renderMessagePage(store, {
-    title: "Fant ikke siden | Endorphin",
-    heading: "Her var det tomt.",
-    text: "Siden finnes ikke, eller har fått en ny adresse.",
+    title: messages?.notFoundTitle || "Fant ikke siden | Endorphin",
+    heading: messages?.notFoundHeading || "Her var det tomt.",
+    text: messages?.notFoundText || "Siden finnes ikke, eller har fått en ny adresse.",
     kicker: "404",
-  });
+  }, renderContext);
 }
 
-export function renderUnavailablePage(store) {
+export function renderUnavailablePage(store, renderContext) {
+  const messages = renderContext?.messages?.site;
   return renderMessagePage(store, {
-    title: "Midlertidig utilgjengelig | Endorphin",
-    heading: "Utvalget er nede.",
-    text: "Vi får ikke hentet produkter akkurat nå. Prøv igjen om litt.",
+    title: messages?.unavailableTitle || "Midlertidig utilgjengelig | Endorphin",
+    heading: messages?.unavailableHeading || "Utvalget er nede.",
+    text: messages?.unavailableText || "Vi får ikke hentet produkter akkurat nå. Prøv igjen om litt.",
     kicker: "Prøv igjen",
-  });
+  }, renderContext);
 }
 
-export function renderSitemap(store) {
+export function renderSitemap(store, renderContext) {
   const collections = publishedCollections(store);
   const products = store?.products || [];
   const paths = [
@@ -827,5 +854,12 @@ export function renderSitemap(store) {
     ...products.map((product) => `/products/${product.handle}/`),
   ];
   const unique = [...new Set(paths)];
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${unique.map((path) => `  <url><loc>${SITE_ORIGIN}${path}</loc></url>`).join("\n")}\n</urlset>\n`;
+  const entry = (path) => {
+    const location = renderContext?.canonicalUrl(path) || `${SITE_ORIGIN}${path}`;
+    const alternates = renderContext?.alternateLinks(path)
+      .map((alternate) => `<xhtml:link rel="alternate" hreflang="${escapeHtml(alternate.locale)}" href="${escapeHtml(alternate.url)}"/>`)
+      .join("") || "";
+    return `  <url><loc>${escapeHtml(location)}</loc>${alternates}</url>`;
+  };
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${unique.map(entry).join("\n")}\n</urlset>\n`;
 }

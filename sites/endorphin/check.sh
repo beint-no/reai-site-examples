@@ -20,8 +20,8 @@ grep -q 'data-contact-form' public/kontakt/index.html
 grep -q 'data-search-results' public/sok/index.html
 grep -q 'data-cart-root' public/handlekurv/index.html
 grep -q "endorphin-cart-v1" public/assets/store.js
-grep -q "'/reai/catalog'" public/assets/store.js
-grep -q '/reai/collections/' public/assets/store.js
+grep -q "reaiPath('/catalog')" public/assets/store.js
+grep -q "reaiPath(\`/collections/" public/assets/store.js
 grep -q 'siteImageUrl' public/assets/store.js
 grep -q 'data-add-to-cart' storefront.mjs
 grep -q 'option-pill' storefront.mjs
@@ -31,7 +31,7 @@ grep -q 'option-swatch' storefront.mjs
 grep -q 'data-product-options' storefront.mjs
 grep -q 'bootstrapProductOptions' public/assets/store.js
 grep -q 'data-product-variant-map' public/assets/store.js
-grep -q 'store.js?v=13' storefront.mjs
+grep -q 'store.js?v=14' storefront.mjs
 grep -q 'store.css?v=11' storefront.mjs
 grep -q 'data-gallery-prev' storefront.mjs
 grep -q 'data-gallery-next' public/assets/store.js
@@ -47,14 +47,15 @@ grep -q 'renderHomePage' storefront.mjs
 grep -q 'renderSitemap' storefront.mjs
 grep -q 'createReaiStorefrontWorker' worker.js
 grep -q 'import \* as storefront from "./storefront.mjs"' worker.js
-grep -q 'norwegianMessages' worker.js
-grep -q 'REAI_SITE_TOKEN' ../../packages/reai-cloudflare-storefront/worker.mjs
+grep -q 'localeRoutes' worker.js
+grep -q 'defineLocaleCatalog' locales/nb-NO.mjs
+grep -q 'siteTokenBinding' ../../packages/reai-cloudflare-storefront/worker.mjs
 grep -q '/reai/collections' ../../packages/reai-cloudflare-storefront/worker.mjs
 grep -q '/site/v1/commerce/collections' ../../packages/reai-cloudflare-storefront/worker.mjs
 grep -q '/site/v1/commerce/products/' ../../packages/reai-cloudflare-storefront/worker.mjs
 grep -q 'Content-Security-Policy' ../../packages/reai-cloudflare-storefront/worker.mjs
 grep -q '/reai/checkout/start' ../../packages/reai-cloudflare-storefront/worker.mjs
-grep -q '/reai/checkout/start' public/assets/store.js
+grep -q "reaiPath('/checkout/start')" public/assets/store.js
 grep -q 'data-checkout-start' public/handlekurv/index.html
 grep -q 'data-order-complete' public/bestilling/fullfort/index.html
 ! grep -q 'data-order-complete' public/handlekurv/index.html

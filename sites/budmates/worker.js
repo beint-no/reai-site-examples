@@ -1,11 +1,15 @@
-import {
-  createReaiStorefrontWorker,
-  norwegianMessages,
-} from "../../packages/reai-cloudflare-storefront/worker.mjs";
+import { createReaiStorefrontWorker } from "../../packages/reai-cloudflare-storefront/worker.mjs";
+import nbNO from "./locales/nb-NO.mjs";
 import * as storefront from "./storefront.mjs";
 
 export default createReaiStorefrontWorker({
   cacheKey: "budmates-v1",
   storefront,
-  messages: norwegianMessages,
+  localeCatalogs: { "nb-NO": nbNO },
+  localeRoutes: [{
+    hostnames: ["*"],
+    locale: "nb-NO",
+    market: "NO",
+    canonicalOrigin: storefront.SITE_ORIGIN,
+  }],
 });

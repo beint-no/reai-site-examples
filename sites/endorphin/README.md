@@ -13,6 +13,8 @@ npx wrangler dev --cwd sites/endorphin
 
 Set `REAI_SITE_TOKEN` in the ignored `.dev.vars` file to a live Site credential. The credential is available only to the Worker and must never be added to browser code or committed.
 
+The current route is `nb-NO` in the `NO` market. Add interface translations under `locales/`, static editorial translations in locale folders and hostname/path mappings in `worker.js`; follow the repository [localization and markets guide](../../docs/localization.md). A market route selects a ReAI Site price list, while its locale selects text and formatting.
+
 The Worker provides these storefront routes:
 
 - `GET /` — homepage from published collections (`joggesko`, `sokker`)

@@ -18,6 +18,7 @@ The repository keeps the reusable API and Cloudflare integration separate from e
 - Responsive AVIF image renditions, intrinsic dimensions and API-provided alt text
 - Static editorial pages alongside dynamic commerce routes
 - Worker caching, security headers, canonical redirects and static asset delivery
+- Explicit locale-folder and locale-domain routing, with market-specific Site price lists
 
 ## Run locally
 
@@ -45,7 +46,7 @@ cp "sites/$storefront_name/.dev.vars.example" "sites/$storefront_name/.dev.vars"
 
 Deployment is local. GitHub Actions validates the repository but does not hold production credentials or deploy storefronts.
 
-Start with [the quickstart](docs/quickstart.md), then read the [architecture](docs/architecture.md), [authentication](docs/authentication.md), [catalog and image](docs/catalog-and-images.md), [checkout](docs/checkout.md) and [Cloudflare deployment](docs/cloudflare-deployment.md) guides.
+Start with [the quickstart](docs/quickstart.md), then read the [architecture](docs/architecture.md), [localization and markets](docs/localization.md), [authentication](docs/authentication.md), [catalog and image](docs/catalog-and-images.md), [checkout](docs/checkout.md) and [Cloudflare deployment](docs/cloudflare-deployment.md) guides.
 
 ## Licensing
 

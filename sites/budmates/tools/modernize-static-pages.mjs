@@ -31,10 +31,8 @@ async function htmlFiles(directory) {
 
 function modernize(html) {
   let result = html
-    .replace('<meta name="viewport" content="width=device-width,initial-scale=1">', '<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark light">')
-    .replace('<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">', '<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="preconnect" href="https://app.reai.no" crossorigin>')
     .replace(/<link rel="stylesheet" href="\/assets\/store\.css(?:\?v=\d+)?">/g, '<link rel="stylesheet" href="/assets/store.css?v=2">')
-    .replace(/<script src="\/assets\/store\.js\?v=\d+" defer><\/script>/g, '<script src="/assets/store.js?v=9" defer></script>')
+    .replace(/<script src="\/assets\/store\.js\?v=\d+" defer><\/script>/g, '<script src="/assets/store.js?v=10" defer></script>')
     .replace('<div class="shop-announcement"><div class="shop-shell"><span>Betal med Vipps</span><span>Fri frakt over 850 kr</span><span>69 kr under 850 kr</span><span>Diskré pakking</span></div></div>', '<aside class="shop-announcement" aria-label="Kjøpsfordeler"><ul class="shop-shell"><li>Betal med Vipps</li><li>Fri frakt over 850 kr</li><li>69 kr under 850 kr</li><li>Diskré pakking</li></ul></aside>')
     .replaceAll('<img src="/assets/brand/budmates-logo.png" alt="BudMates">', '<img src="/assets/brand/budmates-logo.png" alt="BudMates" width="200" height="64" decoding="async">')
     .replace('<button class="shop-menu-toggle" type="button" aria-label="Åpne meny" aria-expanded="false" data-nav-toggle>', '<button class="shop-menu-toggle" type="button" aria-label="Åpne meny" aria-expanded="false" aria-controls="shop-navigation" data-nav-toggle>')
@@ -42,6 +40,12 @@ function modernize(html) {
     .replace(/<nav class="shop-breadcrumbs"><a href="\/">Hjem<\/a><span>\/<\/span><a href="\/artikler\/">Artikler<\/a><span>\/<\/span><span>([^<]+)<\/span><\/nav>/g, '<nav class="shop-breadcrumbs" aria-label="Brødsmulesti"><ol><li><a href="/">Hjem</a></li><li><a href="/artikler/">Artikler</a></li><li><span aria-current="page">$1</span></li></ol></nav>')
     .replace(/<nav class="shop-breadcrumbs"><a href="\/">Hjem<\/a><span>\/<\/span><span>([^<]+)<\/span><\/nav>/g, '<nav class="shop-breadcrumbs" aria-label="Brødsmulesti"><ol><li><a href="/">Hjem</a></li><li><span aria-current="page">$1</span></li></ol></nav>');
 
+  if (!result.includes('<meta name="color-scheme"')) {
+    result = result.replace('<meta name="viewport" content="width=device-width,initial-scale=1">', '<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark light">');
+  }
+  if (!result.includes('<link rel="preconnect" href="https://app.reai.no" crossorigin>')) {
+    result = result.replace('<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">', '<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="preconnect" href="https://app.reai.no" crossorigin>');
+  }
   if (!result.includes('class="noscript-banner"')) {
     result = result.replace('<main id="main">', '<noscript><p class="noscript-banner">JavaScript må være aktivert for handlekurv og utsjekk.</p></noscript><main id="main">');
   }

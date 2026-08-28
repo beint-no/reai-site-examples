@@ -1,6 +1,6 @@
 export const SITE_ORIGIN = "https://budmates.respiro.workers.dev";
 export const HANDLE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-export const STORE_SCRIPT = "/assets/store.js?v=9";
+export const STORE_SCRIPT = "/assets/store.js?v=10";
 export const STORE_STYLE = "/assets/store.css?v=2";
 
 export const NAV_ITEMS = [
@@ -84,17 +84,19 @@ export const stripHtml = (value = "") => String(value)
   .replace(/\s+/g, " ")
   .trim();
 
-export const formatMoney = (value) => new Intl.NumberFormat("nb-NO", {
-  minimumFractionDigits: Number(value) % 1 ? 2 : 0,
-  maximumFractionDigits: 2,
-}).format(Number(value)) + " kr";
+export const formatMoney = (value, currency = "NOK", locale = "nb-NO") => new Intl.NumberFormat(locale, {
+  style: "currency",
+  currency,
+}).format(Number(value));
 
-export const priceRange = (variants = []) => {
+export const priceRange = (variants = [], currency = "NOK", locale = "nb-NO") => {
   const prices = variants.map((variant) => Number(variant.price)).filter((price) => Number.isFinite(price));
-  if (!prices.length) return "0 kr";
+  if (!prices.length) return formatMoney(0, currency, locale);
   const minimum = Math.min(...prices);
   const maximum = Math.max(...prices);
-  return minimum === maximum ? formatMoney(minimum) : `${formatMoney(minimum)} – ${formatMoney(maximum)}`;
+  return minimum === maximum
+    ? formatMoney(minimum, currency, locale)
+    : `${formatMoney(minimum, currency, locale)} – ${formatMoney(maximum, currency, locale)}`;
 };
 
 export const siteImage = (product) => product?.images?.[0] || null;
@@ -310,7 +312,7 @@ export function relatedProducts(store, product, limit = 4) {
   return related;
 }
 
-export function productCard(product, label = "") {
+export function productCard(product, label = "", currency = "NOK", locale = "nb-NO") {
   if (!product?.handle) return "";
   const image = siteImage(product);
   const prices = (product.variants || []).map((variant) => Number(variant.price)).filter((price) => Number.isFinite(price));
@@ -319,11 +321,11 @@ export function productCard(product, label = "") {
   const media = image
     ? responsiveImage(image, { alt: image.alt || product.title, preferredWidth: 480, sizes: CARD_IMAGE_SIZES, loading: "lazy" })
     : '<span class="product-image-fallback">BM</span>';
-  return `<article class="product-card"><a class="product-card-media" href="/products/${escapeHtml(product.handle)}/">${label ? `<span class="product-badge">${escapeHtml(label)}</span>` : ""}${media}</a><div class="product-card-copy"><p>${escapeHtml(product.brand || "BudMates")}</p><h3><a href="/products/${escapeHtml(product.handle)}/">${escapeHtml(product.title)}</a></h3><div class="product-card-price"><strong>${formatMoney(from)}</strong>${compare > from ? `<del>${formatMoney(compare)}</del>` : ""}</div></div></article>`;
+  return `<article class="product-card"><a class="product-card-media" href="/products/${escapeHtml(product.handle)}/">${label ? `<span class="product-badge">${escapeHtml(label)}</span>` : ""}${media}</a><div class="product-card-copy"><p>${escapeHtml(product.brand || "BudMates")}</p><h3><a href="/products/${escapeHtml(product.handle)}/">${escapeHtml(product.title)}</a></h3><div class="product-card-price"><strong>${formatMoney(from, currency, locale)}</strong>${compare > from ? `<del>${formatMoney(compare, currency, locale)}</del>` : ""}</div></div></article>`;
 }
 
-export function productGrid(products, label = "") {
-  const cards = (products || []).map((product) => productCard(product, label)).filter(Boolean);
+export function productGrid(products, label = "", currency = "NOK", locale = "nb-NO") {
+  const cards = (products || []).map((product) => productCard(product, label, currency, locale)).filter(Boolean);
   return cards.length
     ? `<div class="product-grid" data-collection-grid data-server-rendered="true">${cards.join("")}</div>`
     : '<div class="empty-state"><h2>Ingen produkter akkurat nå</h2><p>Utvalget oppdateres fortløpende.</p></div>';
@@ -349,12 +351,19 @@ function breadcrumbs(items) {
   }).join("")}</ol></nav>`;
 }
 
-function chrome(store, active = "") {
+function chrome(store, active = "", renderContext, canonicalPath = "/") {
   const items = navItems(store);
   const nav = [
     `<a href="/"${active === "home" ? ' aria-current="page"' : ""}>Hjem</a>`,
     ...items.map((item) => `<a href="/collections/${item.handle}/"${active === item.handle ? ' aria-current="page"' : ""}>${escapeHtml(item.label)}</a>`),
   ].join("");
+  const localeLinks = renderContext?.alternateLinks(canonicalPath) || [];
+  const languageNavigation = localeLinks.length > 1
+    ? `<nav aria-label="${escapeHtml(renderContext.messages?.site?.languageNavigation || "Language")}">${localeLinks.map((alternate) => {
+        const label = new Intl.DisplayNames([renderContext.locale], { type: "language" }).of(alternate.locale) || alternate.locale;
+        return `<a href="${escapeHtml(alternate.url)}" lang="${escapeHtml(alternate.locale)}"${alternate.locale === renderContext.locale ? ' aria-current="page"' : ""}>${escapeHtml(label)}</a>`;
+      }).join("")}</nav>`
+    : "";
   const year = new Date().getFullYear();
   return {
     header: `<a class="skip-link" href="#main">Hopp til innhold</a>
@@ -363,7 +372,7 @@ function chrome(store, active = "") {
     <a class="shop-logo" href="/" aria-label="BudMates, forside"><img src="/assets/brand/budmates-logo.png" alt="BudMates" width="200" height="64" decoding="async"></a>
     <button class="shop-menu-toggle" type="button" aria-label="Åpne meny" aria-expanded="false" aria-controls="shop-navigation" data-nav-toggle><span></span></button>
     <nav class="shop-nav" id="shop-navigation" aria-label="Hovedmeny" data-nav-links>${nav}</nav>
-    <div class="shop-tools"><a href="/sok/" aria-label="Søk">Søk</a><a href="/handlekurv/" aria-label="Handlekurv">Kurv <span class="cart-count" data-cart-count>0</span></a></div>
+    <div class="shop-tools">${languageNavigation}<a href="/sok/" aria-label="Søk">Søk</a><a href="/handlekurv/" aria-label="Handlekurv">Kurv <span class="cart-count" data-cart-count>0</span></a></div>
   </div></header>
   <a class="trust-strip" href="https://no.trustpilot.com/review/budmates.no" rel="noopener"><span>Dette sier kundene våre</span><strong>Enestående</strong><span class="trust-stars">★★★★★</span><span>4,7 av 5 på Trustpilot</span></a>`,
     footer: `<footer class="shop-footer"><div class="shop-shell shop-footer-grid"><div><a class="shop-logo shop-logo--footer" href="/"><img src="/assets/brand/budmates-logo.png" alt="BudMates" width="200" height="64" loading="lazy" decoding="async"></a><p>Norges headshop på nett. Sendt raskt og diskré fra lager i Norge.</p></div><div><h2>Handle</h2><a href="/collections/papes/">Papes</a><a href="/collections/raw/">RAW</a><a href="/collections/ocb/">OCB</a><a href="/collections/all/">Alle produkter</a></div><div><h2>Informasjon</h2><a href="/levering/">Frakt og levering</a><a href="/kontakt/">Kontakt oss</a><a href="/om/">Om oss</a><a href="/faq/">Vanlige spørsmål</a></div><div><h2>Vilkår</h2><a href="/vilkar/">Salgsvilkår</a><a href="/personvern/">Personvern</a><a href="/artikler/">Artikler</a></div></div><div class="shop-footer-bottom shop-shell"><span>© ${year} BudMates AS · Org.nr. 929 151 291</span><div><a href="https://www.instagram.com/budmates.no">Instagram</a><a href="https://www.snapchat.com/add/budmates.no">Snapchat</a></div></div></footer><div class="cart-toast" role="status" aria-live="polite" data-cart-toast hidden></div>`,
@@ -380,10 +389,21 @@ export function documentHtml({
   schema = "",
   ogType = "website",
   ogImage = `${SITE_ORIGIN}/assets/brand/budmates-logo.png`,
+  renderContext,
 }) {
-  const { header, footer } = chrome(store, active);
-  const url = `${SITE_ORIGIN}${canonicalPath}`;
-  return `<!doctype html><html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark light"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><meta name="theme-color" content="#050605"><link rel="canonical" href="${escapeHtml(url)}"><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="preconnect" href="https://app.reai.no" crossorigin><meta property="og:title" content="${escapeHtml(title)}"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:url" content="${escapeHtml(url)}"><meta property="og:type" content="${escapeHtml(ogType)}"><meta property="og:image" content="${escapeHtml(ogImage)}"><meta property="og:locale" content="nb_NO"><meta property="og:site_name" content="BudMates"><link rel="stylesheet" href="/assets/site.css"><link rel="stylesheet" href="${STORE_STYLE}"><script src="${STORE_SCRIPT}" defer></script>${schema}</head><body>${header}<noscript><p class="noscript-banner">JavaScript må være aktivert for handlekurv og utsjekk.</p></noscript><main id="main">${body}</main>${footer}</body></html>`;
+  const { header, footer } = chrome(store, active, renderContext, canonicalPath);
+  const url = renderContext?.canonicalUrl(canonicalPath) || `${SITE_ORIGIN}${canonicalPath}`;
+  const locale = renderContext?.locale || "nb-NO";
+  const alternates = renderContext?.alternateLinks(canonicalPath)
+    .map((alternate) => `<link rel="alternate" hreflang="${escapeHtml(alternate.locale)}" href="${escapeHtml(alternate.url)}">`)
+    .join("") || "";
+  const apiBase = renderContext?.publicPath("/reai") || "/reai";
+  const currency = store?.currency || "NOK";
+  const market = renderContext?.market || "NO";
+  const html = `<!doctype html><html lang="${escapeHtml(locale)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark light"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><meta name="theme-color" content="#050605"><meta name="reai-api-base" content="${escapeHtml(apiBase)}"><meta name="reai-market" content="${escapeHtml(market)}"><meta name="reai-currency" content="${escapeHtml(currency)}"><link rel="canonical" href="${escapeHtml(url)}">${alternates}<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="preconnect" href="https://app.reai.no" crossorigin><meta property="og:title" content="${escapeHtml(title)}"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:url" content="${escapeHtml(url)}"><meta property="og:type" content="${escapeHtml(ogType)}"><meta property="og:image" content="${escapeHtml(ogImage)}"><meta property="og:locale" content="${escapeHtml(locale.replaceAll("-", "_"))}"><meta property="og:site_name" content="BudMates"><link rel="stylesheet" href="/assets/site.css"><link rel="stylesheet" href="${STORE_STYLE}"><script src="${STORE_SCRIPT}" defer></script>${schema}</head><body>${header}<noscript><p class="noscript-banner">JavaScript må være aktivert for handlekurv og utsjekk.</p></noscript><main id="main">${body}</main>${footer}</body></html>`;
+  return renderContext
+    ? html.replace(/href="(\/(?!assets\/)[^"]*)"/g, (_, path) => `href="${escapeHtml(renderContext.publicPath(path))}"`)
+    : html;
 }
 
 function editorialHome() {
@@ -392,7 +412,7 @@ function editorialHome() {
 <section class="service-band" aria-label="Kjøpsfordeler"><ul class="shop-shell"><li><strong>Fri frakt</strong><span>På ordre over 850 kr</span></li><li><strong>Diskré levering</strong><span>BM AS som avsender</span></li><li><strong>Norsk lager</strong><span>Sendes fra Vadsø</span></li><li><strong>Spør oss</strong><span>post@budmates.no</span></li></ul></section>`;
 }
 
-export function renderHomePage(store) {
+export function renderHomePage(store, renderContext) {
   const bestsellers = (collectionByHandle(store, "bestselgere")?.products || [])
     .map((member) => productByHandle(store, member.handle))
     .filter(Boolean);
@@ -421,9 +441,9 @@ export function renderHomePage(store) {
   }).join("");
   const body = `<section class="store-hero${hero.length ? "" : " store-hero--plain"}" data-storefront="home"><div class="shop-shell store-hero-grid"><div class="store-hero-copy"><p class="shop-kicker">Diskré pakking · Lager i Norge</p><h1>Norges beste<br><span>headshop.</span></h1><p>Rullepapir, bonger, grindere, vaporizere og tilbehør – samlet på ett ryddigere sted.</p><div class="store-actions"><a class="store-button" href="/collections/all/">Se alle produkter</a><a class="store-button store-button--ghost" href="/collections/bestselgere/">Bestselgere</a></div></div>${hero.length ? `<div class="hero-product-stack">${heroCards}</div>` : ""}</div></section>
 ${categoryCards ? `<section class="shop-section shop-section--light"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">Populære kategorier</p><h2>Finn din greie.</h2></div><a class="shop-text-link" href="/collections/all/">Se hele utvalget →</a></div><div class="category-feature-grid">${categoryCards}</div></div></section>` : ""}
-${bestsellers.length ? `<section class="shop-section"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">Det kundene velger igjen</p><h2>Bestselgere.</h2></div><a class="shop-text-link" href="/collections/bestselgere/">Se alle →</a></div>${productGrid(bestsellers.slice(0, 8), "Populær")}</div></section>` : ""}
-${gpen.length ? `<section class="brand-feature"><div class="shop-shell brand-feature-grid"><div><p class="shop-kicker">Offisiell distributør</p><h2>Stündenglass<br>& G Pen.</h2><p>Gravity infusers, vaporizere og originalt tilbehør – tilgjengelig fra lager i Norge.</p><a class="store-button" href="/collections/gpen-stundenglass/">Se kolleksjonen</a></div><div class="brand-feature-products">${gpen.slice(0, 2).map((product) => productCard(product)).join("")}</div></div></section>` : ""}
-${more.length ? `<section class="shop-section shop-section--light"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">Fra utvalget</p><h2>Mer å se.</h2></div><a class="shop-text-link" href="/collections/all/">Se alt →</a></div>${productGrid(more)}</div></section>` : ""}
+${bestsellers.length ? `<section class="shop-section"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">Det kundene velger igjen</p><h2>Bestselgere.</h2></div><a class="shop-text-link" href="/collections/bestselgere/">Se alle →</a></div>${productGrid(bestsellers.slice(0, 8), "Populær", store.currency, renderContext?.locale)}</div></section>` : ""}
+${gpen.length ? `<section class="brand-feature"><div class="shop-shell brand-feature-grid"><div><p class="shop-kicker">Offisiell distributør</p><h2>Stündenglass<br>& G Pen.</h2><p>Gravity infusers, vaporizere og originalt tilbehør – tilgjengelig fra lager i Norge.</p><a class="store-button" href="/collections/gpen-stundenglass/">Se kolleksjonen</a></div><div class="brand-feature-products">${gpen.slice(0, 2).map((product) => productCard(product, "", store.currency, renderContext?.locale)).join("")}</div></div></section>` : ""}
+${more.length ? `<section class="shop-section shop-section--light"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">Fra utvalget</p><h2>Mer å se.</h2></div><a class="shop-text-link" href="/collections/all/">Se alt →</a></div>${productGrid(more, "", store.currency, renderContext?.locale)}</div></section>` : ""}
 ${editorialHome()}`;
   return documentHtml({
     title: "BudMates — Norges headshop på nett",
@@ -432,10 +452,11 @@ ${editorialHome()}`;
     active: "home",
     body,
     store,
+    renderContext,
   });
 }
 
-export function renderCollectionPage(store, handle) {
+export function renderCollectionPage(store, handle, renderContext) {
   const isAll = handle === "all";
   const collection = isAll ? null : collectionByHandle(store, handle);
   if (!isAll && !collection) return null;
@@ -450,7 +471,7 @@ export function renderCollectionPage(store, handle) {
   const active = isAll ? "" : (NAV_ITEMS.find((item) => item.handle === handle)?.handle || "");
   const image = isAll ? "" : collectionImage(collection, store);
   const trail = breadcrumbs([{ href: "/", label: "Hjem" }, { label: title }]);
-  const body = `<header class="collection-hero" data-storefront="collection"><div class="shop-shell">${trail}<p class="shop-kicker">${escapeHtml(countLabel)}</p><h1>${escapeHtml(isAll ? "Alle produkter." : title)}</h1><p>${escapeHtml(description)}</p></div></header><section class="shop-section shop-section--light" aria-labelledby="collection-products"><div class="shop-shell"><h2 class="sr-only" id="collection-products">Produkter i ${escapeHtml(title)}</h2><div class="catalog-toolbar"><strong>${escapeHtml(countLabel)}</strong><a href="/sok/">${isAll ? "Søk i utvalget" : "Søk i hele butikken"}</a></div>${productGrid(members)}</div></section>`;
+  const body = `<header class="collection-hero" data-storefront="collection"><div class="shop-shell">${trail}<p class="shop-kicker">${escapeHtml(countLabel)}</p><h1>${escapeHtml(isAll ? "Alle produkter." : title)}</h1><p>${escapeHtml(description)}</p></div></header><section class="shop-section shop-section--light" aria-labelledby="collection-products"><div class="shop-shell"><h2 class="sr-only" id="collection-products">Produkter i ${escapeHtml(title)}</h2><div class="catalog-toolbar"><strong>${escapeHtml(countLabel)}</strong><a href="/sok/">${isAll ? "Søk i utvalget" : "Søk i hele butikken"}</a></div>${productGrid(members, "", store.currency, renderContext?.locale)}</div></section>`;
   return documentHtml({
     title: `${title} | BudMates`,
     description: metaDescription(collection?.seoDescription || description, description),
@@ -459,10 +480,11 @@ export function renderCollectionPage(store, handle) {
     body,
     store,
     ogImage: image?.url || undefined,
+    renderContext,
   });
 }
 
-export function renderProductPage(store, product, availability = {}) {
+export function renderProductPage(store, product, availability = {}, renderContext) {
   const image = siteImage(product);
   const images = product.images || [];
   const variants = product.variants || [];
@@ -483,7 +505,7 @@ export function renderProductPage(store, product, availability = {}) {
     ? `<label class="product-option">${escapeHtml(optionName)}<select data-product-variant>${variants.map((variant) => {
         const label = variant.options?.map((entry) => entry.value).filter(Boolean).join(" / ") || product.title;
         const inStock = availability[variant.id] === true;
-        return `<option value="${escapeHtml(variant.id)}" data-site-variant="${escapeHtml(variant.id)}" data-site-price="${escapeHtml(variant.price)}" data-site-available="${inStock}">${escapeHtml(label)} · ${formatMoney(variant.price)}${inStock ? "" : " · Utsolgt"}</option>`;
+        return `<option value="${escapeHtml(variant.id)}" data-site-variant="${escapeHtml(variant.id)}" data-site-price="${escapeHtml(variant.price)}" data-site-available="${inStock}">${escapeHtml(label)} · ${formatMoney(variant.price, store.currency, renderContext?.locale)}${inStock ? "" : " · Utsolgt"}</option>`;
       }).join("")}</select></label>`
     : "";
   const schema = jsonLd({
@@ -496,10 +518,10 @@ export function renderProductPage(store, product, availability = {}) {
     brand: { "@type": "Brand", name: product.brand || "BudMates" },
     offers: variants.map((variant) => ({
       "@type": "Offer",
-      priceCurrency: "NOK",
+      priceCurrency: store.currency,
       price: String(variant.price),
       availability: availability[variant.id] === true ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-      url: `${SITE_ORIGIN}/products/${product.handle}/`,
+      url: renderContext?.canonicalUrl(`/products/${product.handle}/`) || `${SITE_ORIGIN}/products/${product.handle}/`,
     })),
   });
   const descriptionHtml = formatDescription(product.description) || `<p>${escapeHtml(product.seoDescription || "")}</p>`;
@@ -508,7 +530,7 @@ export function renderProductPage(store, product, availability = {}) {
     ...(crumbCollection ? [{ href: `/collections/${crumbCollection.handle}/`, label: crumbCollection.title }] : []),
     { label: product.title },
   ]);
-  const body = `<section class="product-page shop-section--light" data-storefront="product"><div class="shop-shell">${trail}<div class="product-layout">${gallery}<div class="product-info"><p class="product-vendor">${escapeHtml(product.brand || "BudMates")}</p><h1>${escapeHtml(product.title)}</h1><div class="product-price" data-product-price aria-live="polite">${priceRange(variants)}</div><p class="product-shipping-note">Avgifter inkludert. Frakt beregnes i kassen.</p><form class="product-purchase" data-product-form>${variantSelect}<div class="product-buy-row"><label>Antall<span class="quantity-control"><button type="button" data-quantity-minus aria-label="Reduser antall">−</button><input type="number" value="1" min="1" max="20" inputmode="numeric" aria-label="Antall" data-quantity><button type="button" data-quantity-plus aria-label="Øk antall">+</button></span></label><button class="store-button store-button--buy" type="button" data-add-to-cart data-id="${escapeHtml(product.id)}" data-title="${escapeHtml(product.title)}" data-price="${escapeHtml(firstVariant?.price ?? "")}" data-image="${escapeHtml(imageUrl(image, 480))}" data-handle="${escapeHtml(product.handle)}" data-variant="${escapeHtml(firstVariant?.id || "")}" data-site-available="${available}"${available ? "" : " disabled"}>${available ? "Legg i handlekurven" : "Utsolgt"}</button></div></form><ul class="product-trust"><li>✓ Lager i Norge</li><li>✓ Diskré pakking</li><li>✓ Fri frakt over 850 kr</li></ul><section class="product-description" aria-label="Produktinformasjon">${descriptionHtml}</section></div></div></div></section>${related.length ? `<section class="shop-section"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">Andre så også på</p><h2>Mer i samme kategori.</h2></div></div>${productGrid(related)}</div></section>` : ""}`;
+  const body = `<section class="product-page shop-section--light" data-storefront="product"><div class="shop-shell">${trail}<div class="product-layout">${gallery}<div class="product-info"><p class="product-vendor">${escapeHtml(product.brand || "BudMates")}</p><h1>${escapeHtml(product.title)}</h1><div class="product-price" data-product-price aria-live="polite">${priceRange(variants, store.currency, renderContext?.locale)}</div><p class="product-shipping-note">Avgifter inkludert. Frakt beregnes i kassen.</p><form class="product-purchase" data-product-form>${variantSelect}<div class="product-buy-row"><label>Antall<span class="quantity-control"><button type="button" data-quantity-minus aria-label="Reduser antall">−</button><input type="number" value="1" min="1" max="20" inputmode="numeric" aria-label="Antall" data-quantity><button type="button" data-quantity-plus aria-label="Øk antall">+</button></span></label><button class="store-button store-button--buy" type="button" data-add-to-cart data-id="${escapeHtml(product.id)}" data-title="${escapeHtml(product.title)}" data-price="${escapeHtml(firstVariant?.price ?? "")}" data-image="${escapeHtml(imageUrl(image, 480))}" data-handle="${escapeHtml(product.handle)}" data-variant="${escapeHtml(firstVariant?.id || "")}" data-site-available="${available}"${available ? "" : " disabled"}>${available ? "Legg i handlekurven" : "Utsolgt"}</button></div></form><ul class="product-trust"><li>✓ Lager i Norge</li><li>✓ Diskré pakking</li><li>✓ Fri frakt over 850 kr</li></ul><section class="product-description" aria-label="Produktinformasjon">${descriptionHtml}</section></div></div></div></section>${related.length ? `<section class="shop-section"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">Andre så også på</p><h2>Mer i samme kategori.</h2></div></div>${productGrid(related, "", store.currency, renderContext?.locale)}</div></section>` : ""}`;
   return documentHtml({
     title: `${product.seoTitle || product.title} | BudMates`.replace(" | BudMates | BudMates", " | BudMates"),
     description: metaDescription(product.seoDescription || product.description, product.title),
@@ -519,39 +541,44 @@ export function renderProductPage(store, product, availability = {}) {
     schema,
     ogType: "product",
     ogImage: image?.url || `${SITE_ORIGIN}/assets/brand/budmates-logo.png`,
+    renderContext,
   });
 }
 
-export function renderMessagePage(store, { title, heading, text, kicker = "BudMates" }) {
-  const body = `<section class="simple-hero"><div class="shop-shell" style="min-height:60vh;display:flex;flex-direction:column;justify-content:center"><p class="shop-kicker">${escapeHtml(kicker)}</p><h1>${escapeHtml(heading)}</h1><p style="color:#b8bbb0">${escapeHtml(text)}</p><p><a class="store-button" href="/">Til forsiden</a></p></div></section>`;
+export function renderMessagePage(store, { title, heading, text, kicker = "BudMates" }, renderContext) {
+  const homeLink = renderContext?.messages?.site?.homeLink || "Til forsiden";
+  const body = `<section class="simple-hero"><div class="shop-shell" style="min-height:60vh;display:flex;flex-direction:column;justify-content:center"><p class="shop-kicker">${escapeHtml(kicker)}</p><h1>${escapeHtml(heading)}</h1><p style="color:#b8bbb0">${escapeHtml(text)}</p><p><a class="store-button" href="/">${escapeHtml(homeLink)}</a></p></div></section>`;
   return documentHtml({
     title,
     description: text,
     canonicalPath: "/404.html",
     body,
     store,
+    renderContext,
   });
 }
 
-export function renderNotFoundPage(store) {
+export function renderNotFoundPage(store, renderContext) {
+  const messages = renderContext?.messages?.site;
   return renderMessagePage(store, {
-    title: "Fant ikke siden | BudMates",
-    heading: "Her var det tomt.",
-    text: "Siden finnes ikke, eller har fått en ny adresse.",
+    title: messages?.notFoundTitle || "Fant ikke siden | BudMates",
+    heading: messages?.notFoundHeading || "Her var det tomt.",
+    text: messages?.notFoundText || "Siden finnes ikke, eller har fått en ny adresse.",
     kicker: "404",
-  });
+  }, renderContext);
 }
 
-export function renderUnavailablePage(store) {
+export function renderUnavailablePage(store, renderContext) {
+  const messages = renderContext?.messages?.site;
   return renderMessagePage(store, {
-    title: "Midlertidig utilgjengelig | BudMates",
-    heading: "Utvalget er nede.",
-    text: "Vi får ikke hentet produkter fra lageret akkurat nå. Prøv igjen om litt.",
+    title: messages?.unavailableTitle || "Midlertidig utilgjengelig | BudMates",
+    heading: messages?.unavailableHeading || "Utvalget er nede.",
+    text: messages?.unavailableText || "Vi får ikke hentet produkter fra lageret akkurat nå. Prøv igjen om litt.",
     kicker: "Site API",
-  });
+  }, renderContext);
 }
 
-export function renderSitemap(store) {
+export function renderSitemap(store, renderContext) {
   const collections = publishedCollections(store);
   const products = store?.products || [];
   const paths = [
@@ -561,5 +588,12 @@ export function renderSitemap(store) {
     ...products.map((product) => `/products/${product.handle}/`),
   ];
   const unique = [...new Set(paths)];
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${unique.map((path) => `  <url><loc>${SITE_ORIGIN}${path}</loc></url>`).join("\n")}\n</urlset>\n`;
+  const entry = (path) => {
+    const location = renderContext?.canonicalUrl(path) || `${SITE_ORIGIN}${path}`;
+    const alternates = renderContext?.alternateLinks(path)
+      .map((alternate) => `<xhtml:link rel="alternate" hreflang="${escapeHtml(alternate.locale)}" href="${escapeHtml(alternate.url)}"/>`)
+      .join("") || "";
+    return `  <url><loc>${escapeHtml(location)}</loc>${alternates}</url>`;
+  };
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${unique.map(entry).join("\n")}\n</urlset>\n`;
 }

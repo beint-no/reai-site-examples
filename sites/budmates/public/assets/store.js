@@ -29,11 +29,21 @@ const VARIANT_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-
 const PRODUCT_PATH = /^\/products\/([^/]+)\/?$/;
 const COLLECTION_PATH = /^\/collections\/([^/]+)\/?$/;
 const COLLECTION_HANDLE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const pageLocale = document.documentElement.lang || 'nb-NO';
+const siteMarket = document.querySelector('meta[name="reai-market"]')?.content || 'NO';
+let siteCurrency = document.querySelector('meta[name="reai-currency"]')?.content || 'NOK';
+const reaiApiBase = (document.querySelector('meta[name="reai-api-base"]')?.content || '/reai').replace(/\/$/, '');
+const storefrontPrefix = reaiApiBase.endsWith('/reai') ? reaiApiBase.slice(0, -'/reai'.length) : '';
+const reaiPath = (path) => `${reaiApiBase}/${String(path).replace(/^\//, '')}`;
+const storefrontPath = (path) => `${storefrontPrefix}${path.startsWith('/') ? path : `/${path}`}`;
+const currentStorefrontPathname = storefrontPrefix && location.pathname.startsWith(`${storefrontPrefix}/`)
+  ? location.pathname.slice(storefrontPrefix.length)
+  : location.pathname;
 
-const formatMoney = (value) => new Intl.NumberFormat('nb-NO', {
-  minimumFractionDigits: Number(value) % 1 ? 2 : 0,
-  maximumFractionDigits: 2,
-}).format(Number(value)) + ' kr';
+const formatMoney = (value) => new Intl.NumberFormat(pageLocale, {
+  style: 'currency',
+  currency: siteCurrency,
+}).format(Number(value));
 
 const fetchJson = async (url, options) => {
   const response = await fetch(url, options);
@@ -101,7 +111,10 @@ const priceRange = (variants) => {
 };
 
 let siteCatalogPromise;
-const getSiteCatalog = () => siteCatalogPromise ||= fetchJson('/reai/catalog');
+const getSiteCatalog = () => siteCatalogPromise ||= fetchJson(reaiPath('/catalog')).then((catalog) => {
+  if (catalog.currency) siteCurrency = catalog.currency;
+  return catalog;
+});
 
 document.querySelector('.product-gallery')?.addEventListener('click', (event) => {
   const button = event.target.closest('[data-gallery-src]');
@@ -214,7 +227,7 @@ function ensureVariantSelect(product) {
 }
 
 async function connectProductToSiteApi() {
-  const handle = addButton?.dataset.handle || location.pathname.match(PRODUCT_PATH)?.[1];
+  const handle = addButton?.dataset.handle || currentStorefrontPathname.match(PRODUCT_PATH)?.[1];
   if (!addButton || !handle) return;
   if (!VARIANT_ID.test(addButton.dataset.variant || '')) {
     addButton.disabled = true;
@@ -222,9 +235,9 @@ async function connectProductToSiteApi() {
   }
 
   try {
-    const product = await fetchJson(`/reai/products/${encodeURIComponent(handle)}`);
+    const product = await fetchJson(reaiPath(`/products/${encodeURIComponent(handle)}`));
     const availability = await Promise.all(product.variants.map((variant) =>
-      fetchJson(`/reai/availability/${variant.id}`),
+      fetchJson(reaiPath(`/availability/${variant.id}`)),
     ));
     const availabilityByVariant = new Map(availability.map((entry) => [entry.variantId, entry.status === 'AVAILABLE']));
     applySiteGallery(product);
@@ -261,12 +274,17 @@ async function connectProductToSiteApi() {
   }
 }
 
-const CART_KEY = 'budmates-cart-v3';
+const LEGACY_CART_KEY = 'budmates-cart-v3';
+const CART_KEY = `${LEGACY_CART_KEY}:${siteMarket}`;
 const readCart = () => {
-  try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); } catch { return []; }
+  try {
+    const stored = localStorage.getItem(CART_KEY) || (siteMarket === 'NO' ? localStorage.getItem(LEGACY_CART_KEY) : null);
+    return JSON.parse(stored || '[]');
+  } catch { return []; }
 };
 const saveCart = (items) => {
   localStorage.setItem(CART_KEY, JSON.stringify(items));
+  if (siteMarket === 'NO') localStorage.removeItem(LEGACY_CART_KEY);
   updateCartCounts();
 };
 const updateCartCounts = () => {
@@ -334,7 +352,7 @@ async function startCheckout() {
   checkoutButton.textContent = 'Sender til kassen …';
   setCheckoutError('');
   try {
-    const response = await fetch('/reai/checkout/start', {
+    const response = await fetch(reaiPath('/checkout/start'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -362,13 +380,13 @@ function renderCart() {
   setCheckoutError('');
   syncCheckoutButton(items);
   if (!items.length) {
-    itemsNode.innerHTML = '<div class="cart-empty"><h2>Handlekurven er tom.</h2><p>Finn noe du liker i hele utvalget.</p><a class="store-button" href="/collections/all/">Se alle produkter</a></div>';
-    subtotalNode.textContent = '0 kr';
+    itemsNode.innerHTML = `<div class="cart-empty"><h2>Handlekurven er tom.</h2><p>Finn noe du liker i hele utvalget.</p><a class="store-button" href="${storefrontPath('/collections/all/')}">Se alle produkter</a></div>`;
+    subtotalNode.textContent = formatMoney(0);
     return;
   }
   itemsNode.innerHTML = items.map((item, index) => `<article class="cart-item">
-    ${item.image ? `<a href="/products/${item.handle}/"><img src="${escapeHtml(item.image)}" alt="" width="120" height="120" loading="lazy" decoding="async"></a>` : ''}
-    <div><h2><a href="/products/${item.handle}/">${escapeHtml(item.title)}</a></h2><p>${formatMoney(item.price)} per stykk</p><div class="cart-item-actions"><button type="button" data-cart-action="minus" data-index="${index}" aria-label="Reduser antall">−</button><strong>${item.quantity}</strong><button type="button" data-cart-action="plus" data-index="${index}" aria-label="Øk antall">+</button><button type="button" data-cart-action="remove" data-index="${index}">Fjern</button></div></div>
+    ${item.image ? `<a href="${storefrontPath(`/products/${item.handle}/`)}"><img src="${escapeHtml(item.image)}" alt="" width="120" height="120" loading="lazy" decoding="async"></a>` : ''}
+    <div><h2><a href="${storefrontPath(`/products/${item.handle}/`)}">${escapeHtml(item.title)}</a></h2><p>${formatMoney(item.price)} per stykk</p><div class="cart-item-actions"><button type="button" data-cart-action="minus" data-index="${index}" aria-label="Reduser antall">−</button><strong>${item.quantity}</strong><button type="button" data-cart-action="plus" data-index="${index}" aria-label="Øk antall">+</button><button type="button" data-cart-action="remove" data-index="${index}">Fjern</button></div></div>
     <div class="cart-item-price">${formatMoney(item.price * item.quantity)}</div>
   </article>`).join('');
   subtotalNode.textContent = formatMoney(items.reduce((sum, item) => sum + item.price * item.quantity, 0));
@@ -399,7 +417,7 @@ function collectionProductCard({ handle, title, vendor, price, image, available 
     ? responsiveImageMarkup(image, { alt: title, preferredWidth: 480, sizes: CARD_IMAGE_SIZES })
     : '<span class="product-image-fallback">BM</span>';
   const soldOut = available === false ? '<span>Utsolgt</span>' : '';
-  return `<article class="product-card"><a class="product-card-media" href="/products/${handle}/">${media}</a><div class="product-card-copy"><p>${escapeHtml(vendor)}</p><h3><a href="/products/${handle}/">${escapeHtml(title)}</a></h3><div class="product-card-price"><strong>${formatMoney(price)}</strong>${soldOut}</div></div></article>`;
+  return `<article class="product-card"><a class="product-card-media" href="${storefrontPath(`/products/${handle}/`)}">${media}</a><div class="product-card-copy"><p>${escapeHtml(vendor)}</p><h3><a href="${storefrontPath(`/products/${handle}/`)}">${escapeHtml(title)}</a></h3><div class="product-card-price"><strong>${formatMoney(price)}</strong>${soldOut}</div></div></article>`;
 }
 
 async function runSearch() {
@@ -474,7 +492,7 @@ async function hydrateCatalogSurfaces() {
 
 async function hydrateCollectionImages() {
   try {
-    const payload = await fetchJson('/reai/collections');
+    const payload = await fetchJson(reaiPath('/collections'));
     const collections = new Map((payload.collections || []).map((collection) => [collection.handle, collection]));
     document.querySelectorAll('a[href^="/collections/"]').forEach((link) => {
       const handle = link.getAttribute('href')?.match(/^\/collections\/([^/]+)\/?$/)?.[1];
@@ -489,7 +507,7 @@ async function hydrateCollectionImages() {
 }
 
 async function renderCollectionFromSiteApi() {
-  const match = location.pathname.match(COLLECTION_PATH);
+  const match = currentStorefrontPathname.match(COLLECTION_PATH);
   const grid = document.querySelector('.product-grid');
   if (!match || !grid || grid.dataset.serverRendered === 'true') return false;
   const handle = match[1];
@@ -503,7 +521,7 @@ async function renderCollectionFromSiteApi() {
         brand: product.brand,
         price: Math.min(...product.variants.map((variant) => Number(variant.price))),
       }))
-    : ((await fetchJson(`/reai/collections/${encodeURIComponent(handle)}`)).products || []);
+    : ((await fetchJson(reaiPath(`/collections/${encodeURIComponent(handle)}`))).products || []);
   grid.innerHTML = members.length ? members.map((member) => {
     const site = siteByHandle.get(member.handle);
     const variantPrices = (site?.variants || []).map((variant) => Number(variant.price));
@@ -539,8 +557,11 @@ if (contactForm) {
   });
 }
 
-if (document.querySelector('[data-order-complete]') || /^\/bestilling\/fullfort\/?$/.test(location.pathname)) {
-  try { localStorage.removeItem(CART_KEY); } catch {}
+if (document.querySelector('[data-order-complete]') || /^\/bestilling\/fullfort\/?$/.test(currentStorefrontPathname)) {
+  try {
+    localStorage.removeItem(CART_KEY);
+    if (siteMarket === 'NO') localStorage.removeItem(LEGACY_CART_KEY);
+  } catch {}
 }
 
 const staleCartImages = readCart().some((item) => item.image && !String(item.image).startsWith('https://app.reai.no/'));
@@ -568,6 +589,7 @@ if (document.querySelector('[data-catalog-count]') || staleCartImages) {
 
 updateCartCounts();
 renderCart();
+if (cartRoot) getSiteCatalog().then(renderCart).catch(() => {});
 connectProductToSiteApi();
 renderCollectionFromSiteApi()
   .catch(() => false)
