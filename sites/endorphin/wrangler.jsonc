@@ -1,7 +1,7 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
+  "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "endorphin",
-  "compatibility_date": "2026-08-08",
+  "compatibility_date": "2026-08-29",
   "workers_dev": true,
   "main": "worker.js",
   "routes": [

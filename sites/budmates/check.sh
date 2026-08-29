@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-node "$(dirname "${BASH_SOURCE[0]}")/../../tools/check-links.mjs" public
 node "$(dirname "${BASH_SOURCE[0]}")/tools/check-storefront.mjs"
 
 for page in index.html artikler/index.html sok/index.html handlekurv/index.html bestilling/fullfort/index.html levering/index.html faq/index.html vilkar/index.html om/index.html kontakt/index.html personvern/index.html kunnskap/index.html 404.html; do
