@@ -9,8 +9,9 @@
   <title>{{ with .Title }}{{ . }} | {{ end }}DuoFiller</title>
   <meta name="description" content="{{ .Description | default .Summary | plainify }}">
   <link rel="canonical" href="{{ .Permalink }}">
-  {{ range .AllTranslations }}<link rel="alternate" hreflang="{{ .Site.Language.Locale }}" href="{{ .Permalink }}">{{ end }}
-  <link rel="alternate" hreflang="x-default" href="{{ .Site.Home.Permalink }}">
+  {{- $translations := .AllTranslations -}}
+  {{ range $translations }}<link rel="alternate" hreflang="{{ .Site.Language.Locale }}" href="{{ .Permalink }}">{{ end }}
+  {{ with index $translations 0 }}<link rel="alternate" hreflang="x-default" href="{{ .Permalink }}">{{ end }}
   <meta property="og:type" content="website">
   <meta property="og:title" content="{{ with .Title }}{{ . }} | {{ end }}DuoFiller">
   <meta property="og:description" content="{{ .Description | default .Summary | plainify }}">
