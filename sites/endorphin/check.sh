@@ -49,8 +49,7 @@ grep -q 'import \* as storefront from "./storefront.mjs"' worker.js
 grep -q 'norwegianMessages' worker.js
 grep -q 'REAI_SITE_TOKEN' ../../packages/reai-cloudflare-storefront/worker.mjs
 grep -q '/reai/collections' ../../packages/reai-cloudflare-storefront/worker.mjs
-grep -q '/site/v1/commerce/collections' ../../packages/reai-cloudflare-storefront/worker.mjs
-grep -q '/site/v1/commerce/products/' ../../packages/reai-cloudflare-storefront/worker.mjs
+grep -q 'ReaiSiteClient' ../../packages/reai-cloudflare-storefront/worker.mjs
 grep -q 'Content-Security-Policy' ../../packages/reai-cloudflare-storefront/worker.mjs
 grep -q '/reai/checkout/start' ../../packages/reai-cloudflare-storefront/worker.mjs
 grep -q '/reai/checkout/start' public/assets/store.js

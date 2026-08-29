@@ -1,3 +1,5 @@
+// @ts-check
+
 import { createReaiStorefrontWorker } from "../../packages/reai-cloudflare-storefront/worker.mjs";
 import englishSource from "./i18n/en.json" with { type: "json" };
 import norwegianSource from "./i18n/nb.json" with { type: "json" };

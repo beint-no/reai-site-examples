@@ -7,6 +7,7 @@ The repository keeps the reusable API and Cloudflare integration separate from e
 ## Repository layout
 
 - `packages/reai-cloudflare-storefront/` — authentication, API routing, checkout validation, caching, security headers and static asset fallback
+- `packages/reai-site-client/` — native JavaScript client checked against generated Site OpenAPI declarations
 - `sites/` — independently runnable and deployable storefronts
 - `docs/` — integration and deployment guides
 
@@ -19,6 +20,7 @@ The repository keeps the reusable API and Cloudflare integration separate from e
 - Optional Hugo builds for multilingual editorial pages, localized permalinks and strict internal-link checks
 - Static editorial pages alongside dynamic commerce routes
 - Worker caching, security headers, canonical redirects and static asset delivery
+- Build-time checking of Site API paths, parameters, request bodies and response handling without transpiling storefront JavaScript
 
 ## Run locally
 
@@ -41,8 +43,7 @@ cp "sites/$storefront_name/.dev.vars.example" "sites/$storefront_name/.dev.vars"
 ```sh
 ./site.sh list
 ./site.sh build all
-./site.sh check all
-./site.sh check-workers all
+npm run check
 ./site.sh deploy storefront-name
 ```
 

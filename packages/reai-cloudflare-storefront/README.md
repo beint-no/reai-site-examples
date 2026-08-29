@@ -1,6 +1,6 @@
 # ReAI Cloudflare storefront integration
 
-This dependency-free ES module provides the shared server-side path for ReAI storefronts. It handles Site authentication, market-and-locale commerce routing, checkout input validation, catalog caching, security headers and Cloudflare static asset fallback.
+This native ES module provides the shared server-side path for ReAI storefronts. It handles Site authentication, market-and-locale commerce routing, checkout input validation, catalog caching, security headers and Cloudflare static asset fallback. All upstream operations go through `@reai/site-client`, whose JSDoc is checked against declarations generated from the Site OpenAPI document.
 
 The storefront supplies its own routing and rendering functions:
 
@@ -30,7 +30,7 @@ Catalog, product, and collection JSON routes use the same snapshot and expose `X
 responses do not report it as `Cf-Cache-Status: HIT`.
 Product pages keep stock live but read up to 100 variant statuses per Site API request instead of issuing one request per variant.
 
-The module is deliberately kept dependency-free and in source form so the complete security boundary remains easy to audit.
+The deployed module remains dependency-free and in source form so the complete security boundary remains easy to audit. TypeScript runs only as a `noEmit` development check; storefronts are authored and deployed as native JavaScript.
 
 ## Compact legal footer
 
