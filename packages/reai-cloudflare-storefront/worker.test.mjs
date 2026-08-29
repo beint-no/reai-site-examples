@@ -52,7 +52,7 @@ test("adds a same-origin return URL and idempotency key", async (context) => {
   }), { REAI_SITE_TOKEN: "test-token" });
 
   assert.equal(response.status, 201);
-  assert.equal(upstreamRequest.input, "https://app.reai.no/site/v1/commerce/checkout-sessions");
+  assert.equal(upstreamRequest.input, "https://app.reai.no/site/v1/commerce/checkout-sessions?market=default&locale=en");
   assert.ok(upstreamRequest.init.headers.get("Idempotency-Key"));
   assert.deepEqual(JSON.parse(upstreamRequest.init.body), {
     lines: [{ variantId, quantity: 2 }],
@@ -79,6 +79,7 @@ test("scopes API routes, checkout returns, and response language to a path-prefi
     cacheKey: "localized-checkout",
     storefront,
     locale: "nb-NO",
+    market: "norway",
     pathPrefix: "/nb",
     checkoutReturnPath: "/bestilling/fullfort/",
   });
@@ -91,8 +92,58 @@ test("scopes API routes, checkout returns, and response language to a path-prefi
 
   assert.equal(response.status, 201);
   assert.equal(response.headers.get("Content-Language"), "nb-NO");
-  assert.equal(upstreamRequests[0].input, "https://app.reai.no/site/v1/commerce/checkout-sessions");
+  assert.equal(upstreamRequests[0].input, "https://app.reai.no/site/v1/commerce/checkout-sessions?market=norway&locale=nb-NO");
   assert.equal(JSON.parse(upstreamRequests[0].init.body).returnUrl, "https://shop.example/nb/bestilling/fullfort/");
+});
+
+test("sends the configured market and locale on every commerce delivery route", async (context) => {
+  const originalFetch = globalThis.fetch;
+  context.after(() => {
+    globalThis.fetch = originalFetch;
+  });
+
+  const inputs = [];
+  globalThis.fetch = async (input) => {
+    inputs.push(String(input));
+    return new Response(JSON.stringify({}), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  };
+
+  const worker = createReaiStorefrontWorker({
+    cacheKey: "market-context",
+    storefront,
+    locale: "en-NO",
+    market: "international",
+  });
+  const routes = [
+    "/reai/catalog",
+    "/reai/products/example",
+    "/reai/collections",
+    "/reai/collections/example",
+    "/reai/availability/018f3c2e-8b1a-4d3e-9c4f-5a6b7c8d9e0f",
+  ];
+  for (const route of routes) {
+    const response = await worker.fetch(new Request(`https://shop.example${route}`), {
+      REAI_SITE_TOKEN: "test-token",
+    });
+    assert.equal(response.status, 200);
+  }
+
+  assert.equal(inputs.length, routes.length);
+  for (const input of inputs) {
+    const url = new URL(input);
+    assert.equal(url.searchParams.get("market"), "international");
+    assert.equal(url.searchParams.get("locale"), "en-NO");
+  }
+});
+
+test("rejects invalid market handles", () => {
+  assert.throws(
+    () => createReaiStorefrontWorker({ cacheKey: "invalid-market", storefront, market: "Not valid!" }),
+    /Invalid market/,
+  );
 });
 
 test("strips the locale prefix for commerce matching and preserves it in redirects", async () => {

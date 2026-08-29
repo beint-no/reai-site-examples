@@ -65,6 +65,7 @@ function beforeRequest({ request, env, url, renderContext }) {
 const englishWorker = createReaiStorefrontWorker({
   cacheKey: "duofiller-brewket-v1",
   storefront,
+  market: "international",
   locale: "en-NO",
   messages: workerMessages(english),
   checkoutReturnPath: "/order/complete/",
@@ -75,6 +76,7 @@ const englishWorker = createReaiStorefrontWorker({
 const norwegianWorker = createReaiStorefrontWorker({
   cacheKey: "duofiller-brewket-v1",
   storefront,
+  market: "norway",
   locale: "nb-NO",
   pathPrefix: "/nb",
   messages: workerMessages(norwegian),

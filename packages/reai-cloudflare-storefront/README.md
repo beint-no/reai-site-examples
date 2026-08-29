@@ -1,6 +1,6 @@
 # ReAI Cloudflare storefront integration
 
-This dependency-free ES module provides the shared server-side path for ReAI storefronts. It handles Site authentication, commerce API routing, checkout input validation, catalog caching, security headers and Cloudflare static asset fallback.
+This dependency-free ES module provides the shared server-side path for ReAI storefronts. It handles Site authentication, market-and-locale commerce routing, checkout input validation, catalog caching, security headers and Cloudflare static asset fallback.
 
 The storefront supplies its own routing and rendering functions:
 
@@ -14,10 +14,12 @@ import * as storefront from "./storefront.mjs";
 export default createReaiStorefrontWorker({
   cacheKey: "my-store-v1",
   storefront,
+  market: "norway",
+  locale: "nb-NO",
   messages: norwegianMessages,
 });
 ```
 
-`storefront` must export `HANDLE`, `matchRoute`, `collectionByHandle`, `productByHandle`, the page renderers and the sitemap renderer. `beforeRequest` can implement canonical-domain or legacy-path redirects without forking the shared integration.
+`storefront` must export `HANDLE`, `matchRoute`, `collectionByHandle`, `productByHandle`, the page renderers and the sitemap renderer. `market` defaults to the ReAI Site market handle `default`; `locale` defaults to `en`. Every commerce delivery call, including availability and checkout, sends both values and isolates cached catalogs by the same pair. `beforeRequest` can implement canonical-domain or legacy-path redirects without forking the shared integration.
 
 The module is deliberately kept dependency-free and in source form so the complete security boundary remains easy to audit.

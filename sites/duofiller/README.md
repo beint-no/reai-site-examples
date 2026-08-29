@@ -9,9 +9,9 @@ Bilingual Hugo storefront for Brewket AS, with live commerce rendered by the sha
 ../../site.sh deploy duofiller
 ```
 
-English is served from `/`; Norwegian is served from `/nb/`. Hugo builds static pages and validates their internal links. The Worker renders `/products/*`, `/collections/*`, the locale-prefixed equivalents, Site API proxy routes, and checkout startup at request time.
+English with international USD pricing is served from `/`; Norwegian with Norway NOK pricing is served from `/nb/`. Hugo builds static pages and validates their internal links. The Worker renders `/products/*`, `/collections/*`, the locale-prefixed equivalents, Site API proxy routes, and checkout startup at request time.
 
-Static and Worker-owned interface copy is translated in `i18n/en.json` and `i18n/nb.json`. ReAI currently publishes one content language per Site, so product and collection fields use the Brewket catalog's English source copy in both route trees. Do not add an unsupported `locale` query parameter or duplicate prices into Hugo content.
+Static and Worker-owned interface copy is translated in `i18n/en.json` and `i18n/nb.json`. ReAI resolves dynamic product and collection translations for the configured locale and variant prices for the configured market. Do not duplicate catalog translations or prices into Hugo content.
 
 The deployed preview requires one Brewket Site credential with these scopes:
 

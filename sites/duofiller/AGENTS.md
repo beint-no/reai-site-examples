@@ -11,7 +11,7 @@
 
 DuoFiller develops compact open can and bottle fillers, connections, and replacement parts for home brewers and small beverage producers. Do not describe the machine as a counter-pressure filler. Purge-gas pressure must never be presented above 3 psi / 0.2 bar.
 
-English is the default language. Norwegian lives under `/nb/`. Hugo owns translated static and editorial pages; the Cloudflare Worker owns live product, collection, availability, cart API, and checkout routes. Both layers read UI text from `i18n/*.json`.
+English is the default language and uses the ReAI `international` market. Norwegian lives under `/nb/` and uses the ReAI `norway` market. Hugo owns translated static and editorial pages; the Cloudflare Worker owns live product, collection, availability, cart API, and checkout routes. Both layers read UI text from `i18n/*.json`.
 
 Product titles, prices, variants, availability, collections, and API product images come from the Brewket Site in ReAI. The product files under `static/assets/products` are presentation assets and temporary image fallbacks, not a second catalog. Never add a committed product-price catalog.
 
