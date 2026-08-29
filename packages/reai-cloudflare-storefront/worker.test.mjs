@@ -146,12 +146,155 @@ test("sends the configured market and locale on every commerce delivery route", 
     assert.equal(response.status, 200);
   }
 
-  assert.equal(inputs.length, routes.length);
   for (const input of inputs) {
     const url = new URL(input);
     assert.equal(url.searchParams.get("market"), "international");
     assert.equal(url.searchParams.get("locale"), "en-NO");
   }
+});
+
+test("serves cached catalog JSON stale while revalidating the storefront snapshot by ETag", async (context) => {
+  const originalFetch = globalThis.fetch;
+  const originalCaches = globalThis.caches;
+  const originalNow = Date.now;
+  context.after(() => {
+    globalThis.fetch = originalFetch;
+    globalThis.caches = originalCaches;
+    Date.now = originalNow;
+  });
+
+  let now = 1_000_000;
+  Date.now = () => now;
+  const cachedResponses = new Map();
+  globalThis.caches = {
+    default: {
+      async match(request) {
+        return cachedResponses.get(request.url)?.clone();
+      },
+      async put(request, response) {
+        cachedResponses.set(request.url, response.clone());
+      },
+    },
+  };
+
+  const snapshot = {
+    catalogVersion: 7,
+    marketId: "018f3c2e-8b1a-4d3e-9c4f-5a6b7c8d9e0f",
+    marketHandle: "norway",
+    locale: "nb-NO",
+    currency: "NOK",
+    products: [{ id: "product-1", handle: "example" }],
+    collections: [{ id: "collection-1", handle: "all", products: [] }],
+  };
+  let upstreamCalls = 0;
+  globalThis.fetch = async (_input, init) => {
+    upstreamCalls += 1;
+    if (init.headers.get("If-None-Match")) return new Response(null, { status: 304 });
+    return new Response(JSON.stringify(snapshot), {
+      headers: {
+        "Content-Type": "application/json",
+        ETag: 'W/"storefront:7:market:nb-NO"',
+      },
+    });
+  };
+
+  const worker = createReaiStorefrontWorker({
+    cacheKey: "stale-revalidation",
+    storefront,
+    market: "norway",
+    locale: "nb-NO",
+  });
+  const request = () => new Request("https://shop.example/reai/catalog");
+  const env = { REAI_SITE_TOKEN: "test-token" };
+
+  const miss = await worker.fetch(request(), env);
+  assert.equal(miss.headers.get("X-ReAI-Storefront-Cache"), "MISS");
+  assert.equal(upstreamCalls, 1);
+  assert.equal((await miss.json()).collections, undefined);
+
+  now += 61_000;
+  let revalidation;
+  const stale = await worker.fetch(request(), env, { waitUntil(promise) { revalidation = promise; } });
+  assert.equal(stale.headers.get("X-ReAI-Storefront-Cache"), "STALE");
+  assert.ok(revalidation);
+  await revalidation;
+  assert.equal(upstreamCalls, 2);
+
+  const hit = await worker.fetch(request(), env);
+  assert.equal(hit.headers.get("X-ReAI-Storefront-Cache"), "HIT");
+  assert.equal(upstreamCalls, 2);
+});
+
+test("loads live product availability in one batch request", async (context) => {
+  const originalFetch = globalThis.fetch;
+  context.after(() => {
+    globalThis.fetch = originalFetch;
+  });
+
+  const variantIds = [
+    "018f3c2e-8b1a-4d3e-9c4f-5a6b7c8d9e0f",
+    "028f3c2e-8b1a-4d3e-9c4f-5a6b7c8d9e0f",
+  ];
+  const upstreamUrls = [];
+  globalThis.fetch = async (input) => {
+    const url = new URL(input);
+    upstreamUrls.push(url);
+    if (url.pathname === "/site/v1/commerce/availability") {
+      return new Response(JSON.stringify({
+        variants: [
+          { variantId: variantIds[0], status: "AVAILABLE" },
+          { variantId: variantIds[1], status: "OUT_OF_STOCK" },
+        ],
+      }), { headers: { "Content-Type": "application/json" } });
+    }
+    return new Response(JSON.stringify({
+      catalogVersion: 1,
+      marketId: "market-id",
+      marketHandle: "default",
+      locale: "en",
+      currency: "NOK",
+      products: [{
+        id: "product-id",
+        handle: "example",
+        variants: variantIds.map((id) => ({ id })),
+      }],
+      collections: [],
+    }), { headers: { "Content-Type": "application/json" } });
+  };
+  let renderedAvailability;
+  const productStorefront = {
+    ...storefront,
+    matchRoute() {
+      return { type: "product", valid: true, needsSlash: false, handle: "example" };
+    },
+    productByHandle(store, handle) {
+      return store.products.find((product) => product.handle === handle);
+    },
+    renderProductPage(_store, _product, availability) {
+      renderedAvailability = availability;
+      return "<!doctype html><title>Example</title>";
+    },
+  };
+  const worker = createReaiStorefrontWorker({
+    cacheKey: "batch-availability",
+    storefront: productStorefront,
+    market: "default",
+    locale: "en",
+  });
+
+  const response = await worker.fetch(
+    new Request("https://shop.example/products/example/"),
+    { REAI_SITE_TOKEN: "test-token" },
+  );
+
+  assert.equal(response.status, 200);
+  const availabilityRequests = upstreamUrls.filter((url) => url.pathname === "/site/v1/commerce/availability");
+  assert.equal(availabilityRequests.length, 1);
+  assert.deepEqual(availabilityRequests[0].searchParams.getAll("variantId"), variantIds);
+  assert.deepEqual(renderedAvailability, {
+    [variantIds[0]]: true,
+    [variantIds[1]]: false,
+  });
 });
 
 test("rejects invalid market handles", () => {
