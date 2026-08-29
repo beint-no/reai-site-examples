@@ -9,7 +9,12 @@ const storefront = {
 };
 
 test("rejects Site API requests when the Worker has no credential", async () => {
-  const worker = createReaiStorefrontWorker({ cacheKey: "missing-token", storefront });
+  const worker = createReaiStorefrontWorker({
+    cacheKey: "missing-token",
+    storefront,
+    market: "default",
+    locale: "en",
+  });
   const response = await worker.fetch(new Request("https://shop.example/reai/catalog"), {});
 
   assert.equal(response.status, 503);
@@ -17,7 +22,12 @@ test("rejects Site API requests when the Worker has no credential", async () => 
 });
 
 test("validates checkout lines before calling ReAI", async () => {
-  const worker = createReaiStorefrontWorker({ cacheKey: "invalid-checkout", storefront });
+  const worker = createReaiStorefrontWorker({
+    cacheKey: "invalid-checkout",
+    storefront,
+    market: "default",
+    locale: "en",
+  });
   const response = await worker.fetch(new Request("https://shop.example/reai/checkout/start", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -43,7 +53,12 @@ test("adds a same-origin return URL and idempotency key", async (context) => {
     });
   };
 
-  const worker = createReaiStorefrontWorker({ cacheKey: "checkout", storefront });
+  const worker = createReaiStorefrontWorker({
+    cacheKey: "checkout",
+    storefront,
+    market: "default",
+    locale: "en",
+  });
   const variantId = "018f3c2e-8b1a-4d3e-9c4f-5a6b7c8d9e0f";
   const response = await worker.fetch(new Request("https://shop.example/reai/checkout/start", {
     method: "POST",
@@ -141,8 +156,24 @@ test("sends the configured market and locale on every commerce delivery route", 
 
 test("rejects invalid market handles", () => {
   assert.throws(
-    () => createReaiStorefrontWorker({ cacheKey: "invalid-market", storefront, market: "Not valid!" }),
+    () => createReaiStorefrontWorker({
+      cacheKey: "invalid-market",
+      storefront,
+      market: "Not valid!",
+      locale: "en",
+    }),
     /Invalid market/,
+  );
+});
+
+test("requires an explicit ReAI market and locale", () => {
+  assert.throws(
+    () => createReaiStorefrontWorker({ cacheKey: "missing-market", storefront, locale: "nb-NO" }),
+    /market is required/,
+  );
+  assert.throws(
+    () => createReaiStorefrontWorker({ cacheKey: "missing-locale", storefront, market: "default" }),
+    /locale is required/,
   );
 });
 
@@ -165,6 +196,7 @@ test("strips the locale prefix for commerce matching and preserves it in redirec
     cacheKey: "localized-route",
     storefront: localizedStorefront,
     locale: "nb-NO",
+    market: "norway",
     pathPrefix: "/nb",
   });
 
