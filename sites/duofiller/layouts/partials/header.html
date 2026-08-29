@@ -1,0 +1,24 @@
+{{- $page := . -}}
+{{- $home := $page.Site.Home.RelPermalink -}}
+{{- $core := partial "checked-url.html" (dict "page" $page "url" "/products/duofiller-core-g3/") -}}
+{{- $connections := partial "checked-url.html" (dict "page" $page "url" "/collections/addons/") -}}
+{{- $parts := partial "checked-url.html" (dict "page" $page "url" "/collections/g3-spare-repair-parts/") -}}
+{{- $support := partial "checked-url.html" (dict "page" $page "url" "/support/") -}}
+{{- $contact := partial "checked-url.html" (dict "page" $page "url" "/contact/") -}}
+{{- $search := partial "checked-url.html" (dict "page" $page "url" "/search/") -}}
+{{- $cart := partial "checked-url.html" (dict "page" $page "url" "/cart/") -}}
+<a class="skip-link" href="#main">{{ i18n "skip_to_content" }}</a>
+<aside class="announcement" aria-label="{{ i18n "announcement_label" }}"><ul class="shell"><li>{{ i18n "announcement_norway" }}</li><li>{{ i18n "announcement_heads" }}</li><li>{{ i18n "announcement_support" }}</li></ul></aside>
+<header class="site-header"><div class="header-inner shell">
+  <a class="brand" href="{{ $home }}" aria-label="DuoFiller, {{ i18n "nav_home" }}"><img src="/assets/duofiller-logo.webp" alt="DuoFiller — Can Easy" width="600" height="134"></a>
+  <nav class="main-nav" id="main-navigation" aria-label="{{ i18n "nav_label" }}" data-nav>
+    <a href="{{ $core }}">{{ i18n "nav_core" }}</a><a href="{{ $connections }}">{{ i18n "nav_connections" }}</a><a href="{{ $parts }}">{{ i18n "nav_parts" }}</a><a href="{{ $support }}">{{ i18n "nav_support" }}</a><a href="{{ $contact }}">{{ i18n "nav_contact" }}</a>
+  </nav>
+  <div class="header-tools">
+    <a class="language-switch" href="{{ with index $page.Translations 0 }}{{ .RelPermalink }}{{ else }}{{ if eq $page.Language.Lang "en" }}/nb/{{ else }}/{{ end }}{{ end }}" hreflang="{{ if eq $page.Language.Lang "en" }}nb{{ else }}en{{ end }}" aria-label="{{ i18n "language_label" }}: {{ i18n "language_switch" }}">{{ i18n "language_switch" }}</a>
+    <a class="tool-link" href="{{ $search }}"><span class="tool-label">{{ i18n "nav_search" }}</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg></a>
+    <a class="tool-link" href="{{ $cart }}"><span class="tool-label">{{ i18n "nav_cart" }}</span><span class="cart-count" data-cart-count>0</span></a>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-navigation" aria-label="{{ i18n "nav_menu_open" }}" data-nav-toggle><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></button>
+  </div>
+</div></header>
+<noscript><p class="noscript">{{ i18n "noscript" }}</p></noscript>

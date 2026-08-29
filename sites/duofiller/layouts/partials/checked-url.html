@@ -1,0 +1,37 @@
+{{- $page := .page -}}
+{{- $raw := strings.TrimSpace .url -}}
+{{- $source := $page.RelPermalink -}}
+{{- $dynamicPrefixes := $page.Site.Params.dynamicprefixes | default (slice "products" "collections" "reai") -}}
+{{- if not $raw -}}
+  {{- errorf "empty URL in %s" $source -}}
+{{- end -}}
+{{- if or (strings.HasPrefix $raw "#") (strings.HasPrefix $raw "mailto:") (strings.HasPrefix $raw "tel:") (strings.HasPrefix $raw "https://") -}}
+  {{- $raw -}}
+{{- else if strings.HasPrefix $raw "http://" -}}
+  {{- errorf "insecure external URL %q in %s" $raw $source -}}
+{{- else -}}
+  {{- $fragmentParts := strings.Split $raw "#" -}}
+  {{- $pathAndQuery := index $fragmentParts 0 -}}
+  {{- $fragment := "" -}}
+  {{- if gt (len $fragmentParts) 1 -}}{{- $fragment = index $fragmentParts 1 -}}{{- end -}}
+  {{- $queryParts := strings.Split $pathAndQuery "?" -}}
+  {{- $path := strings.TrimPrefix (index $queryParts 0) "/" -}}
+  {{- $suffix := strings.TrimPrefix $pathAndQuery (index $queryParts 0) -}}
+  {{- $first := index (strings.Split $path "/") 0 -}}
+  {{- if in $dynamicPrefixes $first -}}
+    {{- $localized := relLangURL (printf "/%s" $path) -}}
+    {{- printf "%s%s" $localized $suffix -}}{{- if $fragment -}}{{- printf "#%s" $fragment -}}{{- end -}}
+  {{- else -}}
+    {{- $target := $page.Site.GetPage (printf "/%s" $path) -}}
+    {{- if not $target -}}
+      {{- errorf "broken internal link %q in %s" $raw $source -}}
+    {{- end -}}
+    {{- if and $fragment (not (or (eq $fragment "main") (eq $fragment "how-it-works"))) -}}
+      {{- $fragments := $target.Fragments.Identifiers -}}
+      {{- if not (in $fragments $fragment) -}}
+        {{- errorf "missing fragment #%s on %s, linked from %s" $fragment $target.RelPermalink $source -}}
+      {{- end -}}
+    {{- end -}}
+    {{- printf "%s%s" $target.RelPermalink $suffix -}}{{- if $fragment -}}{{- printf "#%s" $fragment -}}{{- end -}}
+  {{- end -}}
+{{- end -}}

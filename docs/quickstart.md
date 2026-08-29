@@ -10,7 +10,10 @@ List the available storefront directories and choose the implementation closest 
 
 ```sh
 ./site.sh list
+./site.sh build storefront-name
 ```
+
+The build command is a no-op for a site that owns hand-authored `public/` files. For a Hugo-backed site it creates a fresh ignored `public/` directory and fails on warnings, missing translations, invalid internal links or missing fragments.
 
 ## 3. Configure local development
 
@@ -34,7 +37,7 @@ Then run the Worker:
 ./site.sh dev "$storefront_name"
 ```
 
-The Worker reads catalog content from ReAI and serves static files from the site's `public/` directory.
+The command builds Hugo-backed content first. The Worker then reads catalog content from ReAI and serves static files from the site's `public/` directory.
 
 ## 4. Configure the Site domains
 

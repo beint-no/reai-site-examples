@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="{{ .Site.Language.Locale }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f7f5ef">
+  <meta name="robots" content="noindex,nofollow">
+  <title>{{ with .Title }}{{ . }} | {{ end }}DuoFiller</title>
+  <meta name="description" content="{{ .Description | default .Summary | plainify }}">
+  <link rel="canonical" href="{{ .Permalink }}">
+  {{ range .AllTranslations }}<link rel="alternate" hreflang="{{ .Site.Language.Locale }}" href="{{ .Permalink }}">{{ end }}
+  <link rel="alternate" hreflang="x-default" href="{{ .Site.Home.Permalink }}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ with .Title }}{{ . }} | {{ end }}DuoFiller">
+  <meta property="og:description" content="{{ .Description | default .Summary | plainify }}">
+  <meta property="og:url" content="{{ .Permalink }}">
+  <meta property="og:image" content="{{ .Site.Params.siteOrigin }}/assets/duofiller-social.webp">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="reai-api-base" content="{{ printf "%sreai" .Site.Home.RelPermalink }}">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/site.css">
+  <script type="module" src="/assets/store.js"></script>
+</head>
+<body>
+  {{ partial "header.html" . }}
+  <main id="main">{{ block "main" . }}{{ end }}</main>
+  {{ partial "footer.html" . }}
+</body>
+</html>

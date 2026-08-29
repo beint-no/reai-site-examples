@@ -15,6 +15,7 @@ validate_one() {
   local site_dir="$root_dir/sites/$name"
 
   require_site "$name"
+  build_site "$name"
   test -f "$site_dir/AGENTS.md" || { echo "site '$name' has no AGENTS.md" >&2; exit 1; }
   test -f "$site_dir/README.md" || { echo "site '$name' has no README.md" >&2; exit 1; }
 

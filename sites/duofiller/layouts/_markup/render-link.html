@@ -1,0 +1,2 @@
+{{- $href := partial "checked-url.html" (dict "page" .Page "url" .Destination) -}}
+<a href="{{ $href }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>

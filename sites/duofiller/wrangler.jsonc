@@ -1,0 +1,21 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "duofiller",
+  "compatibility_date": "2026-08-29",
+  "workers_dev": true,
+  "main": "worker.js",
+  "vars": {
+    "REAI_BASE_URL": "https://app.reai.no",
+    "CHECKOUT_ENABLED": "false"
+  },
+  // REAI_SITE_TOKEN is a Cloudflare secret scoped to the Brewket DuoFiller Site.
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": true
+  },
+  "observability": {
+    "enabled": true
+  }
+}

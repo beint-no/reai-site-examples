@@ -1,0 +1,18 @@
+{{- $page := . -}}
+{{- $home := $page.Site.Home.RelPermalink -}}
+{{- $core := partial "checked-url.html" (dict "page" $page "url" "/products/duofiller-core-g3/") -}}
+{{- $all := partial "checked-url.html" (dict "page" $page "url" "/collections/all/") -}}
+{{- $g3 := partial "checked-url.html" (dict "page" $page "url" "/collections/g3-spare-repair-parts/") -}}
+{{- $legacy := partial "checked-url.html" (dict "page" $page "url" "/collections/g2-spare-repair-parts/") -}}
+{{- $support := partial "checked-url.html" (dict "page" $page "url" "/support/") -}}
+{{- $contact := partial "checked-url.html" (dict "page" $page "url" "/contact/") -}}
+{{- $shipping := partial "checked-url.html" (dict "page" $page "url" "/policies/shipping/") -}}
+{{- $privacy := partial "checked-url.html" (dict "page" $page "url" "/policies/privacy/") -}}
+{{- $terms := partial "checked-url.html" (dict "page" $page "url" "/policies/terms/") -}}
+<footer class="footer"><div class="footer-grid shell">
+  <div class="footer-brand"><a href="{{ $home }}"><img src="/assets/duofiller-logo.webp" alt="DuoFiller" width="600" height="134" loading="lazy" decoding="async"></a><p>{{ i18n "footer_description" }}</p></div>
+  <div><h2>{{ i18n "footer_shop" }}</h2><nav><a href="{{ $core }}">{{ i18n "nav_core" }}</a><a href="{{ $all }}">{{ i18n "footer_all_products" }}</a><a href="{{ $g3 }}">{{ i18n "footer_g3_parts" }}</a><a href="{{ $legacy }}">{{ i18n "footer_legacy_parts" }}</a></nav></div>
+  <div><h2>{{ i18n "footer_learn" }}</h2><nav><a href="{{ $support }}">{{ i18n "support_centre" }}</a><a href="https://docs.duofiller.com/english/specs/">{{ i18n "footer_manuals" }}</a><a href="https://docs.duofiller.com/english/getting-started/">{{ i18n "footer_getting_started" }}</a><a href="{{ $contact }}">{{ i18n "nav_contact" }}</a></nav></div>
+  <div><h2>{{ i18n "footer_company" }}</h2><nav><a href="mailto:{{ $page.Site.Params.email }}">{{ $page.Site.Params.email }}</a><a href="{{ $shipping }}">{{ i18n "footer_shipping" }}</a><a href="{{ $privacy }}">{{ i18n "footer_privacy" }}</a><a href="{{ $terms }}">{{ i18n "footer_terms" }}</a></nav></div>
+</div><div class="footer-bottom shell"><span>© {{ now.Year }} {{ $page.Site.Params.company }} · Org. no. {{ $page.Site.Params.organizationNumber }}</span><span>{{ $page.Site.Params.address }}</span></div></footer>
+<div class="toast" role="status" aria-live="polite" data-toast hidden></div>

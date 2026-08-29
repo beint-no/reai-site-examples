@@ -11,6 +11,7 @@ usage() {
   cat <<'EOF'
 usage:
   ./site.sh list
+  ./site.sh build [site|all]
   ./site.sh dev <site>
   ./site.sh check [site|all]
   ./site.sh check-workers [site|all]
@@ -22,8 +23,20 @@ EOF
 dev_site() {
   require_site "$site"
   require_wrangler
+  build_site "$site"
   cd "$root_dir/sites/$site"
   exec "$wrangler_bin" dev
+}
+
+build_sites() {
+  local target="${site:-all}"
+  if [ "$target" = all ]; then
+    while IFS= read -r name; do
+      build_site "$name"
+    done < <(list_sites)
+  else
+    build_site "$target"
+  fi
 }
 
 check_worker() {
@@ -54,6 +67,7 @@ put_secret() {
 
 case "$command_name" in
   list) list_sites ;;
+  build) build_sites ;;
   dev) dev_site ;;
   check) "$root_dir/validate.sh" "${site:-all}" ;;
   check-workers) check_workers ;;
