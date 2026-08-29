@@ -6,6 +6,7 @@ This repository contains Cloudflare storefronts powered by the ReAI Site API. Ev
 
 - Keep the Site credential server-side in a Worker secret. Never commit it, return it to the browser or place it in browser JavaScript.
 - Reuse `packages/reai-cloudflare-storefront/` for authentication, API proxying, checkout validation, caching and common security headers.
+- Send Site API requests through `packages/reai-site-client/`. Its native JavaScript is checked with JSDoc against generated OpenAPI declarations; do not handwrite `/site/v1/` requests elsewhere.
 - Keep brand-specific rendering, content, behavior and styling inside the relevant site directory.
 - Product data, collections, prices, availability, images and checkout come from the Site API. Do not add Shopify or a committed catalog as a second source of truth.
 - Render API image alt text, intrinsic dimensions and width-based renditions. Fall back to useful product context when alt text is absent.
@@ -18,6 +19,8 @@ This repository contains Cloudflare storefronts powered by the ReAI Site API. Ev
 
 ```sh
 npm ci
+npm run typecheck
+npm run generate:site-api
 ./site.sh list
 ./site.sh check all
 ./site.sh check-workers all

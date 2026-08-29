@@ -1,3 +1,5 @@
+// @ts-check
+
 import {
   createReaiStorefrontWorker,
   norwegianMessages,
@@ -13,7 +15,7 @@ export default createReaiStorefrontWorker({
   beforeRequest({ request, url }) {
     if (url.hostname === "www.endorphin.no") {
       url.hostname = "endorphin.no";
-      return Response.redirect(url, 301);
+      return Response.redirect(url.href, 301);
     }
     const legacyTarget = storefront.legacyRedirectUrl(url);
     if (legacyTarget && (request.method === "GET" || request.method === "HEAD")) {

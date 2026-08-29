@@ -21,6 +21,7 @@ From the repository root:
 
 ```sh
 npm ci
+npm run typecheck
 storefront_name=your-storefront
 cp "sites/$storefront_name/.dev.vars.example" "sites/$storefront_name/.dev.vars"
 ```
@@ -53,3 +54,5 @@ printf '%s' "$REAI_SITE_TOKEN" | ./site.sh secret "$storefront_name"
 ```
 
 Verify the homepage, a collection, a product with multiple variants, availability, cart, hosted checkout and successful return path.
+
+Run `npm run check` before deployment. It checks the native JavaScript against generated Site API declarations, rejects direct Site API calls outside the shared client, builds every site and performs Worker dry runs.
