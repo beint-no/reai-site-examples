@@ -1,3 +1,5 @@
+import { renderCompactLegalFooter } from "../../packages/reai-cloudflare-storefront/footer.mjs";
+
 export const SITE_ORIGIN = "https://endorphin.no";
 export const HANDLE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const CONTACT_EMAIL = "post@famme.no";
@@ -623,7 +625,14 @@ function chrome(store, active = "") {
     ...items.map((item) => `<a href="/collections/${item.handle}/"${active === item.handle ? ' aria-current="page"' : ""}>${escapeHtml(item.label)}</a>`),
     `<a href="/collections/all/"${active === "all" ? ' aria-current="page"' : ""}>Alle</a>`,
   ].join("");
-  const year = new Date().getFullYear();
+  const legalFooter = renderCompactLegalFooter({
+    owner: "Endorphin",
+    locale: "nb-NO",
+    refundHref: "/retur/",
+    privacyHref: "/personvern/",
+    termsHref: "/vilkar/",
+    className: "shop-footer-bottom shop-shell",
+  });
   return {
     header: `<a class="skip-link" href="#main">Hopp til innhold</a>
   <aside class="shop-announcement" aria-label="Kjøpsfordeler"><ul class="shop-shell"><li>Gratis bytte &amp; fri frakt over ${SHIPPING_THRESHOLD} kr</li><li>Etikettløs retur</li><li>Vipps, kort og mobilbetaling</li></ul></aside>
@@ -633,7 +642,7 @@ function chrome(store, active = "") {
     <nav class="shop-nav" id="shop-navigation" aria-label="Hovedmeny" data-nav-links>${nav}</nav>
     <div class="shop-tools"><a href="/sok/" aria-label="Søk">Søk</a><a href="/handlekurv/" aria-label="Handlekurv">Kurv <span class="cart-count" data-cart-count>0</span></a></div>
   </div></header>`,
-    footer: `<footer class="shop-footer"><div class="shop-shell shop-footer-grid"><div><a class="shop-logo shop-logo--footer" href="/"><img src="/assets/brand/endorphin-logo.png" alt="Endorphin" width="800" height="95" loading="lazy" decoding="async"></a><p>Joggesko fra Famme med demping til trening, jobb og hverdag. Fri frakt over ${SHIPPING_THRESHOLD} kr.</p></div><div><h2>Handle</h2><a href="/collections/joggesko/">Joggesko</a><a href="/collections/sokker/">Sokker</a><a href="/collections/all/">Alle produkter</a></div><div><h2>Informasjon</h2><a href="/frakt/">Frakt og levering</a><a href="/storrelse/">Størrelsesguide</a><a href="/om/">Om oss</a><a href="/kontakt/">Kontakt</a><a href="/faq/">Ofte stilte spørsmål</a></div><div><h2>Vilkår</h2><a href="/vilkar/">Kjøpsvilkår</a><a href="/retur/">Retur og bytte</a><a href="/personvern/">Personvern</a></div></div><div class="shop-footer-bottom shop-shell"><span>© ${year} Endorphin</span><div><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></div></div></footer><div class="cart-toast" role="status" aria-live="polite" data-cart-toast hidden></div>`,
+    footer: `<footer class="shop-footer"><div class="shop-shell shop-footer-grid"><div><a class="shop-logo shop-logo--footer" href="/"><img src="/assets/brand/endorphin-logo.png" alt="Endorphin" width="800" height="95" loading="lazy" decoding="async"></a><p>Joggesko fra Famme med demping til trening, jobb og hverdag. Fri frakt over ${SHIPPING_THRESHOLD} kr.</p></div><div><h2>Handle</h2><a href="/collections/joggesko/">Joggesko</a><a href="/collections/sokker/">Sokker</a><a href="/collections/all/">Alle produkter</a></div><div><h2>Informasjon</h2><a href="/frakt/">Frakt og levering</a><a href="/storrelse/">Størrelsesguide</a><a href="/om/">Om oss</a><a href="/kontakt/">Kontakt</a><a href="/faq/">Ofte stilte spørsmål</a></div></div>${legalFooter}</footer><div class="cart-toast" role="status" aria-live="polite" data-cart-toast hidden></div>`,
   };
 }
 

@@ -1,3 +1,5 @@
+import { renderCompactLegalFooter } from "../../packages/reai-cloudflare-storefront/footer.mjs";
+
 export const SITE_ORIGIN = "https://duofiller.respiro.workers.dev";
 export const HANDLE = /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/;
 export const CONTACT_EMAIL = "post@brewket.no";
@@ -26,8 +28,8 @@ const message = (context, key) => context?.messages?.[key] || key;
 const publicPath = (context, value) => context?.publicPath?.(value) || value;
 const isNorwegian = (context) => context?.locale?.startsWith("nb");
 const staticPaths = (context) => isNorwegian(context)
-  ? { support: "/brukerstotte/", contact: "/kontakt/", search: "/sok/", cart: "/handlekurv/", shipping: "/policies/frakt/", privacy: "/policies/personvern/", terms: "/policies/vilkar/" }
-  : { support: "/support/", contact: "/contact/", search: "/search/", cart: "/cart/", shipping: "/policies/shipping/", privacy: "/policies/privacy/", terms: "/policies/terms/" };
+  ? { support: "/brukerstotte/", contact: "/kontakt/", search: "/sok/", cart: "/handlekurv/", shipping: "/policies/frakt/", refund: "/policies/retur/", privacy: "/policies/personvern/", terms: "/policies/vilkar/" }
+  : { support: "/support/", contact: "/contact/", search: "/search/", cart: "/cart/", shipping: "/policies/shipping/", refund: "/policies/refund/", privacy: "/policies/privacy/", terms: "/policies/terms/" };
 
 export const displayTitle = (product) => String(product?.title || "").replace(/^Duofiller\b/i, "DuoFiller");
 
@@ -124,9 +126,25 @@ function chrome(store, active, canonicalPath, context) {
   const parts = publicPath(context, "/collections/g3-spare-repair-parts/");
   const languagePath = isNorwegian(context) ? canonicalPath : `/nb${canonicalPath}`;
   const year = new Date().getFullYear();
+  const legalFooter = renderCompactLegalFooter({
+    owner: "Brewket AS",
+    locale: context.locale,
+    year,
+    refundHref: publicPath(context, paths.refund),
+    privacyHref: publicPath(context, paths.privacy),
+    termsHref: publicPath(context, paths.terms),
+    className: "footer-bottom shell",
+    labels: {
+      label: message(context, "footer_legal_label"),
+      poweredBy: message(context, "footer_powered_by"),
+      refund: message(context, "footer_refund"),
+      privacy: message(context, "footer_privacy"),
+      terms: message(context, "footer_terms"),
+    },
+  });
   return {
     header: `<a class="skip-link" href="#main">${escapeHtml(message(context, "skip_to_content"))}</a><aside class="announcement" aria-label="${escapeHtml(message(context, "announcement_label"))}"><ul class="shell"><li>${escapeHtml(message(context, "announcement_norway"))}</li><li>${escapeHtml(message(context, "announcement_heads"))}</li><li>${escapeHtml(message(context, "announcement_support"))}</li></ul></aside><header class="site-header"><div class="header-inner shell"><a class="brand" href="${home}" aria-label="DuoFiller"><img src="/assets/duofiller-logo.webp" alt="DuoFiller — Can Easy" width="600" height="134"></a><nav class="main-nav" id="main-navigation" aria-label="${escapeHtml(message(context, "nav_label"))}" data-nav><a href="${core}"${active === "core" ? ' aria-current="page"' : ""}>${escapeHtml(message(context, "nav_core"))}</a><a href="${connections}"${active === "connections" ? ' aria-current="page"' : ""}>${escapeHtml(message(context, "nav_connections"))}</a><a href="${parts}"${active === "parts" ? ' aria-current="page"' : ""}>${escapeHtml(message(context, "nav_parts"))}</a><a href="${publicPath(context, paths.support)}">${escapeHtml(message(context, "nav_support"))}</a><a href="${publicPath(context, paths.contact)}">${escapeHtml(message(context, "nav_contact"))}</a></nav><div class="header-tools"><a class="language-switch" href="${escapeHtml(languagePath)}" hreflang="${isNorwegian(context) ? "en" : "nb"}">${escapeHtml(message(context, "language_switch"))}</a><a class="tool-link" href="${publicPath(context, paths.search)}"><span class="tool-label">${escapeHtml(message(context, "nav_search"))}</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg></a><a class="tool-link" href="${publicPath(context, paths.cart)}"><span class="tool-label">${escapeHtml(message(context, "nav_cart"))}</span><span class="cart-count" data-cart-count>0</span></a><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-navigation" aria-label="${escapeHtml(message(context, "nav_menu_open"))}" data-nav-toggle><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></button></div></div></header>`,
-    footer: `<footer class="footer"><div class="footer-grid shell"><div class="footer-brand"><a href="${home}"><img src="/assets/duofiller-logo.webp" alt="DuoFiller" width="600" height="134" loading="lazy" decoding="async"></a><p>${escapeHtml(message(context, "footer_description"))}</p></div><div><h2>${escapeHtml(message(context, "footer_shop"))}</h2><nav><a href="${core}">${escapeHtml(message(context, "nav_core"))}</a><a href="${publicPath(context, "/collections/all/")}">${escapeHtml(message(context, "footer_all_products"))}</a><a href="${parts}">${escapeHtml(message(context, "footer_g3_parts"))}</a></nav></div><div><h2>${escapeHtml(message(context, "footer_learn"))}</h2><nav><a href="${publicPath(context, paths.support)}">${escapeHtml(message(context, "support_centre"))}</a><a href="https://docs.duofiller.com/english/specs/">${escapeHtml(message(context, "footer_manuals"))}</a><a href="${publicPath(context, paths.contact)}">${escapeHtml(message(context, "nav_contact"))}</a></nav></div><div><h2>${escapeHtml(message(context, "footer_company"))}</h2><nav><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a><a href="${publicPath(context, paths.shipping)}">${escapeHtml(message(context, "footer_shipping"))}</a><a href="${publicPath(context, paths.privacy)}">${escapeHtml(message(context, "footer_privacy"))}</a><a href="${publicPath(context, paths.terms)}">${escapeHtml(message(context, "footer_terms"))}</a></nav></div></div><div class="footer-bottom shell"><span>© ${year} Brewket AS · ${escapeHtml(message(context, "organization_number_short"))} 924 622 806</span><span>Dalavikvegen 93 · 5574 Skjold · ${escapeHtml(message(context, "country_name"))}</span></div></footer><div class="toast" role="status" aria-live="polite" data-toast hidden></div>`,
+    footer: `<footer class="footer"><div class="footer-grid shell"><div class="footer-brand"><a href="${home}"><img src="/assets/duofiller-logo.webp" alt="DuoFiller" width="600" height="134" loading="lazy" decoding="async"></a><p>${escapeHtml(message(context, "footer_description"))}</p></div><div><h2>${escapeHtml(message(context, "footer_shop"))}</h2><nav><a href="${core}">${escapeHtml(message(context, "nav_core"))}</a><a href="${publicPath(context, "/collections/all/")}">${escapeHtml(message(context, "footer_all_products"))}</a><a href="${parts}">${escapeHtml(message(context, "footer_g3_parts"))}</a></nav></div><div><h2>${escapeHtml(message(context, "footer_learn"))}</h2><nav><a href="${publicPath(context, paths.support)}">${escapeHtml(message(context, "support_centre"))}</a><a href="https://docs.duofiller.com/english/specs/">${escapeHtml(message(context, "footer_manuals"))}</a><a href="${publicPath(context, paths.contact)}">${escapeHtml(message(context, "nav_contact"))}</a></nav></div><div><h2>${escapeHtml(message(context, "footer_company"))}</h2><nav><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a><a href="${publicPath(context, paths.shipping)}">${escapeHtml(message(context, "footer_shipping"))}</a></nav></div></div>${legalFooter}</footer><div class="toast" role="status" aria-live="polite" data-toast hidden></div>`,
   };
 }
 

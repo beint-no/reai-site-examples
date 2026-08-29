@@ -76,7 +76,13 @@ grep -q '^\.dev\.vars$' ../../.gitignore
 grep -q 'sitemap.xml' public/robots.txt
 grep -q 'Sitemap: https://endorphin.no/sitemap.xml' public/robots.txt
 ! grep -R -q 'rel="canonical" href="https://endorphin.respiro.workers.dev' public --include='*.html'
-! grep -R -q 'ReAI' public --include='*.html'
+while IFS= read -r page; do
+  grep -q 'class="compact-legal-links"' "$page"
+  grep -q 'href="https://reai.no" rel="external">Drevet av ReAI</a>' "$page"
+  grep -q 'href="/retur/">Retur</a>' "$page"
+  grep -q 'href="/personvern/">Personvern</a>' "$page"
+  grep -q 'href="/vilkar/">Kjøpsvilkår</a>' "$page"
+done < <(find public -name '*.html' -type f)
 ! grep -R -q 'Rdnt' public --include='*.html'
 ! grep -R -q 'testdrift' public --include='*.html'
 ! grep -R -q 'Kasse hos' public --include='*.html'

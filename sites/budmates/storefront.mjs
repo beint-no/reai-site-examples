@@ -1,3 +1,5 @@
+import { renderCompactLegalFooter } from "../../packages/reai-cloudflare-storefront/footer.mjs";
+
 export const SITE_ORIGIN = "https://budmates.respiro.workers.dev";
 export const HANDLE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const STORE_SCRIPT = "/assets/store.js?v=9";
@@ -355,7 +357,14 @@ function chrome(store, active = "") {
     `<a href="/"${active === "home" ? ' aria-current="page"' : ""}>Hjem</a>`,
     ...items.map((item) => `<a href="/collections/${item.handle}/"${active === item.handle ? ' aria-current="page"' : ""}>${escapeHtml(item.label)}</a>`),
   ].join("");
-  const year = new Date().getFullYear();
+  const legalFooter = renderCompactLegalFooter({
+    owner: "BudMates AS",
+    locale: "nb-NO",
+    refundHref: "/vilkar/#angrerett",
+    privacyHref: "/personvern/",
+    termsHref: "/vilkar/",
+    className: "shop-footer-bottom shop-shell",
+  });
   return {
     header: `<a class="skip-link" href="#main">Hopp til innhold</a>
   <aside class="shop-announcement" aria-label="Kjøpsfordeler"><ul class="shop-shell"><li>Betal med Vipps</li><li>Fri frakt over 850 kr</li><li>69 kr under 850 kr</li><li>Diskré pakking</li></ul></aside>
@@ -366,7 +375,7 @@ function chrome(store, active = "") {
     <div class="shop-tools"><a href="/sok/" aria-label="Søk">Søk</a><a href="/handlekurv/" aria-label="Handlekurv">Kurv <span class="cart-count" data-cart-count>0</span></a></div>
   </div></header>
   <a class="trust-strip" href="https://no.trustpilot.com/review/budmates.no" rel="noopener"><span>Dette sier kundene våre</span><strong>Enestående</strong><span class="trust-stars">★★★★★</span><span>4,7 av 5 på Trustpilot</span></a>`,
-    footer: `<footer class="shop-footer"><div class="shop-shell shop-footer-grid"><div><a class="shop-logo shop-logo--footer" href="/"><img src="/assets/brand/budmates-logo.png" alt="BudMates" width="200" height="64" loading="lazy" decoding="async"></a><p>Norges headshop på nett. Sendt raskt og diskré fra lager i Norge.</p></div><div><h2>Handle</h2><a href="/collections/papes/">Papes</a><a href="/collections/raw/">RAW</a><a href="/collections/ocb/">OCB</a><a href="/collections/all/">Alle produkter</a></div><div><h2>Informasjon</h2><a href="/levering/">Frakt og levering</a><a href="/kontakt/">Kontakt oss</a><a href="/om/">Om oss</a><a href="/faq/">Vanlige spørsmål</a></div><div><h2>Vilkår</h2><a href="/vilkar/">Salgsvilkår</a><a href="/personvern/">Personvern</a><a href="/artikler/">Artikler</a></div></div><div class="shop-footer-bottom shop-shell"><span>© ${year} BudMates AS · Org.nr. 929 151 291</span><div><a href="https://www.instagram.com/budmates.no">Instagram</a><a href="https://www.snapchat.com/add/budmates.no">Snapchat</a></div></div></footer><div class="cart-toast" role="status" aria-live="polite" data-cart-toast hidden></div>`,
+    footer: `<footer class="shop-footer"><div class="shop-shell shop-footer-grid"><div><a class="shop-logo shop-logo--footer" href="/"><img src="/assets/brand/budmates-logo.png" alt="BudMates" width="200" height="64" loading="lazy" decoding="async"></a><p>Norges headshop på nett. Sendt raskt og diskré fra lager i Norge.</p></div><div><h2>Handle</h2><a href="/collections/papes/">Papes</a><a href="/collections/raw/">RAW</a><a href="/collections/ocb/">OCB</a><a href="/collections/all/">Alle produkter</a></div><div><h2>Informasjon</h2><a href="/levering/">Frakt og levering</a><a href="/kontakt/">Kontakt oss</a><a href="/om/">Om oss</a><a href="/faq/">Vanlige spørsmål</a><a href="https://www.instagram.com/budmates.no" rel="external">Instagram</a><a href="https://www.snapchat.com/add/budmates.no" rel="external">Snapchat</a></div></div>${legalFooter}</footer><div class="cart-toast" role="status" aria-live="polite" data-cart-toast hidden></div>`,
   };
 }
 

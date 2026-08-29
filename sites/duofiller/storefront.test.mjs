@@ -50,6 +50,9 @@ test("renders localized product chrome and the preserved local Core image", () =
   assert.match(html, /hreflang="en-NO" href="https:\/\/duofiller\.respiro\.workers\.dev\/products\/duofiller-core-g3\/"/);
   assert.match(html, /hreflang="nb-NO" href="https:\/\/duofiller\.respiro\.workers\.dev\/nb\/products\/duofiller-core-g3\/"/);
   assert.match(html, /hreflang="x-default" href="https:\/\/duofiller\.respiro\.workers\.dev\/products\/duofiller-core-g3\/"/);
+  assert.match(html, /class="footer-bottom shell compact-legal-footer"/);
+  assert.match(html, /href="https:\/\/reai\.no" rel="external"/);
+  assert.match(html, /href="\/nb\/policies\/retur\/"/);
 });
 
 test("prefixes every Norwegian sitemap route", () => {
