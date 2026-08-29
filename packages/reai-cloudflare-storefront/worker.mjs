@@ -63,25 +63,57 @@ function cacheRequest(cacheKey) {
   return new Request(`https://reai-storefront-cache.invalid/${encodeURIComponent(cacheKey)}`);
 }
 
+function normalizePathPrefix(pathPrefix = "") {
+  const value = String(pathPrefix).trim();
+  if (!value || value === "/") return "";
+  if (!value.startsWith("/") || value.endsWith("/") || value.includes("//") || value.includes("?") || value.includes("#")) {
+    throw new TypeError(`Invalid pathPrefix: ${pathPrefix}`);
+  }
+  return value;
+}
+
+function stripPathPrefix(pathname, pathPrefix) {
+  if (!pathPrefix) return pathname;
+  if (pathname === pathPrefix) return "/";
+  if (!pathname.startsWith(`${pathPrefix}/`)) return null;
+  return pathname.slice(pathPrefix.length);
+}
+
 export function createReaiStorefrontWorker({
   cacheKey,
   storefront,
   checkoutReturnPath = "/bestilling/fullfort/",
   noStorePaths = ["/handlekurv/", checkoutReturnPath],
   messages: messageOverrides = {},
+  locale = "en",
+  pathPrefix: configuredPathPrefix = "",
   beforeRequest,
 }) {
   if (!cacheKey) throw new TypeError("cacheKey is required");
   if (!storefront?.HANDLE || !storefront?.matchRoute) throw new TypeError("storefront helpers are required");
 
   const messages = { ...defaultMessages, ...messageOverrides };
-  const storefrontCache = cacheRequest(cacheKey);
+  const pathPrefix = normalizePathPrefix(configuredPathPrefix);
+  const canonicalLocale = Intl.getCanonicalLocales(locale)[0];
+  if (!canonicalLocale) throw new TypeError(`Invalid locale: ${locale}`);
+  const storefrontCache = cacheRequest(`${cacheKey}:${canonicalLocale}`);
+  const publicPath = (pathname) => {
+    const value = pathname.startsWith("/") ? pathname : `/${pathname}`;
+    return pathPrefix ? `${pathPrefix}${value === "/" ? "/" : value}` : value;
+  };
+  const renderContext = Object.freeze({
+    locale: canonicalLocale,
+    pathPrefix,
+    messages: Object.freeze(messages),
+    publicPath,
+  });
 
   const jsonResponse = (body, status, env) => new Response(JSON.stringify(body), {
     status,
     headers: securityHeaders(new Headers({
       "Content-Type": "application/json; charset=utf-8",
       "Cache-Control": "no-store",
+      "Content-Language": canonicalLocale,
     }), env),
   });
 
@@ -90,6 +122,7 @@ export function createReaiStorefrontWorker({
     headers: securityHeaders(new Headers({
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": status === 200 ? cacheControl : "no-store",
+      "Content-Language": canonicalLocale,
     }), env),
   });
 
@@ -97,6 +130,7 @@ export function createReaiStorefrontWorker({
     headers: securityHeaders(new Headers({
       "Content-Type": "application/xml; charset=utf-8",
       "Cache-Control": "public, max-age=300, stale-while-revalidate=3600",
+      "Content-Language": canonicalLocale,
     }), env),
   });
 
@@ -123,7 +157,7 @@ export function createReaiStorefrontWorker({
     return {
       body: JSON.stringify({
         lines,
-        returnUrl: new URL(checkoutReturnPath, url.origin).href,
+        returnUrl: new URL(publicPath(checkoutReturnPath), url.origin).href,
       }),
     };
   }
@@ -196,7 +230,8 @@ export function createReaiStorefrontWorker({
   async function siteApiResponse(request, env, url) {
     if (!env.REAI_SITE_TOKEN) return jsonResponse({ error: messages.notConfigured }, 503, env);
 
-    const route = url.pathname;
+    const route = stripPathPrefix(url.pathname, pathPrefix);
+    if (route == null) return jsonResponse({ error: messages.routeNotFound }, 404, env);
     let upstreamPath;
     let cacheControl = "public, max-age=60, stale-while-revalidate=300";
     let body;
@@ -246,6 +281,7 @@ export function createReaiStorefrontWorker({
       const responseHeaders = securityHeaders(new Headers(), env);
       responseHeaders.set("Content-Type", upstream.headers.get("Content-Type") || "application/json; charset=utf-8");
       responseHeaders.set("Cache-Control", upstream.ok ? cacheControl : "no-store");
+      responseHeaders.set("Content-Language", canonicalLocale);
       return new Response(upstream.body, {
         status: upstream.status,
         statusText: upstream.statusText,
@@ -257,12 +293,14 @@ export function createReaiStorefrontWorker({
   }
 
   async function renderCommerce(request, env, url) {
-    const route = storefront.matchRoute(url.pathname);
+    const storefrontPath = stripPathPrefix(url.pathname, pathPrefix);
+    if (storefrontPath == null) return null;
+    const route = storefront.matchRoute(storefrontPath);
     if (!route) return null;
     if (request.method !== "GET" && request.method !== "HEAD") {
       return jsonResponse({ error: messages.methodNotAllowed }, 405, env);
     }
-    if (route.needsSlash) return Response.redirect(`${url.origin}${route.canonicalPath}`, 301);
+    if (route.needsSlash) return Response.redirect(`${url.origin}${publicPath(route.canonicalPath)}`, 301);
 
     let store;
     try {
@@ -270,37 +308,37 @@ export function createReaiStorefrontWorker({
     } catch {
       if (route.type === "home") return null;
       if (route.type === "sitemap") return jsonResponse({ error: messages.temporarilyUnavailable }, 502, env);
-      return htmlResponse(storefront.renderUnavailablePage(null), env, 502);
+      return htmlResponse(storefront.renderUnavailablePage(null, renderContext), env, 502);
     }
 
-    if (route.type === "home") return htmlResponse(storefront.renderHomePage(store), env);
-    if (route.type === "sitemap") return xmlResponse(storefront.renderSitemap(store), env);
+    if (route.type === "home") return htmlResponse(storefront.renderHomePage(store, renderContext), env);
+    if (route.type === "sitemap") return xmlResponse(storefront.renderSitemap(store, renderContext), env);
 
     if (route.type === "collection") {
-      if (!route.valid) return htmlResponse(storefront.renderNotFoundPage(store), env, 404);
+      if (!route.valid) return htmlResponse(storefront.renderNotFoundPage(store, renderContext), env, 404);
       if (route.handle !== "all" && !storefront.collectionByHandle(store, route.handle)) {
         try {
           const detail = await siteJson(env, `/site/v1/commerce/collections/${encodeURIComponent(route.handle)}`);
           store = { ...store, collections: [...store.collections, detail] };
         } catch (error) {
-          return htmlResponse(storefront.renderNotFoundPage(store), env, error.status === 404 ? 404 : 502);
+          return htmlResponse(storefront.renderNotFoundPage(store, renderContext), env, error.status === 404 ? 404 : 502);
         }
       }
-      return htmlResponse(storefront.renderCollectionPage(store, route.handle), env);
+      return htmlResponse(storefront.renderCollectionPage(store, route.handle, renderContext), env);
     }
 
     if (route.type === "product") {
-      if (!route.valid) return htmlResponse(storefront.renderNotFoundPage(store), env, 404);
+      if (!route.valid) return htmlResponse(storefront.renderNotFoundPage(store, renderContext), env, 404);
       let product = storefront.productByHandle(store, route.handle);
       if (!product) {
         try {
           product = await siteJson(env, `/site/v1/commerce/products/${encodeURIComponent(route.handle)}`);
         } catch (error) {
-          return htmlResponse(storefront.renderNotFoundPage(store), env, error.status === 404 ? 404 : 502);
+          return htmlResponse(storefront.renderNotFoundPage(store, renderContext), env, error.status === 404 ? 404 : 502);
         }
       }
       const availability = await variantAvailability(env, product.variants);
-      return htmlResponse(storefront.renderProductPage(store, product, availability), env);
+      return htmlResponse(storefront.renderProductPage(store, product, availability, renderContext), env);
     }
 
     return null;
@@ -309,9 +347,10 @@ export function createReaiStorefrontWorker({
   return {
     async fetch(request, env) {
       const url = new URL(request.url);
-      const earlyResponse = await beforeRequest?.({ request, env, url });
+      const earlyResponse = await beforeRequest?.({ request, env, url, renderContext });
       if (earlyResponse) return earlyResponse;
-      if (url.pathname.startsWith("/reai/")) return siteApiResponse(request, env, url);
+      const storefrontPath = stripPathPrefix(url.pathname, pathPrefix);
+      if (storefrontPath?.startsWith("/reai/")) return siteApiResponse(request, env, url);
 
       const rendered = await renderCommerce(request, env, url);
       if (rendered) {
@@ -321,7 +360,9 @@ export function createReaiStorefrontWorker({
 
       const response = await env.ASSETS.fetch(request);
       const headers = securityHeaders(new Headers(response.headers), env);
-      const path = url.pathname.endsWith("/") ? url.pathname : `${url.pathname}/`;
+      const localPath = storefrontPath || url.pathname;
+      const path = localPath.endsWith("/") ? localPath : `${localPath}/`;
+      headers.set("Content-Language", canonicalLocale);
       headers.set(
         "Cache-Control",
         noStorePaths.includes(path)

@@ -59,3 +59,69 @@ test("adds a same-origin return URL and idempotency key", async (context) => {
     returnUrl: "https://shop.example/bestilling/fullfort/",
   });
 });
+
+test("scopes API routes, checkout returns, and response language to a path-prefixed locale", async (context) => {
+  const originalFetch = globalThis.fetch;
+  context.after(() => {
+    globalThis.fetch = originalFetch;
+  });
+
+  const upstreamRequests = [];
+  globalThis.fetch = async (input, init) => {
+    upstreamRequests.push({ input, init });
+    return new Response(JSON.stringify({ checkoutUrl: "https://app.reai.no/checkout/session/example" }), {
+      status: 201,
+      headers: { "Content-Type": "application/json" },
+    });
+  };
+
+  const worker = createReaiStorefrontWorker({
+    cacheKey: "localized-checkout",
+    storefront,
+    locale: "nb-NO",
+    pathPrefix: "/nb",
+    checkoutReturnPath: "/bestilling/fullfort/",
+  });
+  const variantId = "018f3c2e-8b1a-4d3e-9c4f-5a6b7c8d9e0f";
+  const response = await worker.fetch(new Request("https://shop.example/nb/reai/checkout/start", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ lines: [{ variantId, quantity: 1 }] }),
+  }), { REAI_SITE_TOKEN: "test-token" });
+
+  assert.equal(response.status, 201);
+  assert.equal(response.headers.get("Content-Language"), "nb-NO");
+  assert.equal(upstreamRequests[0].input, "https://app.reai.no/site/v1/commerce/checkout-sessions");
+  assert.equal(JSON.parse(upstreamRequests[0].init.body).returnUrl, "https://shop.example/nb/bestilling/fullfort/");
+});
+
+test("strips the locale prefix for commerce matching and preserves it in redirects", async () => {
+  let matchedPath;
+  const localizedStorefront = {
+    ...storefront,
+    matchRoute(pathname) {
+      matchedPath = pathname;
+      return {
+        type: "product",
+        handle: "example",
+        canonicalPath: "/products/example/",
+        needsSlash: true,
+        valid: true,
+      };
+    },
+  };
+  const worker = createReaiStorefrontWorker({
+    cacheKey: "localized-route",
+    storefront: localizedStorefront,
+    locale: "nb-NO",
+    pathPrefix: "/nb",
+  });
+
+  const response = await worker.fetch(new Request("https://shop.example/nb/products/example"), {
+    REAI_SITE_TOKEN: "test-token",
+  });
+
+  assert.equal(matchedPath, "/products/example");
+  assert.equal(response.status, 301);
+  assert.equal(response.headers.get("Location"), "https://shop.example/nb/products/example/");
+});

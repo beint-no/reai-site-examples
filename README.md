@@ -16,16 +16,18 @@ The repository keeps the reusable API and Cloudflare integration separate from e
 - Site-scoped bearer credentials that never reach browser code
 - Live availability and hosted checkout
 - Responsive AVIF image renditions, intrinsic dimensions and API-provided alt text
+- Optional Hugo builds for multilingual editorial pages, localized permalinks and strict internal-link checks
 - Static editorial pages alongside dynamic commerce routes
 - Worker caching, security headers, canonical redirects and static asset delivery
 
 ## Run locally
 
-Requirements: Node.js 26 or newer, npm 11.19 or newer, a ReAI Site credential and a Cloudflare account for deployment. Browser code targets Baseline 2025 and uses native ES modules without a legacy bundle.
+Requirements: Node.js 26 or newer, npm 11.19 or newer, Hugo 0.165.0 for Hugo-backed sites, a ReAI Site credential and a Cloudflare account for deployment. Browser code targets Baseline 2025 and uses native ES modules without a legacy bundle.
 
 ```sh
 npm ci
 ./site.sh list
+./site.sh build storefront-name
 
 # Select a storefront from the list.
 storefront_name=your-storefront
@@ -38,6 +40,7 @@ cp "sites/$storefront_name/.dev.vars.example" "sites/$storefront_name/.dev.vars"
 
 ```sh
 ./site.sh list
+./site.sh build all
 ./site.sh check all
 ./site.sh check-workers all
 ./site.sh deploy storefront-name

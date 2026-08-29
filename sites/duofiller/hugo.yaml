@@ -1,0 +1,39 @@
+baseURL: https://duofiller.respiro.workers.dev/
+title: DuoFiller
+locale: en-NO
+defaultContentLanguage: en
+defaultContentLanguageInSubdir: false
+disableKinds: [section, taxonomy, term, rss]
+enableRobotsTXT: true
+
+languages:
+  en:
+    contentDir: content/en
+    locale: en-NO
+    label: English
+    weight: 1
+  nb:
+    contentDir: content/nb
+    locale: nb-NO
+    label: Norsk
+    weight: 2
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: false
+
+minify:
+  minifyOutput: true
+
+outputs:
+  home: [html]
+  page: [html]
+
+params:
+  company: Brewket AS
+  email: post@brewket.no
+  organizationNumber: "924 622 806"
+  address: Dalavikvegen 93, 5574 Skjold, Norway
+  siteOrigin: https://duofiller.respiro.workers.dev
+  dynamicPrefixes: [products, collections, reai]

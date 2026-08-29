@@ -1,0 +1,15 @@
+{{ define "main" }}
+{{- $layout := .Params.pageLayout | default "prose" -}}
+{{- if eq $layout "contact" -}}
+  {{ partial "page-contact.html" . }}
+{{- else if eq $layout "cart" -}}
+  {{ partial "page-cart.html" . }}
+{{- else if eq $layout "search" -}}
+  {{ partial "page-search.html" . }}
+{{- else if eq $layout "complete" -}}
+  <header class="page-hero"><div class="shell"><p class="eyebrow">DuoFiller</p><h1>{{ i18n "checkout_complete_title" }}</h1><p>{{ i18n "checkout_complete_text" }}</p><div class="hero-actions"><a class="button button-primary" href="{{ .Site.Home.RelPermalink }}">{{ i18n "nav_home" }}</a></div></div></header>
+{{- else -}}
+  <header class="page-hero"><div class="shell"><p class="eyebrow">{{ .Params.eyebrow }}</p><h1>{{ .Title }}</h1>{{ with .Description }}<p>{{ . }}</p>{{ end }}</div></header>
+  <section class="section section-white"><div class="product-content shell"><div><p class="eyebrow">DuoFiller</p><h2 class="headline">{{ .Params.sideTitle | default .Title }}</h2></div><div class="prose">{{ .Content }}</div></div></section>
+{{- end -}}
+{{ end }}

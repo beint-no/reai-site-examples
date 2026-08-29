@@ -1,6 +1,7 @@
 {
   "name": "reai-site-examples",
   "private": true,
+  "type": "module",
   "version": "1.0.0",
   "description": "Cloudflare storefront implementations for the ReAI Site API",
   "license": "MIT",

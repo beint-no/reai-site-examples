@@ -7,3 +7,6 @@ node_modules/
 # Cloudflare deployment output and local caches
 dist/
 public/.cache/
+.tools/
+**/.hugo_build.lock
+sites/duofiller/public/
