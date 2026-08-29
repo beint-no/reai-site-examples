@@ -7,6 +7,8 @@ import * as storefront from "./storefront.mjs";
 export default createReaiStorefrontWorker({
   cacheKey: "endorphin-famme-v1",
   storefront,
+  market: "default",
+  locale: "nb-NO",
   messages: norwegianMessages,
   beforeRequest({ request, url }) {
     if (url.hostname === "www.endorphin.no") {

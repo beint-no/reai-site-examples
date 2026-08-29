@@ -20,7 +20,7 @@ export default createReaiStorefrontWorker({
 });
 ```
 
-`storefront` must export `HANDLE`, `matchRoute`, `collectionByHandle`, `productByHandle`, the page renderers and the sitemap renderer. `market` defaults to the ReAI Site market handle `default`; `locale` defaults to `en`. Every commerce delivery call, including availability and checkout, sends both values and isolates cached catalogs by the same pair. `beforeRequest` can implement canonical-domain or legacy-path redirects without forking the shared integration.
+`storefront` must export `HANDLE`, `matchRoute`, `collectionByHandle`, `productByHandle`, the page renderers and the sitemap renderer. `market` and `locale` are required because they select the ReAI delivery context. Every commerce delivery call, including availability and checkout, sends both values and isolates cached catalogs by the same pair. `beforeRequest` can implement canonical-domain or legacy-path redirects without forking the shared integration.
 
 The module is deliberately kept dependency-free and in source form so the complete security boundary remains easy to audit.
 

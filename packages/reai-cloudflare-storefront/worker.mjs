@@ -86,18 +86,24 @@ export function createReaiStorefrontWorker({
   checkoutReturnPath = "/bestilling/fullfort/",
   noStorePaths = ["/handlekurv/", checkoutReturnPath],
   messages: messageOverrides = {},
-  locale = "en",
-  market = "default",
+  locale,
+  market,
   pathPrefix: configuredPathPrefix = "",
   beforeRequest,
 }) {
   if (!cacheKey) throw new TypeError("cacheKey is required");
   if (!storefront?.HANDLE || !storefront?.matchRoute) throw new TypeError("storefront helpers are required");
+  if (typeof locale !== "string" || !locale.trim()) throw new TypeError("locale is required");
+  if (typeof market !== "string" || !market.trim()) throw new TypeError("market is required");
 
   const messages = { ...defaultMessages, ...messageOverrides };
   const pathPrefix = normalizePathPrefix(configuredPathPrefix);
-  const canonicalLocale = Intl.getCanonicalLocales(locale)[0];
-  if (!canonicalLocale) throw new TypeError(`Invalid locale: ${locale}`);
+  let canonicalLocale;
+  try {
+    [canonicalLocale] = Intl.getCanonicalLocales(locale.trim());
+  } catch {
+    throw new TypeError(`Invalid locale: ${locale}`);
+  }
   const canonicalMarket = String(market).trim().toLowerCase();
   if (!MARKET_HANDLE.test(canonicalMarket)) throw new TypeError(`Invalid market: ${market}`);
   const storefrontCache = cacheRequest(`${cacheKey}:${canonicalMarket}:${canonicalLocale}`);

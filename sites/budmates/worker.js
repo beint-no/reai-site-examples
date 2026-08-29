@@ -7,5 +7,7 @@ import * as storefront from "./storefront.mjs";
 export default createReaiStorefrontWorker({
   cacheKey: "budmates-v1",
   storefront,
+  market: "default",
+  locale: "nb-NO",
   messages: norwegianMessages,
 });
