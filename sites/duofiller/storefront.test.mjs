@@ -47,6 +47,9 @@ test("renders localized product chrome and the preserved local Core image", () =
   assert.match(html, /href="\/nb\/products\/duofiller-core-g3\/"/);
   assert.match(html, /\/assets\/products\/duofiller_core_g3-1\.webp/);
   assert.match(html, /<link rel="canonical" href="https:\/\/duofiller\.respiro\.workers\.dev\/nb\/products\/duofiller-core-g3\/">/);
+  assert.match(html, /hreflang="en-NO" href="https:\/\/duofiller\.respiro\.workers\.dev\/products\/duofiller-core-g3\/"/);
+  assert.match(html, /hreflang="nb-NO" href="https:\/\/duofiller\.respiro\.workers\.dev\/nb\/products\/duofiller-core-g3\/"/);
+  assert.match(html, /hreflang="x-default" href="https:\/\/duofiller\.respiro\.workers\.dev\/products\/duofiller-core-g3\/"/);
 });
 
 test("prefixes every Norwegian sitemap route", () => {

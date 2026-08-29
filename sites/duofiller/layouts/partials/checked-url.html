@@ -15,8 +15,8 @@
   {{- $fragment := "" -}}
   {{- if gt (len $fragmentParts) 1 -}}{{- $fragment = index $fragmentParts 1 -}}{{- end -}}
   {{- $queryParts := strings.Split $pathAndQuery "?" -}}
-  {{- $path := strings.TrimPrefix (index $queryParts 0) "/" -}}
-  {{- $suffix := strings.TrimPrefix $pathAndQuery (index $queryParts 0) -}}
+  {{- $path := strings.TrimPrefix "/" (index $queryParts 0) -}}
+  {{- $suffix := strings.TrimPrefix (index $queryParts 0) $pathAndQuery -}}
   {{- $first := index (strings.Split $path "/") 0 -}}
   {{- if in $dynamicPrefixes $first -}}
     {{- $localized := relLangURL (printf "/%s" $path) -}}
