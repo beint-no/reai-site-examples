@@ -53,6 +53,25 @@ async function checkReference(file, raw, kind) {
 
 async function checkHtml(file) {
   const source = await readFile(file, "utf8");
+  const relativeFile = path.relative(root, file);
+  const singletonElements = [
+    ["charset metadata", /<meta\b[^>]*\bcharset=/gi],
+    ["viewport metadata", /<meta\b[^>]*\bname=["']viewport["'][^>]*>/gi],
+    ["color-scheme metadata", /<meta\b[^>]*\bname=["']color-scheme["'][^>]*>/gi],
+    ["canonical link", /<link\b[^>]*\brel=["']canonical["'][^>]*>/gi],
+  ];
+  for (const [label, pattern] of singletonElements) {
+    const count = [...source.matchAll(pattern)].length;
+    if (count > 1) failures.push(`${relativeFile} has ${count} ${label} elements`);
+  }
+
+  const preconnects = [...source.matchAll(/<link\b[^>]*\brel=["']preconnect["'][^>]*\bhref=["']([^"']+)["'][^>]*>/gi)]
+    .map((match) => match[1]);
+  for (const href of new Set(preconnects)) {
+    const count = preconnects.filter((value) => value === href).length;
+    if (count > 1) failures.push(`${relativeFile} has ${count} preconnect links for ${href}`);
+  }
+
   for (const match of source.matchAll(/<a\b[^>]*href=["']([^"']+)["']/gi)) {
     await checkReference(file, match[1], "page");
   }

@@ -21,7 +21,7 @@ The repository keeps the reusable API and Cloudflare integration separate from e
 
 ## Run locally
 
-Requirements: Node.js 26 or newer, npm 11 or newer, a ReAI Site credential and a Cloudflare account for deployment.
+Requirements: Node.js 26 or newer, npm 11.19 or newer, a ReAI Site credential and a Cloudflare account for deployment. Browser code targets Baseline 2025 and uses native ES modules without a legacy bundle.
 
 ```sh
 npm ci
