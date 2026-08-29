@@ -34,7 +34,7 @@
     "dev": "./site.sh dev",
     "sites": "./site.sh list",
     "deploy": "./site.sh deploy",
-    "test": "node --test packages/reai-cloudflare-storefront/worker.test.mjs"
+    "test": "node --test packages/reai-cloudflare-storefront/*.test.mjs"
   },
   "browserslist": [
     "baseline 2025 with downstream"

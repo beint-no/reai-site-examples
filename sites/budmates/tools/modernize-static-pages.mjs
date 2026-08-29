@@ -1,7 +1,25 @@
 import { readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { renderCompactLegalFooter } from "../../../packages/reai-cloudflare-storefront/footer.mjs";
+
 const publicRoot = path.resolve(import.meta.dirname, "..", "public");
+const legalFooter = renderCompactLegalFooter({
+  owner: "BudMates AS",
+  locale: "nb-NO",
+  refundHref: "/vilkar/#angrerett",
+  privacyHref: "/personvern/",
+  termsHref: "/vilkar/",
+  className: "shop-footer-bottom shop-shell",
+});
+const legacyLegalFooter = renderCompactLegalFooter({
+  owner: "BudMates AS",
+  locale: "nb-NO",
+  refundHref: "/vilkar/#angrerett",
+  privacyHref: "/personvern/",
+  termsHref: "/vilkar/",
+  className: "footer-bottom shell",
+});
 const articleDimensions = new Map([
   ["den-ultimate-guiden-til-rullepapir.webp", [1536, 1024]],
   ["hva-er-cones-og-bor-du-bruke-det.webp", [1536, 1024]],
@@ -41,6 +59,12 @@ function modernize(html) {
     .replaceAll('<img src="/assets/brand/budmates-logo.png" alt="BudMates">', '<img src="/assets/brand/budmates-logo.png" alt="BudMates" width="200" height="64" decoding="async">')
     .replace('<button class="shop-menu-toggle" type="button" aria-label="Åpne meny" aria-expanded="false" data-nav-toggle>', '<button class="shop-menu-toggle" type="button" aria-label="Åpne meny" aria-expanded="false" aria-controls="shop-navigation" data-nav-toggle>')
     .replace('<nav class="shop-nav" aria-label="Hovedmeny" data-nav-links>', '<nav class="shop-nav" id="shop-navigation" aria-label="Hovedmeny" data-nav-links>')
+    .replaceAll('<a href="/faq/">Vanlige spørsmål</a></div><div><h2>Vilkår</h2>', '<a href="/faq/">Vanlige spørsmål</a><a href="https://www.instagram.com/budmates.no" rel="external">Instagram</a><a href="https://www.snapchat.com/add/budmates.no" rel="external">Snapchat</a></div><div><h2>Vilkår</h2>')
+    .replaceAll('<div><h2>Vilkår</h2><a href="/vilkar/">Salgsvilkår</a><a href="/personvern/">Personvern</a><a href="/artikler/">Artikler</a></div>', '')
+    .replaceAll('<li><a href="/personvern/">Personvern</a></li>', '')
+    .replace(/<div class="shop-footer-bottom shop-shell"><span>© \d{4} BudMates AS · Org\.nr\. 929 151 291<\/span><div><a href="https:\/\/www\.instagram\.com\/budmates\.no">Instagram<\/a><a href="https:\/\/www\.snapchat\.com\/add\/budmates\.no">Snapchat<\/a><\/div><\/div>/g, legalFooter)
+    .replace('<div class="footer-bottom shell"><span>© <span data-year></span> BudMates AS · Org.nr. 929 151 291</span><span>Kun for personer over 18 år</span></div>', legacyLegalFooter)
+    .replace('<h2>9. Angrerett</h2>', '<h2 id="angrerett">9. Angrerett</h2>')
     .replace(/<nav class="shop-breadcrumbs"><a href="\/">Hjem<\/a><span>\/<\/span><a href="\/artikler\/">Artikler<\/a><span>\/<\/span><span>([^<]+)<\/span><\/nav>/g, '<nav class="shop-breadcrumbs" aria-label="Brødsmulesti"><ol><li><a href="/">Hjem</a></li><li><a href="/artikler/">Artikler</a></li><li><span aria-current="page">$1</span></li></ol></nav>')
     .replace(/<nav class="shop-breadcrumbs"><a href="\/">Hjem<\/a><span>\/<\/span><span>([^<]+)<\/span><\/nav>/g, '<nav class="shop-breadcrumbs" aria-label="Brødsmulesti"><ol><li><a href="/">Hjem</a></li><li><span aria-current="page">$1</span></li></ol></nav>');
 

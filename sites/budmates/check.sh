@@ -25,6 +25,14 @@ grep -q 'store.css?v=2' storefront.mjs
 grep -q 'store.js?v=9' public/sok/index.html
 grep -q 'store.css?v=2' public/sok/index.html
 grep -q 'aria-label="Brødsmulesti"' public/sok/index.html
+while IFS= read -r page; do
+  grep -q 'class="compact-legal-links"' "$page"
+  grep -q 'href="https://reai.no" rel="external">Drevet av ReAI</a>' "$page"
+  grep -q 'href="/vilkar/#angrerett">Retur</a>' "$page"
+  grep -q 'href="/personvern/">Personvern</a>' "$page"
+  grep -q 'href="/vilkar/">Kjøpsvilkår</a>' "$page"
+done < <(find public -name '*.html' -type f)
+grep -q 'id="angrerett"' public/vilkar/index.html
 ! grep -R -q 'store.js?v=6' public --include='*.html'
 grep -q "'/reai/catalog'" public/assets/store.js
 grep -q '/reai/collections/' public/assets/store.js

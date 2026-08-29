@@ -1,5 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { renderCompactLegalFooter } from "../../../packages/reai-cloudflare-storefront/footer.mjs";
 import {
   SHIPPING_THRESHOLD,
   STORE_SCRIPT,
@@ -10,8 +11,15 @@ import {
 
 const origin = "https://endorphin.no";
 const contactEmail = "post@famme.no";
-const year = new Date().getFullYear();
 const nav = `<a href="/">Hjem</a><a href="/collections/joggesko/">Joggesko</a><a href="/collections/sokker/">Sokker</a><a href="/collections/all/">Alle</a>`;
+const legalFooter = renderCompactLegalFooter({
+  owner: "Endorphin",
+  locale: "nb-NO",
+  refundHref: "/retur/",
+  privacyHref: "/personvern/",
+  termsHref: "/vilkar/",
+  className: "shop-footer-bottom shop-shell",
+});
 
 const chrome = (activeTitle) => `<a class="skip-link" href="#main">Hopp til innhold</a>
   <aside class="shop-announcement" aria-label="Kjøpsfordeler"><ul class="shop-shell"><li>Gratis bytte &amp; fri frakt over ${SHIPPING_THRESHOLD} kr</li><li>Etikettløs retur</li><li>Vipps, kort og mobilbetaling</li></ul></aside>
@@ -22,7 +30,7 @@ const chrome = (activeTitle) => `<a class="skip-link" href="#main">Hopp til innh
     <div class="shop-tools"><a href="/sok/" aria-label="Søk">Søk</a><a href="/handlekurv/" aria-label="Handlekurv">Kurv <span class="cart-count" data-cart-count>0</span></a></div>
   </div></header>`;
 
-const footer = `<footer class="shop-footer"><div class="shop-shell shop-footer-grid"><div><a class="shop-logo shop-logo--footer" href="/"><img src="/assets/brand/endorphin-logo.png" alt="Endorphin" width="800" height="95" loading="lazy" decoding="async"></a><p>Joggesko fra Famme med demping til trening, jobb og hverdag. Fri frakt over ${SHIPPING_THRESHOLD} kr.</p></div><div><h2>Handle</h2><a href="/collections/joggesko/">Joggesko</a><a href="/collections/sokker/">Sokker</a><a href="/collections/all/">Alle produkter</a></div><div><h2>Informasjon</h2><a href="/frakt/">Frakt og levering</a><a href="/storrelse/">Størrelsesguide</a><a href="/om/">Om oss</a><a href="/kontakt/">Kontakt</a><a href="/faq/">Ofte stilte spørsmål</a></div><div><h2>Vilkår</h2><a href="/vilkar/">Kjøpsvilkår</a><a href="/retur/">Retur og bytte</a><a href="/personvern/">Personvern</a></div></div><div class="shop-footer-bottom shop-shell"><span>© ${year} Endorphin</span><div><a href="mailto:${contactEmail}">${contactEmail}</a></div></div></footer><div class="cart-toast" role="status" aria-live="polite" data-cart-toast hidden></div>`;
+const footer = `<footer class="shop-footer"><div class="shop-shell shop-footer-grid"><div><a class="shop-logo shop-logo--footer" href="/"><img src="/assets/brand/endorphin-logo.png" alt="Endorphin" width="800" height="95" loading="lazy" decoding="async"></a><p>Joggesko fra Famme med demping til trening, jobb og hverdag. Fri frakt over ${SHIPPING_THRESHOLD} kr.</p></div><div><h2>Handle</h2><a href="/collections/joggesko/">Joggesko</a><a href="/collections/sokker/">Sokker</a><a href="/collections/all/">Alle produkter</a></div><div><h2>Informasjon</h2><a href="/frakt/">Frakt og levering</a><a href="/storrelse/">Størrelsesguide</a><a href="/om/">Om oss</a><a href="/kontakt/">Kontakt</a><a href="/faq/">Ofte stilte spørsmål</a></div></div>${legalFooter}</footer><div class="cart-toast" role="status" aria-live="polite" data-cart-toast hidden></div>`;
 
 const semanticBreadcrumbs = (body) => body.replace(
   /<nav class="shop-breadcrumbs"><a href="\/">Hjem<\/a><span>\/<\/span><span>([^<]+)<\/span><\/nav>/g,
