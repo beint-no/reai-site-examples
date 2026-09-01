@@ -18,7 +18,8 @@ The deployed preview requires one Brewket Site credential with these scopes:
 - `site:read`
 - `commerce:catalog:read`
 - `commerce:availability:read`
+- `commerce:checkout:create`
 
 Set its plaintext token with `../../site.sh secret duofiller`. The token identifies both the ReAI Site and Brewket tenant; no tenant ID belongs in Worker configuration.
 
-Checkout support is implemented but `CHECKOUT_ENABLED` remains `false` while ReAI only has global flat-rate shipping and Brewket's rates vary by destination. The cart opens an order email in this state. To enable payment, configure suitable Site shipping methods, create a replacement credential that also has `commerce:checkout:create`, store it in Cloudflare, and set `CHECKOUT_ENABLED` to `true`.
+Checkout is on. Each route sends its ReAI market and locale, so `/` pays USD and `/nb/` pays NOK. Adyen converts non-NOK captures into Brewket's NOK balance account. Set `CHECKOUT_ENABLED` to `false` to restore the email order-request fallback.
