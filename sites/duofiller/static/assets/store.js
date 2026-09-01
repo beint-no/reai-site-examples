@@ -2,7 +2,10 @@ const locale = document.documentElement.lang || "en-NO";
 const norwegian = locale.startsWith("nb");
 const prefix = location.pathname === "/nb" || location.pathname.startsWith("/nb/") ? "/nb" : "";
 const apiBase = document.querySelector('meta[name="reai-api-base"]')?.content || `${prefix}/reai`;
-const CART_KEY = "duofiller-cart-v2";
+const storeCurrency = document.querySelector("[data-store-currency]")?.dataset.storeCurrency
+  || document.querySelector("[data-add-to-cart]")?.dataset.currency
+  || (norwegian ? "NOK" : "USD");
+const CART_KEY = `duofiller-cart-v3:${norwegian ? "norway" : "international"}`;
 const VARIANT_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const copy = norwegian ? {
@@ -56,7 +59,7 @@ const escapeHtml = (value) => String(value ?? "")
   .replaceAll(">", "&gt;")
   .replaceAll('"', "&quot;")
   .replaceAll("'", "&#39;");
-const formatMoney = (value, currency = "NOK") => new Intl.NumberFormat(locale, {
+const formatMoney = (value, currency = storeCurrency) => new Intl.NumberFormat(locale, {
   style: "currency",
   currency,
   maximumFractionDigits: Number(value) % 1 ? 2 : 0,
@@ -159,7 +162,7 @@ addButton?.addEventListener("click", () => {
     variant,
     title: addButton.dataset.title,
     price: Number(addButton.dataset.price),
-    currency: addButton.dataset.currency || "NOK",
+    currency: addButton.dataset.currency || storeCurrency,
     image: addButton.dataset.image,
     handle: addButton.dataset.handle,
     quantity: amount,

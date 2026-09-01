@@ -67,17 +67,29 @@ test("removes executable markup from catalog descriptions", () => {
 
 test("publishes localized checkout capability without exposing a credential", async () => {
   const response = await worker.fetch(new Request("https://shop.example/nb/reai/storefront-config"), {
-    CHECKOUT_ENABLED: "false",
+    CHECKOUT_ENABLED: "true",
   });
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("Content-Language"), "nb-NO");
-  assert.deepEqual(await response.json(), { checkoutEnabled: false });
+  assert.deepEqual(await response.json(), { checkoutEnabled: true });
 });
 
-test("blocks server checkout while destination-aware shipping is unavailable", async () => {
+test("keeps the checkout kill switch when CHECKOUT_ENABLED is false", async () => {
   const response = await worker.fetch(new Request("https://shop.example/reai/checkout/start", { method: "POST" }), {
     CHECKOUT_ENABLED: "false",
   });
   assert.equal(response.status, 503);
   assert.match((await response.json()).error, /not available yet/i);
+});
+
+test("does not block checkout start when checkout is enabled", async () => {
+  const response = await worker.fetch(new Request("https://shop.example/reai/checkout/start", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ lines: [{ variantId: "018f3c2e-8b1a-4d3e-9c4f-5a6b7c8d9e10", quantity: 1 }] }),
+  }), {
+    CHECKOUT_ENABLED: "true",
+  });
+  assert.equal(response.status, 503);
+  assert.match((await response.json()).error, /not configured/i);
 });

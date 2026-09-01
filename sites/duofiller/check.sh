@@ -20,6 +20,9 @@ grep -Eq 'href="?https://reai.no"? rel="?external"?>Powered by ReAI</a>' "$site_
 grep -Eq 'href="?https://reai.no"? rel="?external"?>Drevet av ReAI</a>' "$site_dir/public/nb/index.html"
 grep -Eq 'href="?/policies/refund/"?>Refund policy</a>' "$site_dir/public/index.html"
 grep -Eq 'href="?/nb/policies/retur/"?>Retur</a>' "$site_dir/public/nb/index.html"
+grep -q 'data-store-currency=USD' "$site_dir/public/cart/index.html"
+grep -q 'data-store-currency=NOK' "$site_dir/public/nb/handlekurv/index.html"
+grep -q 'CHECKOUT_ENABLED": "true"' "$site_dir/wrangler.jsonc"
 
 if rg -n "REAI_SITE_TOKEN\\s*[=:]\\s*['\"][^'\"]+" "$site_dir" --glob '!*.example' --glob '!README.md' --glob '!AGENTS.md'; then
   echo "DuoFiller source appears to contain a Site credential" >&2

@@ -15,6 +15,6 @@ English is the default language and uses the ReAI `international` market. Norweg
 
 Product titles, prices, variants, availability, collections, and API product images come from the Brewket Site in ReAI. The product files under `static/assets/products` are presentation assets and temporary image fallbacks, not a second catalog. Never add a committed product-price catalog.
 
-Online checkout is intentionally disabled until Brewket has destination-aware shipping in ReAI. Keep the email order-request fallback and do not grant `commerce:checkout:create` or set `CHECKOUT_ENABLED=true` without verified shipping methods.
+Online checkout is enabled. English `/` creates an `international` USD session; Norwegian `/nb/` creates a `norway` NOK session. Adyen keeps Brewket's NOK balance account and converts other shopper currencies. The Worker secret must include `commerce:checkout:create`. Keep `CHECKOUT_ENABLED` as the kill switch; the cart falls back to email if it is false.
 
 Keep the Site credential only in the Cloudflare secret `REAI_SITE_TOKEN`. Never put it in Git, Hugo configuration, HTML, client JavaScript, or Wrangler variables.
