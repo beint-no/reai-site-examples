@@ -399,6 +399,12 @@ export function createReaiStorefrontWorker({
 
   async function cachedCommerceResponse(request, env, route, executionContext) {
     if (request.method !== "GET") return null;
+    if (
+      route !== "/reai/catalog"
+      && route !== "/reai/collections"
+      && !route.startsWith("/reai/products/")
+      && !route.startsWith("/reai/collections/")
+    ) return null;
     const cached = await getStorefront(env, executionContext);
     const resolved = cachedCommerceBody(route, cached.store);
     if (!resolved) return null;
@@ -472,7 +478,8 @@ export function createReaiStorefrontWorker({
         statusText: upstream.statusText,
         headers: responseHeaders,
       });
-    } catch {
+    } catch (error) {
+      console.error("Site API request failed", error);
       return jsonResponse({ error: messages.temporarilyUnavailable }, 502, env);
     }
   }
@@ -485,7 +492,9 @@ export function createReaiStorefrontWorker({
     if (request.method !== "GET" && request.method !== "HEAD") {
       return jsonResponse({ error: messages.methodNotAllowed }, 405, env);
     }
-    if (route.needsSlash) return Response.redirect(`${url.origin}${publicPath(route.canonicalPath)}`, 301);
+    if (route.needsSlash) {
+      return Response.redirect(`${url.origin}${publicPath(route.canonicalPath)}${url.search}`, 301);
+    }
 
     let store;
     let cacheStatus;
@@ -493,10 +502,11 @@ export function createReaiStorefrontWorker({
       const cached = await getStorefront(env, executionContext);
       store = cached.store;
       cacheStatus = cached.cacheStatus;
-    } catch {
+    } catch (error) {
+      console.error("Storefront snapshot failed", error);
       if (route.type === "home") return null;
       if (route.type === "sitemap") return jsonResponse({ error: messages.temporarilyUnavailable }, 502, env);
-      return htmlResponse(storefront.renderUnavailablePage(null, renderContext), env, 502);
+      return htmlResponse(storefront.renderUnavailablePage(null, renderContext, route.canonicalPath || "/"), env, 502);
     }
 
     if (route.type === "home") {
@@ -511,13 +521,13 @@ export function createReaiStorefrontWorker({
     }
 
     if (route.type === "collection") {
-      if (!route.valid) return htmlResponse(storefront.renderNotFoundPage(store, renderContext), env, 404);
+      if (!route.valid) return htmlResponse(storefront.renderNotFoundPage(store, renderContext, route.canonicalPath), env, 404);
       if (route.handle !== "all" && !storefront.collectionByHandle(store, route.handle)) {
         try {
           const detail = await siteJson(await siteClient(env).collection(route.handle, deliveryContext));
           store = { ...store, collections: [...store.collections, detail] };
         } catch (error) {
-          return htmlResponse(storefront.renderNotFoundPage(store, renderContext), env, error.status === 404 ? 404 : 502);
+          return htmlResponse(storefront.renderNotFoundPage(store, renderContext, route.canonicalPath), env, error.status === 404 ? 404 : 502);
         }
       }
       const response = htmlResponse(storefront.renderCollectionPage(store, route.handle, renderContext), env);
@@ -526,13 +536,13 @@ export function createReaiStorefrontWorker({
     }
 
     if (route.type === "product") {
-      if (!route.valid) return htmlResponse(storefront.renderNotFoundPage(store, renderContext), env, 404);
+      if (!route.valid) return htmlResponse(storefront.renderNotFoundPage(store, renderContext, route.canonicalPath), env, 404);
       let product = storefront.productByHandle(store, route.handle);
       if (!product) {
         try {
           product = await siteJson(await siteClient(env).product(route.handle, deliveryContext));
         } catch (error) {
-          return htmlResponse(storefront.renderNotFoundPage(store, renderContext), env, error.status === 404 ? 404 : 502);
+          return htmlResponse(storefront.renderNotFoundPage(store, renderContext, route.canonicalPath), env, error.status === 404 ? 404 : 502);
         }
       }
       const availability = await variantAvailability(env, product.variants);

@@ -343,11 +343,11 @@ test("strips the locale prefix for commerce matching and preserves it in redirec
     pathPrefix: "/nb",
   });
 
-  const response = await worker.fetch(new Request("https://shop.example/nb/products/example"), {
+  const response = await worker.fetch(new Request("https://shop.example/nb/products/example?market=international"), {
     REAI_SITE_TOKEN: "test-token",
   });
 
   assert.equal(matchedPath, "/products/example");
   assert.equal(response.status, 301);
-  assert.equal(response.headers.get("Location"), "https://shop.example/nb/products/example/");
+  assert.equal(response.headers.get("Location"), "https://shop.example/nb/products/example/?market=international");
 });

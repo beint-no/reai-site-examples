@@ -54,14 +54,14 @@ test("renders localized product chrome and the preserved local Core image", () =
   assert.match(html, /class="footer-bottom shell compact-legal-footer"/);
   assert.match(html, /href="https:\/\/reai\.no" rel="external"/);
   assert.match(html, /href="\/nb\/policies\/retur\/"/);
-  assert.match(html, /data-market="norway" aria-current="true"/);
+  assert.match(html, /<option value="norway" selected>NOK<\/option>/);
   assert.match(html, /class="language-switch" href="\/products\/duofiller-core-g3\/\?market=norway"/);
 });
 
 test("keeps Norwegian locale when the international market is selected", () => {
   const html = renderProductPage(store, product, { [product.variants[0].id]: true }, context("nb-NO", "/nb", "international"));
   assert.match(html, /<html lang="nb-NO">/);
-  assert.match(html, /data-market="international" aria-current="true"/);
+  assert.match(html, /<option value="international" selected>USD<\/option>/);
   assert.match(html, /href="\/nb\/products\/duofiller-core-g3\/\?market=international"/);
   assert.match(html, /class="language-switch" href="\/products\/duofiller-core-g3\/"/);
 });
