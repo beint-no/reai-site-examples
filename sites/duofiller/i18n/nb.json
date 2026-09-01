@@ -16,6 +16,7 @@
   "nav_menu_open": { "other": "Åpne meny" },
   "language_label": { "other": "Språk" },
   "language_switch": { "other": "English" },
+  "currency_label": { "other": "Valuta" },
   "noscript": { "other": "JavaScript må være aktivert for handlekurv og betaling. Produktinformasjon og brukerstøtte er fortsatt tilgjengelig uten." },
   "footer_description": { "other": "Kompakt fylleutstyr, tilkoblinger og reservedeler fra Brewket AS i Skjold." },
   "footer_shop": { "other": "Handle" },

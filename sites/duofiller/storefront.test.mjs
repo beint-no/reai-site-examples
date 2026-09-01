@@ -10,9 +10,10 @@ import {
 import worker from "./worker.js";
 
 const messages = new Proxy({}, { get: (_target, key) => String(key) });
-const context = (locale = "en-NO", pathPrefix = "") => ({
+const context = (locale = "en-NO", pathPrefix = "", market) => ({
   locale,
   pathPrefix,
+  market: market || (locale.startsWith("nb") ? "norway" : "international"),
   messages,
   publicPath: (pathname) => pathPrefix ? `${pathPrefix}${pathname}` : pathname,
 });
@@ -53,6 +54,16 @@ test("renders localized product chrome and the preserved local Core image", () =
   assert.match(html, /class="footer-bottom shell compact-legal-footer"/);
   assert.match(html, /href="https:\/\/reai\.no" rel="external"/);
   assert.match(html, /href="\/nb\/policies\/retur\/"/);
+  assert.match(html, /data-market="norway" aria-current="true"/);
+  assert.match(html, /class="language-switch" href="\/products\/duofiller-core-g3\/\?market=norway"/);
+});
+
+test("keeps Norwegian locale when the international market is selected", () => {
+  const html = renderProductPage(store, product, { [product.variants[0].id]: true }, context("nb-NO", "/nb", "international"));
+  assert.match(html, /<html lang="nb-NO">/);
+  assert.match(html, /data-market="international" aria-current="true"/);
+  assert.match(html, /href="\/nb\/products\/duofiller-core-g3\/\?market=international"/);
+  assert.match(html, /class="language-switch" href="\/products\/duofiller-core-g3\/"/);
 });
 
 test("prefixes every Norwegian sitemap route", () => {
@@ -71,7 +82,25 @@ test("publishes localized checkout capability without exposing a credential", as
   });
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("Content-Language"), "nb-NO");
-  assert.deepEqual(await response.json(), { checkoutEnabled: true });
+  assert.deepEqual(await response.json(), {
+    checkoutEnabled: true,
+    market: "norway",
+    locale: "nb-NO",
+    currency: "NOK",
+  });
+});
+
+test("selects market independently of locale", async () => {
+  const response = await worker.fetch(new Request("https://shop.example/nb/reai/storefront-config?market=international"), {
+    CHECKOUT_ENABLED: "true",
+  });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), {
+    checkoutEnabled: true,
+    market: "international",
+    locale: "nb-NO",
+    currency: "USD",
+  });
 });
 
 test("keeps the checkout kill switch when CHECKOUT_ENABLED is false", async () => {

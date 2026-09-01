@@ -15,6 +15,11 @@
     <a href="{{ $core }}">{{ i18n "nav_core" }}</a><a href="{{ $connections }}">{{ i18n "nav_connections" }}</a><a href="{{ $parts }}">{{ i18n "nav_parts" }}</a><a href="{{ $support }}">{{ i18n "nav_support" }}</a><a href="{{ $contact }}">{{ i18n "nav_contact" }}</a>
   </nav>
   <div class="header-tools">
+    <nav class="currency-switch" aria-label="{{ i18n "currency_label" }}">
+      <a href="?market=norway" data-market="norway">NOK</a>
+      <a href="?market=europe" data-market="europe">EUR</a>
+      <a href="?market=international" data-market="international">USD</a>
+    </nav>
     <a class="language-switch" href="{{ with index $page.Translations 0 }}{{ .RelPermalink }}{{ else }}{{ if eq $page.Language.Lang "en" }}/nb/{{ else }}/{{ end }}{{ end }}" hreflang="{{ if eq $page.Language.Lang "en" }}nb{{ else }}en{{ end }}" aria-label="{{ i18n "language_label" }}: {{ i18n "language_switch" }}">{{ i18n "language_switch" }}</a>
     <a class="tool-link" href="{{ $search }}"><span class="tool-label">{{ i18n "nav_search" }}</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg></a>
     <a class="tool-link" href="{{ $cart }}"><span class="tool-label">{{ i18n "nav_cart" }}</span><span class="cart-count" data-cart-count>0</span></a>

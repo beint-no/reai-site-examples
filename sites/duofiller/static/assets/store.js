@@ -2,11 +2,45 @@ const locale = document.documentElement.lang || "en-NO";
 const norwegian = locale.startsWith("nb");
 const prefix = location.pathname === "/nb" || location.pathname.startsWith("/nb/") ? "/nb" : "";
 const apiBase = document.querySelector('meta[name="reai-api-base"]')?.content || `${prefix}/reai`;
-const storeCurrency = document.querySelector("[data-store-currency]")?.dataset.storeCurrency
+const MARKET_CURRENCY = { norway: "NOK", europe: "EUR", international: "USD" };
+const defaultMarket = norwegian ? "norway" : "international";
+const requestedMarket = new URL(location.href).searchParams.get("market");
+const market = MARKET_CURRENCY[requestedMarket] ? requestedMarket
+  : (sessionStorage.getItem("duofiller-market") && MARKET_CURRENCY[sessionStorage.getItem("duofiller-market")]
+    ? sessionStorage.getItem("duofiller-market")
+    : defaultMarket);
+const storeCurrency = MARKET_CURRENCY[market]
+  || document.querySelector("[data-store-currency]")?.dataset.storeCurrency
   || document.querySelector("[data-add-to-cart]")?.dataset.currency
   || (norwegian ? "NOK" : "USD");
-const CART_KEY = `duofiller-cart-v3:${norwegian ? "norway" : "international"}`;
+const marketQuery = market === defaultMarket ? "" : `?market=${encodeURIComponent(market)}`;
+const CART_KEY = `duofiller-cart-v3:${market}`;
 const VARIANT_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+(() => {
+  const url = new URL(location.href);
+  if (market === defaultMarket) url.searchParams.delete("market");
+  else url.searchParams.set("market", market);
+  const next = `${url.pathname}${url.search}${url.hash}`;
+  if (next !== `${location.pathname}${location.search}${location.hash}`) history.replaceState(null, "", next);
+  sessionStorage.setItem("duofiller-market", market);
+  document.querySelectorAll("a[href]").forEach((link) => {
+    if (link.dataset.market) return;
+    const value = link.getAttribute("href");
+    if (!value || /^(mailto:|tel:|https?:|\/\/|#)/i.test(value)) return;
+    try {
+      const target = new URL(value, location.origin);
+      if (target.origin !== location.origin) return;
+      const targetDefault = target.pathname === "/nb" || target.pathname.startsWith("/nb/") ? "norway" : "international";
+      if (market === targetDefault) target.searchParams.delete("market");
+      else target.searchParams.set("market", market);
+      link.setAttribute("href", `${target.pathname}${target.search}${target.hash}`);
+    } catch {}
+  });
+  document.querySelectorAll("[data-market]").forEach((link) => {
+    link.setAttribute("aria-current", String(link.dataset.market === market));
+  });
+})();
 
 const copy = norwegian ? {
   add: "Legg i handlekurven",
@@ -50,8 +84,8 @@ const copy = norwegian ? {
   subject: "Enquiry from",
 };
 
-const productPath = (handle) => `${prefix}/products/${encodeURIComponent(handle)}/`;
-const allProductsPath = `${prefix}/collections/all/`;
+const productPath = (handle) => `${prefix}/products/${encodeURIComponent(handle)}/${marketQuery}`;
+const allProductsPath = `${prefix}/collections/all/${marketQuery}`;
 const staticAssetHandle = (handle) => handle === "duofiller-core-g3" ? "duofiller_core_g3" : handle;
 const escapeHtml = (value) => String(value ?? "")
   .replaceAll("&", "&amp;")
@@ -191,7 +225,7 @@ const cartLines = document.querySelector("[data-cart-lines]");
 const cartTotal = document.querySelector("[data-cart-total]");
 const checkoutButton = document.querySelector("[data-cart-checkout]");
 const cartError = document.querySelector("[data-cart-error]");
-const storefrontConfig = fetch(`${apiBase}/storefront-config`, { headers: { Accept: "application/json" } })
+const storefrontConfig = fetch(`${apiBase}/storefront-config${marketQuery}`, { headers: { Accept: "application/json" } })
   .then((response) => response.ok ? response.json() : { checkoutEnabled: false })
   .catch(() => ({ checkoutEnabled: false }));
 
@@ -239,7 +273,7 @@ checkoutButton?.addEventListener("click", async () => {
   checkoutButton.textContent = copy.checkoutBusy;
   if (cartError) cartError.textContent = "";
   try {
-    const response = await fetch(`${apiBase}/checkout/start`, {
+    const response = await fetch(`${apiBase}/checkout/start${marketQuery}`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() },
       body: JSON.stringify({ lines }),
@@ -258,7 +292,7 @@ const searchInput = document.querySelector("[data-search-input]");
 const searchResults = document.querySelector("[data-search-results]");
 const searchCount = document.querySelector("[data-search-count]");
 let catalogPromise;
-const getCatalog = () => catalogPromise ||= fetch(`${apiBase}/catalog`).then((response) => {
+const getCatalog = () => catalogPromise ||= fetch(`${apiBase}/catalog${marketQuery}`).then((response) => {
   if (!response.ok) throw new Error();
   return response.json();
 });
