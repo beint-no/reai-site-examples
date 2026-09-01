@@ -20,6 +20,13 @@ if (englishKeys.length !== norwegianKeys.length || englishKeys.some((key, index)
   throw new TypeError("DuoFiller locale catalogs must contain identical keys");
 }
 
+const MARKET_CURRENCY = Object.freeze({
+  norway: "NOK",
+  europe: "EUR",
+  international: "USD",
+});
+const MARKETS = Object.freeze(Object.keys(MARKET_CURRENCY));
+
 function workerMessages(messages) {
   return {
     ...messages,
@@ -41,7 +48,12 @@ function beforeRequest({ request, env, url, renderContext }) {
   const checkoutPath = renderContext.publicPath("/reai/checkout/start");
   const checkoutEnabled = env.CHECKOUT_ENABLED === "true";
   if (url.pathname === configPath && request.method === "GET") {
-    return new Response(JSON.stringify({ checkoutEnabled }), {
+    return new Response(JSON.stringify({
+      checkoutEnabled,
+      market: renderContext.market,
+      locale: renderContext.locale,
+      currency: MARKET_CURRENCY[renderContext.market],
+    }), {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
         "Content-Language": renderContext.locale,
@@ -64,34 +76,50 @@ function beforeRequest({ request, env, url, renderContext }) {
   return null;
 }
 
-const englishWorker = createReaiStorefrontWorker({
-  cacheKey: "duofiller-brewket-v1",
-  storefront,
-  market: "international",
-  locale: "en-NO",
-  messages: workerMessages(english),
+function createLocaleWorkers(locale, messages, options) {
+  return Object.fromEntries(MARKETS.map((market) => [
+    market,
+    createReaiStorefrontWorker({
+      cacheKey: "duofiller-brewket-v1",
+      storefront,
+      market,
+      locale,
+      messages: workerMessages(messages),
+      beforeRequest,
+      ...options,
+    }),
+  ]));
+}
+
+const englishWorkers = createLocaleWorkers("en-NO", english, {
   checkoutReturnPath: "/order/complete/",
   noStorePaths: ["/cart/", "/order/complete/"],
-  beforeRequest,
 });
-
-const norwegianWorker = createReaiStorefrontWorker({
-  cacheKey: "duofiller-brewket-v1",
-  storefront,
-  market: "norway",
-  locale: "nb-NO",
+const norwegianWorkers = createLocaleWorkers("nb-NO", norwegian, {
   pathPrefix: "/nb",
-  messages: workerMessages(norwegian),
   checkoutReturnPath: "/bestilling/fullfort/",
   noStorePaths: ["/handlekurv/", "/bestilling/fullfort/"],
-  beforeRequest,
 });
+
+function isNorwegianPath(pathname) {
+  return pathname === "/nb" || pathname.startsWith("/nb/");
+}
+
+function requestedMarket(url, locale) {
+  const value = url.searchParams.get("market")?.trim().toLowerCase();
+  if (value && MARKETS.includes(value)) return value;
+  return storefront.defaultMarketForLocale(locale);
+}
 
 export default {
   fetch(request, env, context) {
-    const { pathname } = new URL(request.url);
-    return pathname === "/nb" || pathname.startsWith("/nb/")
-      ? norwegianWorker.fetch(request, env, context)
-      : englishWorker.fetch(request, env, context);
+    const url = new URL(request.url);
+    const norwegian = isNorwegianPath(url.pathname);
+    const locale = norwegian ? "nb-NO" : "en-NO";
+    const market = requestedMarket(url, locale);
+    const workers = norwegian ? norwegianWorkers : englishWorkers;
+    const selected = workers[market] ?? workers[norwegian ? "norway" : "international"];
+    if (!selected) throw new Error(`Missing DuoFiller worker for ${locale} ${market}`);
+    return selected.fetch(request, env, context);
   },
 };
