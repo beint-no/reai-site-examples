@@ -79,4 +79,21 @@ test("returns typed JSON without changing the upstream response", async () => {
 
 test("requires a server-side Site credential", () => {
   assert.throws(() => new ReaiSiteClient({ token: "" }), /token is required/);
+  assert.throws(() => new ReaiSiteClient({ token: "   " }), /token is required/);
+});
+
+test("calls fetch as a free function and trims the Site credential", async () => {
+  let invokedThis;
+  let authorization;
+  const client = new ReaiSiteClient({
+    token: " site-token \n",
+    async fetch(input, init) {
+      invokedThis = this;
+      authorization = new Request(input, init).headers.get("Authorization");
+      return Response.json({ ok: true });
+    },
+  });
+  await client.site();
+  assert.equal(invokedThis, undefined);
+  assert.equal(authorization, "Bearer site-token");
 });

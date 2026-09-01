@@ -37,8 +37,18 @@ const VARIANT_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[89ab][0-9a-f]{3}-[0-9a
       link.setAttribute("href", `${target.pathname}${target.search}${target.hash}`);
     } catch {}
   });
-  document.querySelectorAll("[data-market]").forEach((link) => {
-    link.setAttribute("aria-current", String(link.dataset.market === market));
+  document.querySelectorAll("[data-market-select]").forEach((select) => {
+    select.value = market;
+    select.addEventListener("change", () => {
+      const next = select.value;
+      if (!MARKET_CURRENCY[next]) return;
+      sessionStorage.setItem("duofiller-market", next);
+      const target = new URL(location.href);
+      const targetDefault = target.pathname === "/nb" || target.pathname.startsWith("/nb/") ? "norway" : "international";
+      if (next === targetDefault) target.searchParams.delete("market");
+      else target.searchParams.set("market", next);
+      location.assign(`${target.pathname}${target.search}${target.hash}`);
+    });
   });
 })();
 

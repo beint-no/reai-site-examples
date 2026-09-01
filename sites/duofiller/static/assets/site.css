@@ -76,9 +76,8 @@
   .main-nav a:is(:hover,[aria-current="page"]) { background: var(--white); }
   .header-tools { display: flex; align-items: center; gap: 6px; }
   .language-switch { display: inline-flex; min-height: 40px; align-items: center; padding-inline: 12px; border: 1px solid var(--line); border-radius: 99px; text-decoration: none; font-size: .72rem; font-weight: 850; }
-  .currency-switch { display: inline-flex; align-items: center; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 99px; }
-  .currency-switch a { display: inline-flex; min-height: 34px; align-items: center; padding-inline: 10px; border-radius: 99px; text-decoration: none; font-size: .7rem; font-weight: 850; }
-  .currency-switch a:is(:hover,[aria-current="true"]) { background: var(--white); }
+  .currency-switch { display: inline-flex; align-items: center; }
+  .currency-switch select { min-height: 40px; padding: 0 28px 0 12px; border: 1px solid var(--line); border-radius: 99px; background: var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23111111' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6' d='m1.5 1.5 4.5 4.5 4.5-4.5'/%3E%3C/svg%3E") no-repeat right 10px center; color: inherit; font: inherit; font-size: .72rem; font-weight: 850; appearance: none; }
   .tool-link, .menu-toggle { display: inline-flex; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; gap: 7px; border: 0; border-radius: 99px; background: transparent; text-decoration: none; font-size: .78rem; font-weight: 800; }
   .tool-link svg, .menu-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
   .tool-link:hover, .menu-toggle:hover { background: var(--white); }
@@ -348,7 +347,7 @@
   .header-inner { min-height: 76px; gap: 12px; }
   .brand img { width: 170px; }
   .language-switch { padding-inline: 9px; font-size: .66rem; }
-  .currency-switch a { min-height: 30px; padding-inline: 8px; font-size: .62rem; }
+  .currency-switch select { min-height: 34px; padding-inline: 10px 24px; font-size: .66rem; }
   .tool-label { display: none; }
   .main-nav { top: 108px; }
   .hero-grid { min-height: auto; grid-template-columns: 1fr; padding-block: 66px 30px; }

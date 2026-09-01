@@ -72,8 +72,10 @@ export class ReaiSiteClient {
   constructor(options) {
     if (!options.token) throw new TypeError("token is required");
     this.#baseUrl = (options.baseUrl || "https://app.reai.no").replace(/\/$/, "");
-    this.#token = options.token;
-    this.#fetch = options.fetch || globalThis.fetch;
+    this.#token = String(options.token).trim();
+    if (!this.#token) throw new TypeError("token is required");
+    const fetchImpl = options.fetch || globalThis.fetch.bind(globalThis);
+    this.#fetch = (input, init) => fetchImpl(input, init);
   }
 
   /** @type {string} */
