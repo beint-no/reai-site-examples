@@ -118,6 +118,7 @@ export default {
     const locale = norwegian ? "nb-NO" : "en-NO";
     const market = requestedMarket(url, locale);
     const workers = norwegian ? norwegianWorkers : englishWorkers;
-    return workers[market].fetch(request, env, context);
+    const selected = workers[market] ?? (norwegian ? norwegianWorkers.norway : englishWorkers.international);
+    return selected.fetch(request, env, context);
   },
 };
