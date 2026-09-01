@@ -1,0 +1,29 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "kebabkingtrondheim",
+  "compatibility_date": "2026-09-01",
+  "workers_dev": true,
+  "main": "worker.js",
+  "routes": [
+    {
+      "pattern": "kebabkingtrondheim.no",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.kebabkingtrondheim.no",
+      "custom_domain": true
+    }
+  ],
+  "vars": {
+    "REAI_BASE_URL": "https://app.reai.no"
+  },
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": true
+  },
+  "observability": {
+    "enabled": true
+  }
+}
