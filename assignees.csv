@@ -5,10 +5,10 @@ Brewket AS,https://duofiller.no,Leni,preview_ready,sites/duofiller,https://duofi
 Budmates AS,https://budmates.no,Ian,preview_ready,sites/budmates,https://budmates.respiro.workers.dev/,not_sent,Shopify; existing ReAI storefront
 Daggry Design AS,https://daggry.com,Aminul,assigned,,,not_sent,Shopify
 EVENSENSOLUTION AS,https://modchronos.eu,Uddhika,assigned,,https://modchronos.respiro.workers.dev,not_sent,Shopify; migrate the existing customer-sites/client-demo-sites/modchronos preview instead of rebuilding
-EVutleie AS,https://evutleie.no,Ian,assigned,,,not_sent,WooCommerce
+EVutleie AS,https://evutleie.no,Ian,assigned,,,not_sent,Non-client ReAI tenant; WooCommerce
 Hjertelig AS,https://hjertelig.no,Uddhika,assigned,,https://hjertelig.respiro.workers.dev,not_sent,Shopify; migrate the existing customer-sites/client-demo-sites/hjertelig preview instead of rebuilding
 Hvit Natt AS,https://hvitnatt.no,Uddhika,assigned,,https://hvitnatt.respiro.workers.dev,not_sent,Shopify; migrate the existing customer-sites/client-demo-sites/hvitnatt preview instead of rebuilding
-iGlow AS,https://iglow.no,Aminul,assigned,,,not_sent,Shopify
+iGlow AS,https://iglow.no,Aminul,assigned,,,not_sent,Non-client ReAI tenant; Shopify
 Kebab King Alshahadat,https://kebabkingtrondheim.no,Ian,in_progress,sites/kebabking,,not_sent,Migration of the existing production site is already in progress
 MP Group AS,https://merchmate.no,Ian,assigned,,,not_sent,WooCommerce
 Vintage Designer AS,https://vintagedesigner.no,Leni,assigned,,,not_sent,Shopify; reassigned during cross-repository workload balancing
