@@ -51,15 +51,26 @@ function siteOrigin(env) {
   }
 }
 
-function securityHeaders(headers, env) {
+function securityHeaders(headers, env, frameSources = []) {
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   headers.set(
     "Content-Security-Policy",
-    `default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: ${siteOrigin(env)}; script-src 'self'; form-action 'self' mailto:; base-uri 'self'; frame-ancestors 'none'; object-src 'none'`,
+    `default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: ${siteOrigin(env)}; script-src 'self'; form-action 'self' mailto:; base-uri 'self'; frame-ancestors 'none'; frame-src 'self'${frameSources.length ? ` ${frameSources.join(" ")}` : ""}; object-src 'none'`,
   );
   return headers;
+}
+
+function normalizeFrameSources(sources = []) {
+  if (!Array.isArray(sources)) throw new TypeError("frameSources must be an array");
+  return [...new Set(sources.map((source) => {
+    const url = new URL(source);
+    if (url.protocol !== "https:" || url.pathname !== "/" || url.search || url.hash) {
+      throw new TypeError(`Invalid frame source: ${source}`);
+    }
+    return url.origin;
+  }))];
 }
 
 function cacheRequest(cacheKey) {
@@ -92,6 +103,7 @@ function stripPathPrefix(pathname, pathPrefix) {
  *   locale: string,
  *   market: string,
  *   pathPrefix?: string,
+ *   frameSources?: string[],
  *   beforeRequest?: ((context: BeforeRequestContext) => Response | null | Promise<Response | null>) | null,
  * }} options
  */
@@ -104,6 +116,7 @@ export function createReaiStorefrontWorker({
   locale,
   market,
   pathPrefix: configuredPathPrefix = "",
+  frameSources: configuredFrameSources = [],
   beforeRequest = null,
 }) {
   if (!cacheKey) throw new TypeError("cacheKey is required");
@@ -113,6 +126,7 @@ export function createReaiStorefrontWorker({
 
   const messages = { ...defaultMessages, ...messageOverrides };
   const pathPrefix = normalizePathPrefix(configuredPathPrefix);
+  const frameSources = normalizeFrameSources(configuredFrameSources);
   let resolvedLocale;
   try {
     [resolvedLocale] = Intl.getCanonicalLocales(locale.trim());
@@ -147,7 +161,7 @@ export function createReaiStorefrontWorker({
       "Content-Type": "application/json; charset=utf-8",
       "Cache-Control": "no-store",
       "Content-Language": canonicalLocale,
-    }), env),
+    }), env, frameSources),
   });
 
   const htmlResponse = (html, env, status = 200, cacheControl = "public, max-age=60, stale-while-revalidate=300") => new Response(html, {
@@ -156,7 +170,7 @@ export function createReaiStorefrontWorker({
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": status === 200 ? cacheControl : "no-store",
       "Content-Language": canonicalLocale,
-    }), env),
+    }), env, frameSources),
   });
 
   const xmlResponse = (xml, env) => new Response(xml, {
@@ -164,7 +178,7 @@ export function createReaiStorefrontWorker({
       "Content-Type": "application/xml; charset=utf-8",
       "Cache-Control": "public, max-age=300, stale-while-revalidate=3600",
       "Content-Language": canonicalLocale,
-    }), env),
+    }), env, frameSources),
   });
 
   async function checkoutRequest(request, url, env) {
@@ -414,7 +428,7 @@ export function createReaiStorefrontWorker({
       "Content-Language": canonicalLocale,
       ETag: entityTag,
       "X-ReAI-Storefront-Cache": cached.cacheStatus,
-    }), env);
+    }), env, frameSources);
     if (matchesEntityTag(request, entityTag)) return new Response(null, { status: 304, headers });
     headers.set("Content-Type", "application/json; charset=utf-8");
     return new Response(JSON.stringify(resolved.body), { headers });
@@ -469,7 +483,7 @@ export function createReaiStorefrontWorker({
 
     try {
       const upstream = (await upstreamResult).response;
-      const responseHeaders = securityHeaders(new Headers(), env);
+      const responseHeaders = securityHeaders(new Headers(), env, frameSources);
       responseHeaders.set("Content-Type", upstream.headers.get("Content-Type") || "application/json; charset=utf-8");
       responseHeaders.set("Cache-Control", upstream.ok ? cacheControl : "no-store");
       responseHeaders.set("Content-Language", canonicalLocale);
@@ -569,7 +583,7 @@ export function createReaiStorefrontWorker({
       }
 
       const response = await env.ASSETS.fetch(request);
-      const headers = securityHeaders(new Headers(response.headers), env);
+      const headers = securityHeaders(new Headers(response.headers), env, frameSources);
       const localPath = storefrontPath || url.pathname;
       const path = localPath.endsWith("/") ? localPath : `${localPath}/`;
       headers.set("Content-Language", canonicalLocale);

@@ -21,6 +21,24 @@ test("rejects Site API requests when the Worker has no credential", async () => 
   assert.deepEqual(await response.json(), { error: "The Site API is not configured." });
 });
 
+test("allows explicitly configured HTTPS frame origins", async () => {
+  const worker = createReaiStorefrontWorker({
+    cacheKey: "map-frame",
+    storefront,
+    market: "default",
+    locale: "nb-NO",
+    frameSources: ["https://www.openstreetmap.org"],
+  });
+  const response = await worker.fetch(new Request("https://shop.example/"), {
+    ASSETS: { fetch: async () => new Response("<!doctype html><title>Map</title>") },
+  });
+
+  assert.match(
+    response.headers.get("Content-Security-Policy"),
+    /frame-src 'self' https:\/\/www\.openstreetmap\.org/,
+  );
+});
+
 test("validates checkout lines before calling ReAI", async () => {
   const worker = createReaiStorefrontWorker({
     cacheKey: "invalid-checkout",
