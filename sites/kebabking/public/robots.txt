@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /
+
+Sitemap: https://kebabking-reai-preview.respiro.workers.dev/sitemap.xml
