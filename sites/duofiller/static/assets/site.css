@@ -76,8 +76,29 @@
   .main-nav a:is(:hover,[aria-current="page"]) { background: var(--white); }
   .header-tools { display: flex; align-items: center; gap: 6px; }
   .language-switch { display: inline-flex; min-height: 40px; align-items: center; padding-inline: 12px; border: 1px solid var(--line); border-radius: 99px; text-decoration: none; font-size: .72rem; font-weight: 850; }
-  .currency-switch { display: inline-flex; align-items: center; }
-  .currency-switch select { min-height: 40px; padding: 0 28px 0 12px; border: 1px solid var(--line); border-radius: 99px; background: var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23111111' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6' d='m1.5 1.5 4.5 4.5 4.5-4.5'/%3E%3C/svg%3E") no-repeat right 10px center; color: inherit; font: inherit; font-size: .72rem; font-weight: 850; appearance: none; }
+  .currency-switch { position: relative; }
+  .currency-switch summary { display: inline-flex; min-height: 40px; align-items: center; gap: 7px; padding: 5px 10px 5px 5px; border: 1px solid var(--line); border-radius: 99px; background: var(--white); cursor: pointer; list-style: none; user-select: none; }
+  .currency-switch summary::-webkit-details-marker { display: none; }
+  .currency-switch summary:hover { border-color: color-mix(in srgb, var(--blue) 45%, var(--line)); }
+  .currency-switch[open] summary { border-color: var(--blue); box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 14%, transparent); }
+  .currency-indicator, .currency-option-symbol { display: grid; place-items: center; flex: 0 0 auto; border-radius: 50%; font-weight: 900; letter-spacing: -.04em; }
+  .currency-indicator { width: 28px; height: 28px; color: var(--white); background: var(--blue); font-size: .65rem; }
+  .currency-code { font-size: .72rem; font-weight: 900; letter-spacing: .03em; }
+  .currency-chevron { width: 10px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; transition: rotate .18s ease; }
+  .currency-switch[open] .currency-chevron { rotate: 180deg; }
+  .currency-popover { position: absolute; z-index: 10; top: calc(100% + 10px); right: 0; width: 246px; padding: 10px; border: 1px solid var(--line); border-radius: 18px; background: var(--white); box-shadow: 0 18px 50px rgba(17,24,32,.18); }
+  .currency-popover > p { padding: 5px 8px 8px; color: var(--muted); font-size: .68rem; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+  .currency-popover ul { display: grid; gap: 3px; list-style: none; }
+  .currency-popover a { display: grid; min-height: 58px; grid-template-columns: 36px 1fr 20px; align-items: center; gap: 10px; padding: 7px 9px; border-radius: 11px; text-decoration: none; }
+  .currency-popover a:hover { background: var(--paper); }
+  .currency-popover a[aria-current="true"] { background: var(--blue-pale); }
+  .currency-option-symbol { width: 34px; height: 34px; color: var(--blue-dark); background: var(--paper); font-size: .72rem; }
+  .currency-popover a[aria-current="true"] .currency-option-symbol { color: var(--white); background: var(--blue); }
+  .currency-option-copy { display: grid; line-height: 1.2; }
+  .currency-option-copy strong { font-size: .78rem; letter-spacing: .03em; }
+  .currency-option-copy small { margin-top: 3px; color: var(--muted); font-size: .7rem; }
+  .currency-check { width: 18px; fill: none; stroke: var(--blue); stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.5; visibility: hidden; }
+  .currency-popover a[aria-current="true"] .currency-check { visibility: visible; }
   .tool-link, .menu-toggle { display: inline-flex; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; gap: 7px; border: 0; border-radius: 99px; background: transparent; text-decoration: none; font-size: .78rem; font-weight: 800; }
   .tool-link svg, .menu-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
   .tool-link:hover, .menu-toggle:hover { background: var(--white); }
@@ -347,7 +368,9 @@
   .header-inner { min-height: 76px; gap: 12px; }
   .brand img { width: 170px; }
   .language-switch { padding-inline: 9px; font-size: .66rem; }
-  .currency-switch select { min-height: 34px; padding-inline: 10px 24px; font-size: .66rem; }
+  .currency-switch summary { min-height: 36px; gap: 6px; padding: 4px 8px 4px 4px; }
+  .currency-indicator { width: 26px; height: 26px; font-size: .6rem; }
+  .currency-code { font-size: .66rem; }
   .tool-label { display: none; }
   .main-nav { top: 108px; }
   .hero-grid { min-height: auto; grid-template-columns: 1fr; padding-block: 66px 30px; }

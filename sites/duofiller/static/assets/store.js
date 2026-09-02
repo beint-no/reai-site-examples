@@ -3,12 +3,10 @@ const norwegian = locale.startsWith("nb");
 const prefix = location.pathname === "/nb" || location.pathname.startsWith("/nb/") ? "/nb" : "";
 const apiBase = document.querySelector('meta[name="reai-api-base"]')?.content || `${prefix}/reai`;
 const MARKET_CURRENCY = { norway: "NOK", europe: "EUR", international: "USD" };
+const MARKET_SYMBOL = { norway: "kr", europe: "€", international: "$" };
 const defaultMarket = norwegian ? "norway" : "international";
 const requestedMarket = new URL(location.href).searchParams.get("market");
-const market = MARKET_CURRENCY[requestedMarket] ? requestedMarket
-  : (sessionStorage.getItem("duofiller-market") && MARKET_CURRENCY[sessionStorage.getItem("duofiller-market")]
-    ? sessionStorage.getItem("duofiller-market")
-    : defaultMarket);
+const market = MARKET_CURRENCY[requestedMarket] ? requestedMarket : defaultMarket;
 const storeCurrency = MARKET_CURRENCY[market]
   || document.querySelector("[data-store-currency]")?.dataset.storeCurrency
   || document.querySelector("[data-add-to-cart]")?.dataset.currency
@@ -23,7 +21,6 @@ const VARIANT_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[89ab][0-9a-f]{3}-[0-9a
   else url.searchParams.set("market", market);
   const next = `${url.pathname}${url.search}${url.hash}`;
   if (next !== `${location.pathname}${location.search}${location.hash}`) history.replaceState(null, "", next);
-  sessionStorage.setItem("duofiller-market", market);
   document.querySelectorAll("a[href]").forEach((link) => {
     if (link.dataset.market) return;
     const value = link.getAttribute("href");
@@ -37,18 +34,40 @@ const VARIANT_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[89ab][0-9a-f]{3}-[0-9a
       link.setAttribute("href", `${target.pathname}${target.search}${target.hash}`);
     } catch {}
   });
-  document.querySelectorAll("[data-market-select]").forEach((select) => {
-    select.value = market;
-    select.addEventListener("change", () => {
-      const next = select.value;
+  const switches = [...document.querySelectorAll("[data-market-switch]")];
+  switches.forEach((switcher) => {
+    const label = switcher.dataset.label || "Currency";
+    const summary = switcher.querySelector("summary");
+    const code = switcher.querySelector("[data-market-current-code]");
+    const symbol = switcher.querySelector("[data-market-current-symbol]");
+    if (summary) summary.setAttribute("aria-label", `${label}: ${MARKET_CURRENCY[market]}`);
+    if (code) code.textContent = MARKET_CURRENCY[market];
+    if (symbol) symbol.textContent = MARKET_SYMBOL[market];
+    switcher.querySelectorAll("[data-market]").forEach((link) => {
+      const next = link.dataset.market;
       if (!MARKET_CURRENCY[next]) return;
-      sessionStorage.setItem("duofiller-market", next);
       const target = new URL(location.href);
       const targetDefault = target.pathname === "/nb" || target.pathname.startsWith("/nb/") ? "norway" : "international";
       if (next === targetDefault) target.searchParams.delete("market");
       else target.searchParams.set("market", next);
-      location.assign(`${target.pathname}${target.search}${target.hash}`);
+      link.setAttribute("href", `${target.pathname}${target.search}${target.hash}`);
+      if (next === market) link.setAttribute("aria-current", "true");
+      else link.removeAttribute("aria-current");
     });
+    switcher.addEventListener("toggle", () => {
+      if (!switcher.open) return;
+      switches.forEach((candidate) => { if (candidate !== switcher) candidate.open = false; });
+    });
+  });
+  document.addEventListener("click", (event) => {
+    switches.forEach((switcher) => { if (switcher.open && !switcher.contains(event.target)) switcher.open = false; });
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    const open = switches.find((switcher) => switcher.open);
+    if (!open) return;
+    open.open = false;
+    open.querySelector("summary")?.focus();
   });
 })();
 
