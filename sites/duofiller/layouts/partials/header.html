@@ -7,6 +7,17 @@
 {{- $contact := partial "checked-url.html" (dict "page" $page "url" "/contact/") -}}
 {{- $search := partial "checked-url.html" (dict "page" $page "url" "/search/") -}}
 {{- $cart := partial "checked-url.html" (dict "page" $page "url" "/cart/") -}}
+{{- $isNorwegian := eq $page.Language.Lang "nb" -}}
+{{- $currentPath := $page.RelPermalink -}}
+{{- $norwayMarket := cond $isNorwegian $currentPath (printf "%s?market=norway" $currentPath) -}}
+{{- $europeMarket := printf "%s?market=europe" $currentPath -}}
+{{- $internationalMarket := cond $isNorwegian (printf "%s?market=international" $currentPath) $currentPath -}}
+{{- $defaultCurrency := cond $isNorwegian "NOK" "USD" -}}
+{{- $defaultSymbol := cond $isNorwegian "kr" "$" -}}
+{{- $languagePath := cond $isNorwegian "/" "/nb/" -}}
+{{- with index $page.Translations 0 }}{{ $languagePath = .RelPermalink }}{{ end -}}
+{{- $languageMarket := cond $isNorwegian "norway" "international" -}}
+{{- $languageHref := printf "%s?market=%s" $languagePath $languageMarket -}}
 <a class="skip-link" href="#main">{{ i18n "skip_to_content" }}</a>
 <aside class="announcement" aria-label="{{ i18n "announcement_label" }}"><ul class="shell"><li>{{ i18n "announcement_norway" }}</li><li>{{ i18n "announcement_heads" }}</li><li>{{ i18n "announcement_support" }}</li></ul></aside>
 <header class="site-header"><div class="header-inner shell">
@@ -15,14 +26,15 @@
     <a href="{{ $core }}">{{ i18n "nav_core" }}</a><a href="{{ $connections }}">{{ i18n "nav_connections" }}</a><a href="{{ $parts }}">{{ i18n "nav_parts" }}</a><a href="{{ $support }}">{{ i18n "nav_support" }}</a><a href="{{ $contact }}">{{ i18n "nav_contact" }}</a>
   </nav>
   <div class="header-tools">
-    <label class="currency-switch"><span class="visually-hidden">{{ i18n "currency_label" }}</span>
-      <select name="market" data-market-select aria-label="{{ i18n "currency_label" }}">
-        <option value="norway"{{ if eq .Language.Lang "nb" }} selected{{ end }}>NOK</option>
-        <option value="europe">EUR</option>
-        <option value="international"{{ if eq .Language.Lang "en" }} selected{{ end }}>USD</option>
-      </select>
-    </label>
-    <a class="language-switch" href="{{ with index $page.Translations 0 }}{{ .RelPermalink }}{{ else }}{{ if eq $page.Language.Lang "en" }}/nb/{{ else }}/{{ end }}{{ end }}" hreflang="{{ if eq $page.Language.Lang "en" }}nb{{ else }}en{{ end }}" aria-label="{{ i18n "language_label" }}: {{ i18n "language_switch" }}">{{ i18n "language_switch" }}</a>
+    <details class="currency-switch" data-market-switch data-label="{{ i18n "currency_label" }}">
+      <summary aria-label="{{ i18n "currency_label" }}: {{ $defaultCurrency }}"><span class="currency-indicator" data-market-current-symbol aria-hidden="true">{{ $defaultSymbol }}</span><span class="currency-code" data-market-current-code>{{ $defaultCurrency }}</span><svg class="currency-chevron" viewBox="0 0 12 8" aria-hidden="true"><path d="m1.5 1.5 4.5 4.5 4.5-4.5"></path></svg></summary>
+      <div class="currency-popover"><p>{{ i18n "currency_label" }}</p><ul>
+        <li><a href="{{ $norwayMarket }}" data-market="norway"{{ if $isNorwegian }} aria-current="true"{{ end }}><span class="currency-option-symbol" aria-hidden="true">kr</span><span class="currency-option-copy"><strong>NOK</strong><small>{{ i18n "currency_market_norway" }}</small></span><svg class="currency-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg></a></li>
+        <li><a href="{{ $europeMarket }}" data-market="europe"><span class="currency-option-symbol" aria-hidden="true">€</span><span class="currency-option-copy"><strong>EUR</strong><small>{{ i18n "currency_market_europe" }}</small></span><svg class="currency-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg></a></li>
+        <li><a href="{{ $internationalMarket }}" data-market="international"{{ if not $isNorwegian }} aria-current="true"{{ end }}><span class="currency-option-symbol" aria-hidden="true">$</span><span class="currency-option-copy"><strong>USD</strong><small>{{ i18n "currency_market_international" }}</small></span><svg class="currency-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg></a></li>
+      </ul></div>
+    </details>
+    <a class="language-switch" href="{{ $languageHref }}" hreflang="{{ if eq $page.Language.Lang "en" }}nb{{ else }}en{{ end }}" aria-label="{{ i18n "language_label" }}: {{ i18n "language_switch" }}">{{ i18n "language_switch" }}</a>
     <a class="tool-link" href="{{ $search }}"><span class="tool-label">{{ i18n "nav_search" }}</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg></a>
     <a class="tool-link" href="{{ $cart }}"><span class="tool-label">{{ i18n "nav_cart" }}</span><span class="cart-count" data-cart-count>0</span></a>
     <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-navigation" aria-label="{{ i18n "nav_menu_open" }}" data-nav-toggle><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></button>
