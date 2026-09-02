@@ -26,10 +26,10 @@ grep -q 'CHECKOUT_ENABLED": "true"' "$site_dir/wrangler.jsonc"
 grep -q 'data-market-switch' "$site_dir/public/index.html"
 grep -q 'data-market-current-code>NOK' "$site_dir/public/nb/index.html"
 grep -q 'data-market-current-code>USD' "$site_dir/public/index.html"
-grep -q 'href=/?market=norway data-market=norway' "$site_dir/public/index.html"
-grep -q 'href=/nb/?market=international data-market=international' "$site_dir/public/nb/index.html"
-grep -q 'class=language-switch href=/nb/?market=international' "$site_dir/public/index.html"
-grep -q 'class=language-switch href=/?market=norway' "$site_dir/public/nb/index.html"
+grep -Eq 'href="?/\?market=norway"? data-market=norway' "$site_dir/public/index.html"
+grep -Eq 'href="?/nb/\?market=international"? data-market=international' "$site_dir/public/nb/index.html"
+grep -Eq 'class=language-switch href="?/nb/\?market=international"?' "$site_dir/public/index.html"
+grep -Eq 'class=language-switch href="?/\?market=norway"?' "$site_dir/public/nb/index.html"
 
 if rg -n "REAI_SITE_TOKEN\\s*[=:]\\s*['\"][^'\"]+" "$site_dir" --glob '!*.example' --glob '!README.md' --glob '!AGENTS.md'; then
   echo "DuoFiller source appears to contain a Site credential" >&2
