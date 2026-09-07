@@ -15,7 +15,7 @@ Real sample products and their photographs are ignored local files, never part o
 - Four local-harness tests passed, including explicit fixture startup, actual Worker/client integration and deployment-fixture rejection.
 - All repository site checks and all four Worker dry runs passed. No deployment was performed.
 - Dependency audit: zero vulnerabilities. `git diff --check` passed.
-- The optional live API-contract freshness check failed: generated declarations differ from the currently served OpenAPI document (the first difference is route ordering). The existing generated client/types were not modified by this storefront change. Reconcile this repository-wide drift before live integration; type checking and the client boundary pass against the committed contract.
+- The repository live API-contract freshness check failed locally and in CI: generated declarations differ from the currently served OpenAPI document (the first difference is route ordering). The existing generated client/types were not modified by this storefront change. Reconcile this repository-wide drift before merging/live integration; type checking and the client boundary pass against the committed contract.
 
 ## Browser verification
 
