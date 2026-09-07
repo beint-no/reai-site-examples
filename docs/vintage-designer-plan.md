@@ -1,6 +1,6 @@
 # Vintage Designer storefront plan
 
-Status: planning only. The storefront has not been implemented or deployed.
+Status: storefront implemented and verified locally with explicit ignored sample data. ReAI setup and Cloudflare deployment are deferred. Checkout remains disabled. See `sites/vintage-designer/README.md` and `docs/vintage-designer-verification.md` for local review and test evidence.
 
 ## Direction
 
