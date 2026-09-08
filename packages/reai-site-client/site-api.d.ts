@@ -4,15 +4,15 @@
  */
 
 export interface paths {
-    "/site/v1/commerce/storefront": {
+    "/site/v1/commerce/availability": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get the complete published storefront snapshot */
-        get: operations["storefront"];
+        /** Get coarse availability for up to 100 published variants */
+        get: operations["availabilities"];
         put?: never;
         post?: never;
         delete?: never;
@@ -21,49 +21,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/site/v1/commerce/products/{handle}": {
+    "/site/v1/commerce/availability/{variantId}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get a published product */
-        get: operations["product"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/site/v1/site": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get the authenticated site */
-        get: operations["site"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/site/v1/commerce/products": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List published products */
-        get: operations["products"];
+        /** Get coarse availability for a published variant */
+        get: operations["availability"];
         put?: never;
         post?: never;
         delete?: never;
@@ -109,40 +75,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/site/v1/commerce/collections/{handle}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a published collection with ordered published products */
-        get: operations["collection"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/site/v1/commerce/availability/{variantId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get coarse availability for a published variant */
-        get: operations["availability"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/site/v1/commerce/collections": {
         parameters: {
             query?: never;
@@ -160,15 +92,83 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/site/v1/commerce/availability": {
+    "/site/v1/commerce/collections/{handle}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get coarse availability for up to 100 published variants */
-        get: operations["availabilities"];
+        /** Get a published collection with ordered published products */
+        get: operations["collection"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/site/v1/commerce/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List published products */
+        get: operations["products"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/site/v1/commerce/products/{handle}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a published product */
+        get: operations["product"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/site/v1/commerce/storefront": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the complete published storefront snapshot */
+        get: operations["storefront"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/site/v1/site": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the authenticated site */
+        get: operations["site"];
         put?: never;
         post?: never;
         delete?: never;
@@ -181,94 +181,24 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        SiteCatalogRes: {
-            products: components["schemas"]["SiteDeliveryProductRes"][];
-            marketHandle: string;
-            locale: string;
-            /** Format: uuid */
-            marketId: string;
-            /** Format: int32 */
-            catalogVersion: number;
-            currency: components["schemas"]["CurrencyCode"];
-        };
-        SiteDeliveryVariantRes: {
-            /** Format: uuid */
-            id: string;
-            options: components["schemas"]["SiteDeliveryOptionRes"][];
-            compareAtPrice?: number | null;
-            vatRate: number;
-            price: number;
-            sku: string;
-        };
-        /** @description Public product image. Fetch bytes from url; catalog JSON never includes image data. */
-        ProductImage: {
-            /**
-             * Format: int32
-             * @example 1200
-             */
-            height?: number;
-            /**
-             * Format: int32
-             * @example 1200
-             */
-            width?: number;
-            renditions?: components["schemas"]["ProductImageRendition"][];
-            /** @example RAW Classic rolling papers */
-            alt?: string | null;
-            /** @example https://app.reai.no/media/product-images/018f3c2e-8b1a-7d3e-9c4f-5a6b7c8d9e0f/macbook-air-13-inch.avif */
-            url?: string;
-        };
-        ProductImageRendition: {
-            url: string;
-            /** Format: int32 */
-            height: number;
-            /** Format: int32 */
-            width: number;
-        };
         /**
          * @description ISO 4217 three-letter currency code.
          * @example NOK
          */
         CurrencyCode: string;
-        /** @description Created checkout session. Open checkoutUrl in the shopper's browser. Do not expose the Site credential to the browser. */
-        SiteCheckoutSessionRes: {
-            id: string;
-            locale: string;
-            checkoutUrl: string;
-            /** Format: date-time */
-            expiresAt: string;
-            /** Format: uuid */
-            marketId: string;
-            total: components["schemas"]["SiteCheckoutTotalRes"];
-            marketHandle: string;
-            currency: components["schemas"]["CurrencyCode"];
-        };
-        SiteDeliveryMarketRes: {
-            /** Format: uuid */
-            id: string;
-            locales: string[];
-            handle: string;
-            isDefault: boolean;
-            countries: string[];
-            currency: string;
-            defaultLocale: string;
-            name: string;
-        };
-        /** @description Checkout lines already selected by the store or application. Create this request from a trusted backend or Worker, never from the shopper's browser. */
-        SiteCheckoutSessionReq: {
-            returnUrl?: string | null;
-            lines: components["schemas"]["SiteCheckoutLineReq"][];
+        FieldError: {
+            /** @example lines */
+            field?: string;
+            /** @example must not be empty */
+            message?: string;
         };
         /** @description RFC 9457 problem response */
         ProblemDetail: {
-            type?: string | null;
-            /** @example Invalid request */
-            title?: string | null;
+            /** @example variantId is not published on this site */
+            detail?: string | null;
             /** @example variantId is not published on this site */
             error?: string | null;
             fieldErrors?: components["schemas"]["FieldError"][];
-            /** @example variantId is not published on this site */
-            detail?: string | null;
             /** @example /site/v1/commerce/checkout-sessions */
             instance?: string | null;
             /**
@@ -276,161 +206,231 @@ export interface components {
              * @example 400
              */
             status?: number;
+            /** @example Invalid request */
+            title?: string | null;
+            type?: string | null;
         };
-        FieldError: {
-            /** @example lines */
-            field?: string;
-            /** @example must not be empty */
-            message?: string;
+        /** @description Public product image. Fetch bytes from url; catalog JSON never includes image data. */
+        ProductImage: {
+            /** @example RAW Classic rolling papers */
+            alt?: string | null;
+            /**
+             * Format: int32
+             * @example 1200
+             */
+            height?: number;
+            renditions?: components["schemas"]["ProductImageRendition"][];
+            /** @example https://app.reai.no/media/product-images/018f3c2e-8b1a-7d3e-9c4f-5a6b7c8d9e0f/macbook-air-13-inch.avif */
+            url?: string;
+            /**
+             * Format: int32
+             * @example 1200
+             */
+            width?: number;
         };
-        SiteDeliveryOptionRes: {
-            value: string;
-            name: string;
-        };
-        SiteCheckoutTotalRes: {
-            net: number;
-            vat: number;
-            gross: number;
-        };
-        SiteAvailabilityRes: {
-            /** @enum {string} */
-            status: "AVAILABLE" | "OUT_OF_STOCK";
-            marketHandle: string;
-            locale: string;
-            /** Format: uuid */
-            variantId: string;
-            /** Format: uuid */
-            marketId: string;
-            currency: components["schemas"]["CurrencyCode"];
-        };
-        SiteDeliveryCollectionsRes: {
-            marketHandle: string;
-            locale: string;
-            collections: components["schemas"]["SiteDeliveryCollectionRes"][];
-            /** Format: uuid */
-            marketId: string;
+        ProductImageRendition: {
             /** Format: int32 */
-            catalogVersion: number;
-            currency: components["schemas"]["CurrencyCode"];
-        };
-        SiteDeliveryCollectionProductRes: {
-            title: string;
-            /** Format: uuid */
-            id: string;
-            handle: string;
-            price: number;
-            brand?: string | null;
+            height: number;
+            url: string;
+            /** Format: int32 */
+            width: number;
         };
         SiteAvailabilitiesRes: {
-            /** Format: uuid */
-            marketId: string;
             currency: components["schemas"]["CurrencyCode"];
-            variants: components["schemas"]["SiteVariantAvailabilityRes"][];
             locale: string;
             marketHandle: string;
+            /** Format: uuid */
+            marketId: string;
+            variants: components["schemas"]["SiteVariantAvailabilityRes"][];
         };
-        SiteStorefrontRes: {
-            products: components["schemas"]["SiteDeliveryProductRes"][];
-            collections: components["schemas"]["SiteStorefrontCollectionRes"][];
+        SiteAvailabilityRes: {
+            currency: components["schemas"]["CurrencyCode"];
+            locale: string;
+            marketHandle: string;
+            /** Format: uuid */
+            marketId: string;
+            /** @enum {string} */
+            status: "AVAILABLE" | "OUT_OF_STOCK";
+            /** Format: uuid */
+            variantId: string;
+        };
+        SiteCatalogRes: {
             /** Format: int32 */
             catalogVersion: number;
-            locale: string;
             currency: components["schemas"]["CurrencyCode"];
+            locale: string;
             marketHandle: string;
             /** Format: uuid */
             marketId: string;
+            products: components["schemas"]["SiteDeliveryProductRes"][];
+        };
+        SiteCheckoutLineReq: {
+            /** Format: int32 */
+            quantity: number;
+            /** Format: uuid */
+            variantId: string;
+        };
+        /** @description Checkout lines already selected by the store or application. Create this request from a trusted backend or Worker, never from the shopper's browser. */
+        SiteCheckoutSessionReq: {
+            lines: components["schemas"]["SiteCheckoutLineReq"][];
+            returnUrl?: string | null;
+        };
+        /** @description Created checkout session. Open checkoutUrl in the shopper's browser. Do not expose the Site credential to the browser. */
+        SiteCheckoutSessionRes: {
+            checkoutUrl: string;
+            currency: components["schemas"]["CurrencyCode"];
+            /** Format: date-time */
+            expiresAt: string;
+            id: string;
+            locale: string;
+            marketHandle: string;
+            /** Format: uuid */
+            marketId: string;
+            total: components["schemas"]["SiteCheckoutTotalRes"];
+        };
+        SiteCheckoutTotalRes: {
+            gross: number;
+            net: number;
+            vat: number;
         };
         SiteDeliveryCollectionDetailRes: {
-            imageUrl?: string | null;
-            description?: string | null;
             /** Format: int32 */
             catalogVersion: number;
-            handle: string;
-            title: string;
-            marketHandle: string;
-            seoDescription?: string | null;
-            seoTitle: string;
             currency: components["schemas"]["CurrencyCode"];
-            locale: string;
+            description?: string | null;
+            handle: string;
             /** Format: uuid */
             id: string;
+            imageUrl?: string | null;
+            locale: string;
+            marketHandle: string;
             /** Format: uuid */
             marketId: string;
             products: components["schemas"]["SiteDeliveryCollectionProductRes"][];
+            seoDescription?: string | null;
+            seoTitle: string;
+            title: string;
         };
-        SiteDeliveryRes: {
-            /** @enum {string} */
-            status: "enabled" | "disabled";
+        SiteDeliveryCollectionProductRes: {
+            brand?: string | null;
+            handle: string;
             /** Format: uuid */
             id: string;
-            activeDomain?: string | null;
-            sourceLocale: string;
-            name: string;
-            markets: components["schemas"]["SiteDeliveryMarketRes"][];
-        };
-        SiteCheckoutLineReq: {
-            /** Format: uuid */
-            variantId: string;
-            /** Format: int32 */
-            quantity: number;
+            price: number;
+            title: string;
         };
         SiteDeliveryCollectionRes: {
-            imageUrl?: string | null;
+            description?: string | null;
+            handle: string;
             /** Format: uuid */
             id: string;
-            title: string;
-            seoTitle: string;
-            description?: string | null;
+            imageUrl?: string | null;
             seoDescription?: string | null;
+            seoTitle: string;
+            title: string;
+        };
+        SiteDeliveryCollectionsRes: {
+            /** Format: int32 */
+            catalogVersion: number;
+            collections: components["schemas"]["SiteDeliveryCollectionRes"][];
+            currency: components["schemas"]["CurrencyCode"];
+            locale: string;
+            marketHandle: string;
+            /** Format: uuid */
+            marketId: string;
+        };
+        SiteDeliveryMarketRes: {
+            countries: string[];
+            currency: string;
+            defaultLocale: string;
             handle: string;
+            /** Format: uuid */
+            id: string;
+            isDefault: boolean;
+            locales: string[];
+            name: string;
+        };
+        SiteDeliveryOptionRes: {
+            name: string;
+            value: string;
+        };
+        SiteDeliveryProductDetailRes: {
+            brand?: string | null;
+            /** Format: int32 */
+            catalogVersion: number;
+            currency: components["schemas"]["CurrencyCode"];
+            description?: string | null;
+            handle: string;
+            /** Format: uuid */
+            id: string;
+            images: components["schemas"]["ProductImage"][];
+            locale: string;
+            marketHandle: string;
+            /** Format: uuid */
+            marketId: string;
+            seoDescription?: string | null;
+            seoTitle: string;
+            title: string;
+            variants: components["schemas"]["SiteDeliveryVariantRes"][];
+        };
+        SiteDeliveryProductRes: {
+            brand?: string | null;
+            description?: string | null;
+            handle: string;
+            /** Format: uuid */
+            id: string;
+            images: components["schemas"]["ProductImage"][];
+            seoDescription?: string | null;
+            seoTitle: string;
+            title: string;
+            variants: components["schemas"]["SiteDeliveryVariantRes"][];
+        };
+        SiteDeliveryRes: {
+            activeDomain?: string | null;
+            /** Format: uuid */
+            id: string;
+            markets: components["schemas"]["SiteDeliveryMarketRes"][];
+            name: string;
+            sourceLocale: string;
+            /** @enum {string} */
+            status: "enabled" | "disabled";
+        };
+        SiteDeliveryVariantRes: {
+            compareAtPrice?: number | null;
+            /** Format: uuid */
+            id: string;
+            options: components["schemas"]["SiteDeliveryOptionRes"][];
+            price: number;
+            sku: string;
+            vatRate: number;
+        };
+        SiteStorefrontCollectionRes: {
+            description?: string | null;
+            handle: string;
+            /** Format: uuid */
+            id: string;
+            imageUrl?: string | null;
+            products: components["schemas"]["SiteDeliveryCollectionProductRes"][];
+            seoDescription?: string | null;
+            seoTitle: string;
+            title: string;
+        };
+        SiteStorefrontRes: {
+            /** Format: int32 */
+            catalogVersion: number;
+            collections: components["schemas"]["SiteStorefrontCollectionRes"][];
+            currency: components["schemas"]["CurrencyCode"];
+            locale: string;
+            marketHandle: string;
+            /** Format: uuid */
+            marketId: string;
+            products: components["schemas"]["SiteDeliveryProductRes"][];
         };
         SiteVariantAvailabilityRes: {
             /** @enum {string} */
             status: "AVAILABLE" | "OUT_OF_STOCK";
             /** Format: uuid */
             variantId: string;
-        };
-        SiteDeliveryProductDetailRes: {
-            seoTitle: string;
-            variants: components["schemas"]["SiteDeliveryVariantRes"][];
-            description?: string | null;
-            seoDescription?: string | null;
-            handle: string;
-            currency: components["schemas"]["CurrencyCode"];
-            marketHandle: string;
-            /** Format: uuid */
-            marketId: string;
-            title: string;
-            /** Format: int32 */
-            catalogVersion: number;
-            locale: string;
-            images: components["schemas"]["ProductImage"][];
-            brand?: string | null;
-            /** Format: uuid */
-            id: string;
-        };
-        SiteStorefrontCollectionRes: {
-            /** Format: uuid */
-            id: string;
-            title: string;
-            handle: string;
-            products: components["schemas"]["SiteDeliveryCollectionProductRes"][];
-            imageUrl?: string | null;
-            seoDescription?: string | null;
-            seoTitle: string;
-            description?: string | null;
-        };
-        SiteDeliveryProductRes: {
-            seoDescription?: string | null;
-            seoTitle: string;
-            variants: components["schemas"]["SiteDeliveryVariantRes"][];
-            /** Format: uuid */
-            id: string;
-            title: string;
-            images: components["schemas"]["ProductImage"][];
-            description?: string | null;
-            handle: string;
-            brand?: string | null;
         };
     };
     responses: never;
@@ -441,9 +441,10 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    storefront: {
+    availabilities: {
         parameters: {
-            query?: {
+            query: {
+                variantId: string[];
                 /**
                  * @description Market handle. Omit to use the default market.
                  * @example international
@@ -455,183 +456,6 @@ export interface operations {
                  */
                 locale?: string | null;
             };
-            header?: {
-                /** @description ETag from an earlier response for the same URL. A match returns 304 without a response body. */
-                "If-None-Match"?: string | null;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SiteStorefrontRes"];
-                };
-            };
-            /** @description Storefront snapshot unchanged for the supplied If-None-Match validator */
-            304: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            /** @description Not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
-                };
-            };
-        };
-    };
-    product: {
-        parameters: {
-            query?: {
-                /**
-                 * @description Market handle. Omit to use the default market.
-                 * @example international
-                 */
-                market?: string | null;
-                /**
-                 * @description Canonical BCP 47 locale enabled for the selected market.
-                 * @example en
-                 */
-                locale?: string | null;
-            };
-            header?: {
-                /** @description ETag from an earlier response for the same URL. A match returns 304 without a response body. */
-                "If-None-Match"?: string | null;
-            };
-            path: {
-                handle: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SiteDeliveryProductDetailRes"];
-                };
-            };
-            /** @description Product unchanged for the supplied If-None-Match validator */
-            304: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            /** @description Not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
-                };
-            };
-        };
-    };
-    site: {
-        parameters: {
-            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
@@ -644,7 +468,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SiteDeliveryRes"];
+                    "application/json": components["schemas"]["SiteAvailabilitiesRes"];
                 };
             };
             /** @description Bad request */
@@ -701,7 +525,7 @@ export interface operations {
             };
         };
     };
-    products: {
+    availability: {
         parameters: {
             query?: {
                 /**
@@ -715,11 +539,10 @@ export interface operations {
                  */
                 locale?: string | null;
             };
-            header?: {
-                /** @description ETag from an earlier response for the same URL. A match returns 304 without a response body. */
-                "If-None-Match"?: string | null;
+            header?: never;
+            path: {
+                variantId: string;
             };
-            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -730,15 +553,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SiteCatalogRes"];
+                    "application/json": components["schemas"]["SiteAvailabilityRes"];
                 };
-            };
-            /** @description Products unchanged for the supplied If-None-Match validator */
-            304: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
             /** @description Bad request */
             400: {
@@ -976,6 +792,99 @@ export interface operations {
             };
         };
     };
+    collections: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Market handle. Omit to use the default market.
+                 * @example international
+                 */
+                market?: string | null;
+                /**
+                 * @description Canonical BCP 47 locale enabled for the selected market.
+                 * @example en
+                 */
+                locale?: string | null;
+            };
+            header?: {
+                /** @description ETag from an earlier response for the same URL. A match returns 304 without a response body. */
+                "If-None-Match"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteDeliveryCollectionsRes"];
+                };
+            };
+            /** @description Collections unchanged for the supplied If-None-Match validator */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
     collection: {
         parameters: {
             query?: {
@@ -1071,92 +980,7 @@ export interface operations {
             };
         };
     };
-    availability: {
-        parameters: {
-            query?: {
-                /**
-                 * @description Market handle. Omit to use the default market.
-                 * @example international
-                 */
-                market?: string | null;
-                /**
-                 * @description Canonical BCP 47 locale enabled for the selected market.
-                 * @example en
-                 */
-                locale?: string | null;
-            };
-            header?: never;
-            path: {
-                variantId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SiteAvailabilityRes"];
-                };
-            };
-            /** @description Bad request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            /** @description Not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetail"];
-                };
-            };
-        };
-    };
-    collections: {
+    products: {
         parameters: {
             query?: {
                 /**
@@ -1185,10 +1009,10 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SiteDeliveryCollectionsRes"];
+                    "application/json": components["schemas"]["SiteCatalogRes"];
                 };
             };
-            /** @description Collections unchanged for the supplied If-None-Match validator */
+            /** @description Products unchanged for the supplied If-None-Match validator */
             304: {
                 headers: {
                     [name: string]: unknown;
@@ -1249,11 +1073,9 @@ export interface operations {
             };
         };
     };
-    availabilities: {
+    product: {
         parameters: {
-            query: {
-                /** @example  */
-                variantId: string[];
+            query?: {
                 /**
                  * @description Market handle. Omit to use the default market.
                  * @example international
@@ -1265,6 +1087,183 @@ export interface operations {
                  */
                 locale?: string | null;
             };
+            header?: {
+                /** @description ETag from an earlier response for the same URL. A match returns 304 without a response body. */
+                "If-None-Match"?: string | null;
+            };
+            path: {
+                handle: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteDeliveryProductDetailRes"];
+                };
+            };
+            /** @description Product unchanged for the supplied If-None-Match validator */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    storefront: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Market handle. Omit to use the default market.
+                 * @example international
+                 */
+                market?: string | null;
+                /**
+                 * @description Canonical BCP 47 locale enabled for the selected market.
+                 * @example en
+                 */
+                locale?: string | null;
+            };
+            header?: {
+                /** @description ETag from an earlier response for the same URL. A match returns 304 without a response body. */
+                "If-None-Match"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteStorefrontRes"];
+                };
+            };
+            /** @description Storefront snapshot unchanged for the supplied If-None-Match validator */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    site: {
+        parameters: {
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
@@ -1277,7 +1276,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SiteAvailabilitiesRes"];
+                    "application/json": components["schemas"]["SiteDeliveryRes"];
                 };
             };
             /** @description Bad request */

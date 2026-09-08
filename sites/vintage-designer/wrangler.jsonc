@@ -1,0 +1,11 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "vintage-designer",
+  "main": "worker.js",
+  "compatibility_date": "2026-09-07",
+  "workers_dev": true,
+  "build": { "command": "node ../../tools/vintage-designer-local/validate-deployment.mjs" },
+  "vars": { "REAI_BASE_URL": "https://app.reai.no", "CHECKOUT_ENABLED": "false" },
+  "assets": { "directory": "./public", "binding": "ASSETS", "not_found_handling": "404-page", "run_worker_first": true },
+  "observability": { "enabled": true }
+}
