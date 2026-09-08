@@ -101,10 +101,10 @@ const store = {
 };
 
 assert(matchRoute("/products/raw-mason-jar-glassoppbevaring").type === "product", "product route");
-assert(matchRoute("/products/raw-mason-jar-glassoppbevaring").needsSlash, "product trailing slash");
-assert(matchRoute("/collections/all/").handle === "all", "all collection route");
+assert(!matchRoute("/products/raw-mason-jar-glassoppbevaring").needsSlash, "Shopify product URL is canonical");
+assert(matchRoute("/collections/all").handle === "all", "all collection route");
 assert(matchRoute("/sitemap.xml").type === "sitemap", "sitemap route");
-assert(!matchRoute("/artikler/"), "editorial routes stay static");
+assert(!matchRoute("/blogs/news"), "editorial routes stay static");
 
 const description = formatDescription(product.description);
 assert(description.includes("<p>"), "description uses paragraphs");
@@ -113,8 +113,8 @@ assert(description.includes("Det lufttette lokket"), "description splits glued s
 assert(!description.includes("mulig.Det"), "description inserts missing spaces");
 
 const rewritten = sanitizeHtml(store.collections[0].description);
-assert(rewritten.includes('href="/artikler/den-ultimate-guiden-til-rullepapir/"'), "collection HTML rewrites article links");
-assert(!rewritten.includes("/blogs/news/"), "collection HTML drops Shopify blog paths");
+assert(rewritten.includes('href="/blogs/news/den-ultimate-guiden-til-rullepapir"'), "collection HTML rewrites article links");
+assert(!rewritten.includes("/artikler/"), "collection HTML keeps Shopify blog paths");
 
 assert(!navItems(store).some((item) => HIDDEN_COLLECTION_HANDLES.has(item.handle)), "nav omits empty frontpage/ligher");
 assert(navItems(store).some((item) => item.handle === "papes"), "nav keeps published curated collections");
@@ -126,7 +126,7 @@ assert(imageSrcset(product.images[0]).includes("/480.avif 480w"), "image helper 
 
 const home = renderHomePage(store);
 assert(home.includes("https://app.reai.no/media/product-images/mason-1"), "homepage uses ReAI images");
-assert(!home.includes("/assets/products/"), "homepage does not use local product photos");
+assert(!home.includes("/assets/products"), "homepage does not use local product photos");
 assert(!home.includes("/data/catalog.json"), "homepage does not read catalog.json");
 assert(home.includes('data-storefront="home"'), "homepage is marked as server-rendered");
 assert(home.includes(STORE_SCRIPT), "homepage loads store.js");
@@ -136,8 +136,8 @@ assert(home.includes('<picture class="responsive-picture">'), "homepage uses the
 assert(home.includes('type="image/avif"'), "homepage advertises AVIF sources");
 assert(home.includes('sizes="(max-width: 560px) calc(100vw - 28px)'), "homepage category images declare their layout width");
 assert(home.includes('width="1600" height="1600"'), "homepage category images reserve their aspect ratio");
-assert(!home.includes("/collections/ligher/"), "homepage chrome omits the ligher collection");
-assert(!home.includes("/collections/frontpage/"), "homepage chrome omits the empty frontpage collection");
+assert(!home.includes("/collections/ligher"), "homepage chrome omits the ligher collection");
+assert(!home.includes("/collections/frontpage"), "homepage chrome omits the empty frontpage collection");
 assert(home.includes("/assets/discreet-delivery-1200.avif"), "homepage includes a responsive delivery story");
 assert(home.includes('width="200" height="64"'), "homepage logo reserves its intrinsic aspect ratio");
 
@@ -153,7 +153,7 @@ const page = renderProductPage(store, product, { [product.variants[0].id]: true,
 assert(page.includes('data-add-to-cart'), "product page has add-to-cart");
 assert(page.includes(product.variants[0].id), "product page uses ReAI variant UUIDs");
 assert(page.includes("https://app.reai.no/media/product-images/mason-1"), "product gallery uses ReAI images");
-assert(!page.includes("/assets/products/"), "product page does not use local product photos");
+assert(!page.includes("/assets/products"), "product page does not use local product photos");
 assert(page.includes("application/ld+json"), "product page includes JSON-LD");
 assert(page.includes("https://schema.org/InStock"), "JSON-LD reflects availability");
 assert(page.includes(related.handle), "product page shows related products");
@@ -165,11 +165,11 @@ assert(page.includes('data-responsive-source'), "product gallery keeps its pictu
 assert(page.includes('aria-label="Brødsmulesti"') && page.includes("<ol>"), "product breadcrumbs use an ordered semantic trail");
 
 const sitemap = renderSitemap(store);
-assert(sitemap.includes("/products/raw-mason-jar-glassoppbevaring/"), "sitemap lists products");
-assert(sitemap.includes("/collections/raw/"), "sitemap lists collections");
-assert(sitemap.includes("/artikler/bong-guide-komplett/"), "sitemap keeps editorial routes");
-assert(!sitemap.includes("/collections/frontpage/"), "sitemap omits empty frontpage");
-assert(!sitemap.includes("/collections/ligher/"), "sitemap omits empty ligher");
+assert(sitemap.includes("/products/raw-mason-jar-glassoppbevaring"), "sitemap lists products");
+assert(sitemap.includes("/collections/raw"), "sitemap lists collections");
+assert(sitemap.includes("/blogs/news/bong-guide-komplett"), "sitemap keeps editorial routes");
+assert(!sitemap.includes("/collections/frontpage"), "sitemap omits empty frontpage");
+assert(!sitemap.includes("/collections/ligher"), "sitemap omits empty ligher");
 
 for (const route of EDITORIAL_PATHS) {
   if (route === "/") {
