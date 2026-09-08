@@ -5,6 +5,7 @@ import { renderStaticPage, renderUnavailablePage, renderNotFoundPage } from './s
 
 // Editorial output and the unavailable shell contain no catalogue data.
 const pages = ['sok', 'handlekurv', 'bestilling/fullfort', 'pages/var-autentisering', 'pages/om-oss', 'pages/contact', 'pages/retur', 'pages/personvernerklaering', 'pages/kjopsvilkar', 'pages/sokeoppdrag', 'blogs/blog', 'blogs/blog/louis-vuitton-speedy-30-vs-35-hvilken-storrelse-passer-deg', 'blogs/blog/slik-pleier-og-oppbevarer-du-en-vintage-skinnveske'];
+pages.push('pages/tilstandsguide');
 const outputs = [['index.html', renderUnavailablePage(null,{},'/')], ['404.html',renderNotFoundPage(null,{},'/404/')], ...pages.map((path) => [`${path}/index.html`,renderStaticPage(`/${path}/`)])];
 for (const [path,html] of outputs) {
   const target = fileURLToPath(new URL(`./public/${path}`,import.meta.url));

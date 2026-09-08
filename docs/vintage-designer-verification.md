@@ -1,6 +1,16 @@
 # Vintage Designer local verification
 
-Verified 2026-09-07. This is a local storefront, not a deployed or live-ReAI shop.
+## Current handoff — 2026-09-08
+
+The approved snapshot demonstration is published at https://vintage-designer.respiro.workers.dev. The former Pages project has been removed. ReAI integration remains deferred and checkout is unavailable; no live store or production domain was changed. The assignment CSV records the user's confirmation that the outreach email was sent.
+
+The approved follow-up design includes brand discovery panels, model switching, full galleries and image enlargement, source-backed condition details, and refined mobile/editorial layouts. The hosted presentation omits development banners while retaining indexing protection and a controlled unavailable-checkout response. Real catalog exports and product images remain ignored; only the explicit hosted artifact is uploaded manually.
+
+Pre-merge verification: full `npm run check` passed, including type checking, API boundary, shared/site/local/demo tests, all Worker dry runs, refreshed API declaration freshness, and dependency audit (zero vulnerabilities). The hosted-demo and local-harness tests now run in the site check. The earlier stale-contract failure below was resolved by regenerating declarations from the published API; no hand-written client endpoint changes were needed.
+
+## Earlier local verification — 2026-09-07
+
+The sections below record the initial local-only stage, before the approved design refinements and snapshot deployment.
 
 ## Scope
 

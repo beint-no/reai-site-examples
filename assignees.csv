@@ -1,4 +1,4 @@
 company,website,owner,status,site_folder,preview_url,proposal_status,notes
 EVutleie AS,https://evutleie.no,Leni,assigned,,,not_sent,Non-client ReAI tenant with an active website
 iGlow AS,https://iglow.no,Aminul,assigned,,,not_sent,Non-client ReAI tenant with an active website
-Vintage Designer AS,https://vintagedesigner.no,Ian,assigned,sites/vintage-designer,,not_sent,E-commerce customer; create and approve static preview before ReAI backend work; transferred from customer-sites; storefront development complete and locally verified 2026-09-07; ReAI configuration and deployment deferred
+Vintage Designer AS,https://vintagedesigner.no,Ian,preview_ready,sites/vintage-designer,https://vintage-designer.respiro.workers.dev,sent,E-commerce customer; transferred from customer-sites; storefront locally verified and snapshot demo deployed 2026-09-07; preview approved for outreach; email sent confirmed by Ian 2026-09-08; ReAI integration deferred and checkout disabled

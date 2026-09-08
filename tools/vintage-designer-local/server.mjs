@@ -17,6 +17,7 @@ if (fixture.localFixture !== true || !Array.isArray(fixture.storefront?.products
 const port = args.includes('--port') ? Number(option('--port')) : 8787;
 if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error('Port must be 1024–65535');
 const failureMode = args.includes('--upstream-error');
+const previewRevision = Date.now();
 const mime = { '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.html': 'text/html', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.avif': 'image/avif', '.woff2': 'font/woff2', '.txt': 'text/plain', '.xml': 'application/xml' };
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 async function fileResponse(directory, relative, fallback = false) {
@@ -34,6 +35,9 @@ async function fileResponse(directory, relative, fallback = false) {
   }
 }
 const { products, collections, ...context } = fixture.storefront;
+// The delivery contract has only two states. Unknown snapshot inventory cannot
+// be added to the cart; neutral UI copy must not infer that such an item sold.
+const deliveryAvailability = variantId => fixture.availability[variantId] === 'AVAILABLE' ? 'AVAILABLE' : 'OUT_OF_STOCK';
 function upstream(request) {
   if (failureMode) return json({ error: 'Deliberate local upstream failure' }, 503);
   const url = new URL(request.url);
@@ -49,10 +53,10 @@ function upstream(request) {
     const collection = collections.find(collection => collection.handle === decodeURIComponent(url.pathname.split('/').at(-1)));
     return collection ? json({ ...context, ...collection }) : json({ error: 'Not found' }, 404);
   }
-  if (url.pathname === '/site/v1/commerce/availability') return json({ ...context, variants: url.searchParams.getAll('variantId').map(variantId => ({ variantId, status: fixture.availability[variantId] || 'OUT_OF_STOCK' })) });
+  if (url.pathname === '/site/v1/commerce/availability') return json({ ...context, variants: url.searchParams.getAll('variantId').map(variantId => ({ variantId, status: deliveryAvailability(variantId) })) });
   if (url.pathname.startsWith('/site/v1/commerce/availability/')) {
     const variantId = url.pathname.split('/').at(-1);
-    return fixture.availability[variantId] ? json({ ...context, variantId, status: fixture.availability[variantId] }) : json({ error: 'Not found' }, 404);
+    return fixture.availability[variantId] ? json({ ...context, variantId, status: deliveryAvailability(variantId) }) : json({ error: 'Not found' }, 404);
   }
   if (url.pathname === '/site/v1/site') return json({ id: context.marketId, name: 'Vintage Designer — local sample', status: 'enabled', sourceLocale: 'nb-NO', activeDomain: null, markets: [] });
   return json({ error: 'Local upstream endpoint not implemented' }, 404);
@@ -60,6 +64,7 @@ function upstream(request) {
 async function send(response, outgoing, head = false) {
   const headers = new Headers(response.headers);
   headers.set('X-Robots-Tag', 'noindex, nofollow');
+  headers.set('Cache-Control', 'no-store');
   headers.set('X-Content-Type-Options', 'nosniff');
   headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
@@ -81,7 +86,17 @@ const server = http.createServer(async (incoming, outgoing) => {
     const request = new Request(url, { method: incoming.method, headers: incoming.headers, ...(!['GET', 'HEAD'].includes(incoming.method) ? { body: Buffer.concat(chunks) } : {}) });
     if (url.pathname.startsWith('/__local-media/')) return send(await fileResponse(path.join(localRoot, 'media'), url.pathname.slice('/__local-media'.length)), outgoing, incoming.method === 'HEAD');
     const response = await worker.fetch(request, { REAI_BASE_URL: `http://127.0.0.1:${upstreamPort}`, REAI_SITE_TOKEN: 'local-fixture-only', CHECKOUT_ENABLED: 'false', ASSETS: { fetch: request => fileResponse(path.join(root, 'sites/vintage-designer/public'), new URL(request.url).pathname, true) } }, { waitUntil: promise => promise.catch(error => console.error(error)) });
-    await send(response, outgoing, incoming.method === 'HEAD');
+    if (fixture.snapshotAt && response.headers.get('content-type')?.includes('text/html') && incoming.method !== 'HEAD') {
+      const date = new Date(fixture.snapshotAt);
+      if (!Number.isFinite(date.getTime())) throw new Error('Invalid snapshot timestamp');
+      const stamp = date.toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
+      const html = (await response.text()).replace(/(\/assets\/(?:store\.js|store\.css|design\.css))"/g, `$1?preview=${previewRevision}"`).replace(/(<div class="preview-bar">)[\s\S]*?(<\/div>)/,
+        `$1Forhåndsvisning · Datauttrekk ${stamp} · Priser og lager er ikke live · Kjøp er ikke aktivert$2`);
+      const headers = new Headers(response.headers);
+      headers.delete('content-length');
+      headers.set('Cache-Control', 'no-store');
+      await send(new Response(html, {status: response.status, headers}), outgoing);
+    } else await send(response, outgoing, incoming.method === 'HEAD');
   } catch (error) {
     console.error(error);
     await send(json({ error: 'Local preview failed; inspect terminal output' }, 500), outgoing);

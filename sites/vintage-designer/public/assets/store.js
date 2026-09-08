@@ -6,7 +6,7 @@ const readCart = () => { try { const parsed = JSON.parse(localStorage.getItem(st
 const writeCart = (cart) => { memoryCart = cart; try { localStorage.setItem(storageKey,JSON.stringify(cart)); } catch { toast('Handlekurven lagres bare så lenge denne siden er åpen.'); } updateCount(); };
 const updateCount = () => $$('[data-cart-count]').forEach((node) => { node.textContent = String(readCart().length); });
 const toast = (message) => { const node = $('.toast'); if (!node) return; node.textContent = message; node.hidden = false; window.clearTimeout(toast.timer); toast.timer = window.setTimeout(() => { node.hidden = true; },5000); };
-const request = async (path) => { const response = await fetch(path,{headers:{Accept:'application/json'},signal:AbortSignal.timeout(10000)}); if (!response.ok) throw new Error('Kunne ikke hente data'); return response.json(); };
+const request = async (path) => { const response = await fetch(path,{cache:'no-cache',headers:{Accept:'application/json'},signal:AbortSignal.timeout(10000)}); if (!response.ok) throw new Error('Kunne ikke hente data'); return response.json(); };
 let catalogPromise;
 const catalog = () => catalogPromise ||= request('/reai/catalog').then((data) => data.products || []).catch((error) => { catalogPromise = undefined; throw error; });
 const availabilityCache = new Map();
@@ -35,6 +35,13 @@ dialog?.addEventListener('click',(event) => { if (event.target === dialog) { con
 $('[data-menu]')?.addEventListener('click',(event) => { const open = event.currentTarget.getAttribute('aria-expanded') !== 'true'; event.currentTarget.setAttribute('aria-expanded',String(open)); $('#navigation').classList.toggle('is-open',open); });
 updateCount();
 window.addEventListener('storage',updateCount);
+$$('[data-model-tab]').forEach(button=>button.addEventListener('click',()=>{
+  $$('[data-model-tab]').forEach(tab=>tab.setAttribute('aria-pressed',String(tab===button)));
+  $$('[data-model-panel]').forEach(panel=>{panel.hidden=panel.dataset.modelPanel!==button.dataset.modelTab;});
+}));
+const imageDialog=$('.image-dialog');
+$('[data-zoom]')?.addEventListener('click',()=>{const original=$('.gallery-main img');if(!original)return;const copy=original.cloneNode(true);copy.sizes='90vw';$('[data-zoom-image]').replaceChildren(copy);imageDialog.showModal();});
+$('[data-close-zoom]')?.addEventListener('click',()=>imageDialog.close());
 
 const grid = $('[data-catalog-grid]');
 const filterForm = $('[data-filters]');
@@ -65,7 +72,7 @@ function applyFilters() {
     node.hidden = (brand !== 'all' && node.dataset.brand !== brand) || (selectedAvailability !== 'all' && node.dataset.availability !== selectedAvailability);
     if (!node.hidden) {
       count++;
-      if (node.dataset.availability === 'sold' && !soldHeading) { const divider = document.createElement('div'); divider.className = 'sold-divider'; divider.innerHTML = '<h2>Fra det solgte arkivet</h2><p>Disse veskene har funnet et nytt hjem.</p>'; grid.append(divider); soldHeading = true; }
+      if (node.dataset.availability === 'sold' && !soldHeading) { const divider = document.createElement('div'); divider.className = 'sold-divider'; divider.innerHTML = '<h2>Ikke tilgjengelig i utvalget</h2><p>Disse veskene har ingen registrert positiv lagerbeholdning.</p>'; grid.append(divider); soldHeading = true; }
     }
     grid.append(node);
   });
@@ -79,7 +86,7 @@ window.addEventListener('popstate',() => { syncFiltersFromUrl(); applyFilters();
 async function hydrateCards(nodes) {
   // Bound concurrency so a large catalogue does not flood the availability route.
   let next = 0;
-  await Promise.all(Array.from({length:Math.min(5,nodes.length)},async () => { while (next < nodes.length) { const node = nodes[next++]; let ids=[]; try { ids=JSON.parse(node.dataset.variants); } catch {} const status = await productAvailability(ids); node.dataset.availability=status; const label=$('[data-stock-label]',node); label.hidden=false; label.textContent=status === 'sold' ? 'Solgt' : status === 'available' ? 'Tilgjengelig':'Status utilgjengelig'; } }));
+  await Promise.all(Array.from({length:Math.min(5,nodes.length)},async () => { while (next < nodes.length) { const node = nodes[next++]; let ids=[]; try { ids=JSON.parse(node.dataset.variants); } catch {} const status = await productAvailability(ids); node.dataset.availability=status; const label=$('[data-stock-label]',node); label.hidden=false; label.textContent=status === 'sold' ? 'Ikke tilgjengelig' : status === 'available' ? 'Tilgjengelig':'Status utilgjengelig'; } }));
 }
 if (grid) hydrateCards(cards).then(() => { applyFilters(); $$('[data-availability-note]').forEach((node) => { node.textContent = cards.some((card) => card.dataset.availability === 'unknown') ? 'Noe lagerstatus kunne ikke hentes. Prøv igjen senere.' : 'Tilgjengelige vesker vises først.'; }); });
 
@@ -87,7 +94,7 @@ $$('[data-gallery-index]').forEach((button) => button.addEventListener('click',(
 const detail = $('[data-product-detail]');
 if (detail) {
   const form = $('[data-add-form]'); const select = $('#variant'); const button = $('.add-button'); const statusNode = $('[data-product-availability]');
-  async function updateVariant() { button.disabled=true; statusNode.textContent='Sjekker tilgjengelighet …'; const selected=select.value; try { const [status,products]=await Promise.all([availability(selected),catalog()]); if (select.value !== selected) return; const variant=products.find((product) => product.handle === detail.dataset.productDetail)?.variants?.find((variant) => variant.id === selected); $('.product-price').textContent=money(gross(variant)); button.disabled=status !== 'available' || gross(variant) === null; statusNode.textContent=status === 'available' ? 'Tilgjengelig – klar for et nytt kapittel' : status === 'sold' ? 'Solgt – denne vesken er en del av arkivet' : 'Tilgjengelighet kunne ikke hentes. Prøv igjen senere.'; } catch { if (select.value === selected) statusNode.textContent='Pris og tilgjengelighet kunne ikke hentes. Prøv igjen senere.'; } }
+  async function updateVariant() { button.disabled=true; statusNode.textContent='Sjekker tilgjengelighet …'; const selected=select.value; try { const [status,products]=await Promise.all([availability(selected),catalog()]); if (select.value !== selected) return; const variant=products.find((product) => product.handle === detail.dataset.productDetail)?.variants?.find((variant) => variant.id === selected); $('.product-price').textContent=money(gross(variant)); button.disabled=status !== 'available' || gross(variant) === null; statusNode.textContent=status === 'available' ? 'Tilgjengelig – klar for et nytt kapittel' : status === 'sold' ? 'Ikke tilgjengelig – ingen registrert positiv lagerbeholdning' : 'Tilgjengelighet kunne ikke hentes. Prøv igjen senere.'; } catch { if (select.value === selected) statusNode.textContent='Pris og tilgjengelighet kunne ikke hentes. Prøv igjen senere.'; } }
   select.addEventListener('change',updateVariant); updateVariant();
   form.addEventListener('submit',async (event) => { event.preventDefault(); if (button.disabled) return; const id=select.value; availabilityCache.delete(id); button.disabled=true; if (await availability(id) !== 'available') { await updateVariant(); return; } const cart=readCart(); if (!cart.includes(id)) cart.push(id); writeCart(cart); toast('Vesken er lagt i handlekurven. Kjøp er ikke aktivert.'); button.disabled=false; });
 }
@@ -105,7 +112,7 @@ async function renderCart() {
   try {
     const products=await catalog(); let total=0; let complete=true;
     const entries=await Promise.all(cart.map(async (id) => { const product=products.find((product) => product.variants?.some((variant) => variant.id===id)); if (!product) { complete=false; return {id,missing:true}; } const variant=product.variants.find((variant) => variant.id===id); const state=await availability(id); const value=gross(variant); if (state !== 'available' || value === null) complete=false; else total+=value; return {id,product,state,value}; }));
-    root.innerHTML=entries.map(({id,product,state,value,missing}) => `<article class="cart-row">${missing ? '<div class="image-missing">—</div>' : image(product.images?.[0],product.title)}<div><h2>${missing ? 'Vesken er ikke lenger i utvalget' : `<a href="/products/${escape(encodeURIComponent(product.handle))}/">${escape(product.title)}</a>`}</h2><p>${missing ? 'Fjern vesken fra handlekurven.' : `${escape(money(value))} · ${state === 'available' ? 'Tilgjengelig':state === 'sold' ? 'Solgt – ikke tilgjengelig':'Lagerstatus utilgjengelig'}`}</p></div><button type="button" data-remove="${escape(id)}" aria-label="Fjern ${escape(product?.title || 'vesken')} fra handlekurven">Fjern</button></article>`).join('');
+    root.innerHTML=entries.map(({id,product,state,value,missing}) => `<article class="cart-row">${missing ? '<div class="image-missing">—</div>' : image(product.images?.[0],product.title)}<div><h2>${missing ? 'Vesken er ikke lenger i utvalget' : `<a href="/products/${escape(encodeURIComponent(product.handle))}/">${escape(product.title)}</a>`}</h2><p>${missing ? 'Fjern vesken fra handlekurven.' : `${escape(money(value))} · ${state === 'available' ? 'Tilgjengelig':state === 'sold' ? 'Ikke tilgjengelig':'Lagerstatus utilgjengelig'}`}</p></div><button type="button" data-remove="${escape(id)}" aria-label="Fjern ${escape(product?.title || 'vesken')} fra handlekurven">Fjern</button></article>`).join('');
     $$('[data-remove]',root).forEach((button) => button.addEventListener('click',() => { writeCart(readCart().filter((id) => id !== button.dataset.remove)); renderCart(); }));
     $('[data-cart-total]').textContent=complete ? money(total) : 'Kan ikke beregnes'; summary.hidden=false;
   } catch { root.innerHTML='<div class="empty-state"><h2>Handlekurven kunne ikke oppdateres.</h2><p>Veskene er fortsatt lagret. Last siden på nytt for å hente priser og tilgjengelighet igjen.</p><a class="text-link" href="/handlekurv/">Prøv igjen →</a></div>'; }

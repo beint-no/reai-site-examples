@@ -51,3 +51,6 @@ Use restrained green accents for authentication information.
 
 This document records the intended storefront work; it does not mark that work
 complete or authorize deployment by itself.
+# Current status — 2026-09-08
+
+The storefront demonstration has been approved for outreach and published at https://vintage-designer.respiro.workers.dev. The user confirmed that the email has been sent. ReAI integration remains deferred; the hosted export uses an ignored product snapshot and cannot take orders or payments. The following plan records the earlier local-only phase and is superseded by this approved hosted demonstration scope.

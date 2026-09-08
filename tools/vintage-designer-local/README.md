@@ -18,3 +18,9 @@ Wrangler's build command runs `validate-deployment.mjs` on every dry run and dep
 For a cold upstream-failure test, stop the server and restart with the additional `--upstream-error` argument. This returns failures from all mocked upstream routes; it never falls back to sample data. Restart between cold-cache error scenarios.
 
 For live integration later, use the normal site development command with the actual Site credential stored outside Git. Do not run this harness. The real Worker already uses the shared client and proxy boundary. Keep checkout disabled until separately approved.
+
+## Dated local snapshots
+
+The ignored fixture may instead contain a `snapshotAt` ISO timestamp. The local harness displays it on HTML pages with a notice that prices and stock are not live. Keep extraction scripts, raw snapshots, source identifiers and real product data inside `.local/`; they are not deployment assets or public repository documentation.
+
+Normalize legacy net prices to two decimal places and add VAT rounded to two decimals, using verified source VAT treatment. Delivery prices are already gross and the renderer must not add VAT again. Retain unknown inventory separately in the local snapshot. The two-state delivery adapter conservatively exposes it as unavailable; the UI says “Ikke tilgjengelig”, never that the item was sold. Reuse images only after matching source product identity; otherwise retain the missing-image placeholder. Generated local handles and title-based collections are preview conveniences, not existing ReAI publications.

@@ -15,6 +15,6 @@ Use Norwegian copy, semantic HTML, visible keyboard focus, reduced motion and re
 
 ## Data and preview boundary
 
-Reuse the shared Worker and Site client. Browser requests stay behind `/reai/*`. Product data must not be committed. Explicit local fixture tooling lives outside the Worker bundle; `.local/` is ignored and never published. ReAI errors must remain errors, not fixture fallbacks.
+Reuse the shared Worker and Site client. Browser requests stay behind `/reai/*`. Product data must not be committed. Explicit local fixture tooling lives outside the normal Worker bundle; `.local/` is ignored. The separately approved snapshot demonstration uses `tools/vintage-designer-pages/` to export only allowlisted storefront fields and verified images into a fresh ignored artifact. Never publish the raw `.local/` directory. ReAI errors must remain errors, not fixture fallbacks.
 
 Checkout is disabled at the Worker boundary. Keep noindex/nofollow on all responses. Do not add account, newsletter, contact-submission or payment services. Contact links open email. Public policy content links to the client's current authoritative policies.

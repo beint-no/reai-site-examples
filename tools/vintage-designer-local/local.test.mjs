@@ -34,9 +34,10 @@ test('local server refuses implicit fixture or a fixture outside ignored directo
 test('actual Worker and shared client serve explicit synthetic fixture; checkout stays disabled', async () => {
   const fixturePath = path.join(site, '.local', `synthetic-test-${process.pid}.json`);
   const variantId = '00000000-0000-4000-8000-000000000002';
+  const unknownId = '00000000-0000-4000-8000-000000000004';
   const product = { id: '00000000-0000-4000-8000-000000000001', title: 'Synthetic test bag', seoTitle: 'Synthetic test bag', handle: 'synthetic-test-bag', images: [], variants: [{ id: variantId, sku: 'TEST', options: [], price: 100, vatRate: 0 }] };
   await mkdir(path.dirname(fixturePath), { recursive: true });
-  await writeFile(fixturePath, JSON.stringify({ localFixture: true, storefront: { products: [product], collections: [], catalogVersion: 1, marketHandle: 'norway', marketId: '00000000-0000-4000-8000-000000000003', locale: 'nb-NO', currency: 'NOK' }, availability: { [variantId]: 'AVAILABLE' } }));
+  await writeFile(fixturePath, JSON.stringify({ localFixture: true, snapshotAt: "2026-09-07T06:44:00Z", storefront: { products: [product], collections: [], catalogVersion: 1, marketHandle: 'norway', marketId: '00000000-0000-4000-8000-000000000003', locale: 'nb-NO', currency: 'NOK' }, availability: { [variantId]: 'AVAILABLE', [unknownId]: 'UNKNOWN' } }));
   const port = 20000 + Math.floor(Math.random() * 20000);
   const child = spawn(process.execPath, [path.join(root, 'tools/vintage-designer-local/server.mjs'), '--fixture', fixturePath, '--port', String(port)], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
   let stderr = '';
@@ -50,12 +51,20 @@ test('actual Worker and shared client serve explicit synthetic fixture; checkout
     const origin = `http://127.0.0.1:${port}`;
     const catalog = await fetch(`${origin}/reai/catalog`);
     assert.equal(catalog.status, 200);
+    assert.equal(catalog.headers.get('Cache-Control'), 'no-store');
     assert.equal((await catalog.json()).products[0].handle, product.handle);
     const availability = await fetch(`${origin}/reai/availability/${variantId}`);
     assert.equal((await availability.json()).status, 'AVAILABLE');
+    const unknown = await fetch(`${origin}/reai/availability/${unknownId}`);
+    assert.equal((await unknown.json()).status, 'OUT_OF_STOCK');
     const page = await fetch(`${origin}/products/${product.handle}/`);
     assert.equal(page.status, 200);
-    assert.match(await page.text(), /Synthetic test bag/);
+    const html = await page.text();
+    assert.match(html, /Synthetic test bag/);
+    assert.match(html, /Datauttrekk 2026-09-07 06:44 UTC/);
+    assert.match(html, /Priser og lager er ikke live/);
+    assert.match(html, /store\.js\?preview=\d+/);
+    assert.equal(page.headers.get("Cache-Control"), "no-store");
     assert.match(page.headers.get('X-Robots-Tag'), /noindex/);
     const missing = await fetch(`${origin}/unknown-local-test-route/`);
     assert.equal(missing.status, 404);
