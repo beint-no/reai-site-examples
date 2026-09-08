@@ -362,13 +362,13 @@ function renderCart() {
   setCheckoutError('');
   syncCheckoutButton(items);
   if (!items.length) {
-    itemsNode.innerHTML = '<div class="cart-empty"><h2>Handlekurven er tom.</h2><p>Finn noe du liker i hele utvalget.</p><a class="store-button" href="/collections/all/">Se alle produkter</a></div>';
+    itemsNode.innerHTML = '<div class="cart-empty"><h2>Handlekurven er tom.</h2><p>Finn noe du liker i hele utvalget.</p><a class="store-button" href="/collections/all">Se alle produkter</a></div>';
     subtotalNode.textContent = '0 kr';
     return;
   }
   itemsNode.innerHTML = items.map((item, index) => `<article class="cart-item">
-    ${item.image ? `<a href="/products/${item.handle}/"><img src="${escapeHtml(item.image)}" alt="" width="120" height="120" loading="lazy" decoding="async"></a>` : ''}
-    <div><h2><a href="/products/${item.handle}/">${escapeHtml(item.title)}</a></h2><p>${formatMoney(item.price)} per stykk</p><div class="cart-item-actions"><button type="button" data-cart-action="minus" data-index="${index}" aria-label="Reduser antall">−</button><strong>${item.quantity}</strong><button type="button" data-cart-action="plus" data-index="${index}" aria-label="Øk antall">+</button><button type="button" data-cart-action="remove" data-index="${index}">Fjern</button></div></div>
+    ${item.image ? `<a href="/products/${item.handle}"><img src="${escapeHtml(item.image)}" alt="" width="120" height="120" loading="lazy" decoding="async"></a>` : ''}
+    <div><h2><a href="/products/${item.handle}">${escapeHtml(item.title)}</a></h2><p>${formatMoney(item.price)} per stykk</p><div class="cart-item-actions"><button type="button" data-cart-action="minus" data-index="${index}" aria-label="Reduser antall">−</button><strong>${item.quantity}</strong><button type="button" data-cart-action="plus" data-index="${index}" aria-label="Øk antall">+</button><button type="button" data-cart-action="remove" data-index="${index}">Fjern</button></div></div>
     <div class="cart-item-price">${formatMoney(item.price * item.quantity)}</div>
   </article>`).join('');
   subtotalNode.textContent = formatMoney(items.reduce((sum, item) => sum + item.price * item.quantity, 0));
@@ -399,7 +399,7 @@ function collectionProductCard({ handle, title, vendor, price, image, available 
     ? responsiveImageMarkup(image, { alt: title, preferredWidth: 480, sizes: CARD_IMAGE_SIZES })
     : '<span class="product-image-fallback">BM</span>';
   const soldOut = available === false ? '<span>Utsolgt</span>' : '';
-  return `<article class="product-card"><a class="product-card-media" href="/products/${handle}/">${media}</a><div class="product-card-copy"><p>${escapeHtml(vendor)}</p><h3><a href="/products/${handle}/">${escapeHtml(title)}</a></h3><div class="product-card-price"><strong>${formatMoney(price)}</strong>${soldOut}</div></div></article>`;
+  return `<article class="product-card"><a class="product-card-media" href="/products/${handle}">${media}</a><div class="product-card-copy"><p>${escapeHtml(vendor)}</p><h3><a href="/products/${handle}">${escapeHtml(title)}</a></h3><div class="product-card-price"><strong>${formatMoney(price)}</strong>${soldOut}</div></div></article>`;
 }
 
 async function runSearch() {

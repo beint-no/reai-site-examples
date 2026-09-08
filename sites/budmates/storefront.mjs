@@ -1,8 +1,9 @@
+import { canonicalPath } from "./routes.mjs";
 import { renderCompactLegalFooter } from "../../packages/reai-cloudflare-storefront/footer.mjs";
 
 export const SITE_ORIGIN = "https://budmates.respiro.workers.dev";
 export const HANDLE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-export const STORE_SCRIPT = "/assets/store.js?v=9";
+export const STORE_SCRIPT = "/assets/store.js?v=10";
 export const STORE_STYLE = "/assets/store.css?v=2";
 
 export const NAV_ITEMS = [
@@ -20,45 +21,48 @@ export const HIDDEN_COLLECTION_HANDLES = new Set(["frontpage", "ligher"]);
 
 export const EDITORIAL_PATHS = [
   "/",
-  "/artikler/",
-  "/artikler/bong-guide-komplett/",
-  "/artikler/bong-typer-glass-silikon-akryl/",
-  "/artikler/den-ultimate-guiden-til-rullepapir/",
-  "/artikler/gravity-bong-hva-er-det-og-bor-du-kjope-en/",
-  "/artikler/grinder-den-komplette-guiden-til-urtekverner/",
-  "/artikler/hva-er-cones-og-bor-du-bruke-det/",
-  "/artikler/hva-er-forskjellen-pa-tynne-og-tykke-papes/",
-  "/artikler/hva-er-ocb-alt-du-trenger-a-vite-om-den-franske-merkevaren/",
-  "/artikler/hva-er-perkolator-bong/",
-  "/artikler/hva-er-raw-rullepapir-alt-du-trenger-a-vite-om-det-amerikanske-merket/",
-  "/artikler/hvilke-papes-er-best-guide-for-nybegynnere/",
-  "/artikler/hvilken-storrelse-pa-papes-bor-du-velge/",
-  "/artikler/hvordan-bruke-bong-nybegynner/",
-  "/artikler/hvordan-bruke-vaporizer-nybegynner/",
-  "/artikler/hvordan-rulle-royk-her-er-vare-gode-tips/",
-  "/artikler/hvordan-vaske-bong/",
-  "/artikler/hvordan-vaske-en-grinder-her-er-vaere-gode-tips/",
-  "/artikler/hvorfor-brenner-rullepapiret-ujevnt-5-vanlige-arsaker/",
-  "/artikler/manitou-tobakk-sky-green-og-gold-den-komplette-guiden/",
-  "/artikler/raw-eller-ocb-hvilket-merke-er-best-for-dine-papes/",
-  "/artikler/rengjore-vedlikeholde-vaporizer/",
-  "/artikler/rullepapir-med-filter-fordeler-og-beste-valg/",
-  "/artikler/ubleket-vs-bleket-rullepapir-hva-er-best-og-hvorfor/",
-  "/artikler/vaporizer-guide-komplett/",
-  "/artikler/vaporizer-vs-royking/",
-  "/faq/",
-  "/handlekurv/",
-  "/kontakt/",
-  "/kunnskap/",
-  "/kunnskap/diskret-levering/",
-  "/kunnskap/materialer-og-holdbarhet/",
-  "/kunnskap/rengjoring-og-vedlikehold/",
-  "/levering/",
-  "/om/",
-  "/personvern/",
-  "/sok/",
-  "/utvalg/",
-  "/vilkar/",
+  "/blogs/news",
+  "/blogs/news/bong-guide-komplett",
+  "/blogs/news/bong-typer-glass-silikon-akryl",
+  "/blogs/news/den-ultimate-guiden-til-rullepapir",
+  "/blogs/news/gravity-bong-hva-er-det-og-bor-du-kjope-en",
+  "/blogs/news/grinder-den-komplette-guiden-til-urtekverner",
+  "/blogs/news/hva-er-cones-og-bor-du-bruke-det",
+  "/blogs/news/hva-er-forskjellen-pa-tynne-og-tykke-papes",
+  "/blogs/news/hva-er-ocb-alt-du-trenger-a-vite-om-den-franske-merkevaren",
+  "/blogs/news/hva-er-perkolator-bong",
+  "/blogs/news/hva-er-raw-rullepapir-alt-du-trenger-a-vite-om-det-amerikanske-merket",
+  "/blogs/news/hvilke-papes-er-best-guide-for-nybegynnere",
+  "/blogs/news/hvilken-storrelse-pa-papes-bor-du-velge",
+  "/blogs/news/hvordan-bruke-bong-nybegynner",
+  "/blogs/news/hvordan-bruke-vaporizer-nybegynner",
+  "/blogs/news/hvordan-rulle-royk-her-er-vare-gode-tips",
+  "/blogs/news/hvordan-vaske-bong",
+  "/blogs/news/hvordan-vaske-en-grinder-her-er-vaere-gode-tips",
+  "/blogs/news/hvorfor-brenner-rullepapiret-ujevnt-5-vanlige-arsaker",
+  "/blogs/news/manitou-tobakk-sky-green-og-gold-den-komplette-guiden",
+  "/blogs/news/raw-eller-ocb-hvilket-merke-er-best-for-dine-papes",
+  "/blogs/news/rengjore-vedlikeholde-vaporizer",
+  "/blogs/news/rullepapir-med-filter-fordeler-og-beste-valg",
+  "/blogs/news/ubleket-vs-bleket-rullepapir-hva-er-best-og-hvorfor",
+  "/blogs/news/vaporizer-guide-komplett",
+  "/blogs/news/vaporizer-vs-royking",
+  "/pages/faq",
+  "/pages/kontakt-oss",
+  "/kunnskap",
+  "/kunnskap/diskret-levering",
+  "/kunnskap/materialer-og-holdbarhet",
+  "/kunnskap/rengjoring-og-vedlikehold",
+  "/pages/frakt",
+  "/pages/om-oss",
+  "/policies/privacy-policy",
+  "/policies/refund-policy",
+  "/pages/sosiale-medier",
+  "/pages/gdpr-compliance",
+  "/pages/appi-compliance",
+  "/pages/ccpa-compliance",
+  "/utvalg",
+  "/pages/salgsvilkar",
 ];
 
 const ALLOWED_TAGS = new Set(["P", "H2", "H3", "UL", "OL", "LI", "STRONG", "EM", "A", "BR", "B", "I"]);
@@ -166,11 +170,17 @@ const galleryButton = (image, index, productTitle) => {
   return `<button type="button" data-gallery-src="${escapeHtml(src)}" data-gallery-alt="${escapeHtml(alt)}"${srcset ? ` data-gallery-srcset="${escapeHtml(srcset)}" data-gallery-sizes="${escapeHtml(PRODUCT_IMAGE_SIZES)}"` : ""} aria-label="Vis produktbilde ${index + 1}" aria-current="${index === 0 ? "true" : "false"}"${index === 0 ? ' class="is-active"' : ""}>${thumbnail}</button>`;
 };
 
-const rewriteStoreHref = (href) => String(href || "")
-  .replace(/https?:\/\/(?:www\.)?budmates\.no\/blogs\/news\/([^/?#]+)/gi, "/artikler/$1/")
-  .replace(/\/blogs\/news\/([^/?#]+)/gi, "/artikler/$1/")
-  .replace(/https?:\/\/(?:www\.)?budmates\.no\/collections\/([^/?#]+)/gi, "/collections/$1/")
-  .replace(/https?:\/\/(?:www\.)?budmates\.no\/products\/([^/?#]+)/gi, "/products/$1/");
+const rewriteStoreHref = (href) => {
+  const value = String(href || "");
+  if (!/^(?:\/|https?:\/\/)/i.test(value)) return value;
+  try {
+    const url = new URL(value, "https://budmates.no");
+    if (!["budmates.no", "www.budmates.no", new URL(SITE_ORIGIN).hostname].includes(url.hostname)) return value;
+    return `${canonicalPath(url.pathname)}${url.search}${url.hash}`;
+  } catch {
+    return value;
+  }
+};
 
 const isSafeHref = (href) => {
   const value = String(href || "").trim();
@@ -234,8 +244,9 @@ export function matchRoute(pathname) {
     return {
       type: "product",
       handle: product[1],
-      canonicalPath: `/products/${product[1]}/`,
-      needsSlash: !path.endsWith("/"),
+      canonicalPath: `/products/${product[1]}`,
+      // Shared worker's legacy field means redirect to canonicalPath.
+      needsSlash: path.endsWith("/"),
       valid: HANDLE.test(product[1]),
     };
   }
@@ -244,8 +255,8 @@ export function matchRoute(pathname) {
     return {
       type: "collection",
       handle: collection[1],
-      canonicalPath: `/collections/${collection[1]}/`,
-      needsSlash: !path.endsWith("/"),
+      canonicalPath: `/collections/${collection[1]}`,
+      needsSlash: path.endsWith("/"),
       valid: collection[1] === "all" || HANDLE.test(collection[1]),
     };
   }
@@ -321,7 +332,7 @@ export function productCard(product, label = "") {
   const media = image
     ? responsiveImage(image, { alt: image.alt || product.title, preferredWidth: 480, sizes: CARD_IMAGE_SIZES, loading: "lazy" })
     : '<span class="product-image-fallback">BM</span>';
-  return `<article class="product-card"><a class="product-card-media" href="/products/${escapeHtml(product.handle)}/">${label ? `<span class="product-badge">${escapeHtml(label)}</span>` : ""}${media}</a><div class="product-card-copy"><p>${escapeHtml(product.brand || "BudMates")}</p><h3><a href="/products/${escapeHtml(product.handle)}/">${escapeHtml(product.title)}</a></h3><div class="product-card-price"><strong>${formatMoney(from)}</strong>${compare > from ? `<del>${formatMoney(compare)}</del>` : ""}</div></div></article>`;
+  return `<article class="product-card"><a class="product-card-media" href="/products/${escapeHtml(product.handle)}">${label ? `<span class="product-badge">${escapeHtml(label)}</span>` : ""}${media}</a><div class="product-card-copy"><p>${escapeHtml(product.brand || "BudMates")}</p><h3><a href="/products/${escapeHtml(product.handle)}">${escapeHtml(product.title)}</a></h3><div class="product-card-price"><strong>${formatMoney(from)}</strong>${compare > from ? `<del>${formatMoney(compare)}</del>` : ""}</div></div></article>`;
 }
 
 export function productGrid(products, label = "") {
@@ -355,14 +366,14 @@ function chrome(store, active = "") {
   const items = navItems(store);
   const nav = [
     `<a href="/"${active === "home" ? ' aria-current="page"' : ""}>Hjem</a>`,
-    ...items.map((item) => `<a href="/collections/${item.handle}/"${active === item.handle ? ' aria-current="page"' : ""}>${escapeHtml(item.label)}</a>`),
+    ...items.map((item) => `<a href="/collections/${item.handle}"${active === item.handle ? ' aria-current="page"' : ""}>${escapeHtml(item.label)}</a>`),
   ].join("");
   const legalFooter = renderCompactLegalFooter({
     owner: "BudMates AS",
     locale: "nb-NO",
-    refundHref: "/vilkar/#angrerett",
-    privacyHref: "/personvern/",
-    termsHref: "/vilkar/",
+    refundHref: "/policies/refund-policy",
+    privacyHref: "/policies/privacy-policy",
+    termsHref: "/pages/salgsvilkar",
     className: "shop-footer-bottom shop-shell",
   });
   return {
@@ -372,10 +383,10 @@ function chrome(store, active = "") {
     <a class="shop-logo" href="/" aria-label="BudMates, forside"><img src="/assets/brand/budmates-logo.png" alt="BudMates" width="200" height="64" decoding="async"></a>
     <button class="shop-menu-toggle" type="button" aria-label="Åpne meny" aria-expanded="false" aria-controls="shop-navigation" data-nav-toggle><span></span></button>
     <nav class="shop-nav" id="shop-navigation" aria-label="Hovedmeny" data-nav-links>${nav}</nav>
-    <div class="shop-tools"><a href="/sok/" aria-label="Søk">Søk</a><a href="/handlekurv/" aria-label="Handlekurv">Kurv <span class="cart-count" data-cart-count>0</span></a></div>
+    <div class="shop-tools"><a href="/search" aria-label="Søk">Søk</a><a href="/cart" aria-label="Handlekurv">Kurv <span class="cart-count" data-cart-count>0</span></a></div>
   </div></header>
   <a class="trust-strip" href="https://no.trustpilot.com/review/budmates.no" rel="noopener"><span>Dette sier kundene våre</span><strong>Enestående</strong><span class="trust-stars">★★★★★</span><span>4,7 av 5 på Trustpilot</span></a>`,
-    footer: `<footer class="shop-footer"><div class="shop-shell shop-footer-grid"><div><a class="shop-logo shop-logo--footer" href="/"><img src="/assets/brand/budmates-logo.png" alt="BudMates" width="200" height="64" loading="lazy" decoding="async"></a><p>Norges headshop på nett. Sendt raskt og diskré fra lager i Norge.</p></div><div><h2>Handle</h2><a href="/collections/papes/">Papes</a><a href="/collections/raw/">RAW</a><a href="/collections/ocb/">OCB</a><a href="/collections/all/">Alle produkter</a></div><div><h2>Informasjon</h2><a href="/levering/">Frakt og levering</a><a href="/kontakt/">Kontakt oss</a><a href="/om/">Om oss</a><a href="/faq/">Vanlige spørsmål</a><a href="https://www.instagram.com/budmates.no" rel="external">Instagram</a><a href="https://www.snapchat.com/add/budmates.no" rel="external">Snapchat</a></div></div>${legalFooter}</footer><div class="cart-toast" role="status" aria-live="polite" data-cart-toast hidden></div>`,
+    footer: `<footer class="shop-footer"><div class="shop-shell shop-footer-grid"><div><a class="shop-logo shop-logo--footer" href="/"><img src="/assets/brand/budmates-logo.png" alt="BudMates" width="200" height="64" loading="lazy" decoding="async"></a><p>Norges headshop på nett. Sendt raskt og diskré fra lager i Norge.</p></div><div><h2>Handle</h2><a href="/collections/papes">Papes</a><a href="/collections/raw">RAW</a><a href="/collections/ocb">OCB</a><a href="/collections/all">Alle produkter</a></div><div><h2>Informasjon</h2><a href="/pages/frakt">Frakt og levering</a><a href="/pages/kontakt-oss">Kontakt oss</a><a href="/pages/om-oss">Om oss</a><a href="/pages/faq">Vanlige spørsmål</a><a href="https://www.instagram.com/budmates.no" rel="external">Instagram</a><a href="https://www.snapchat.com/add/budmates.no" rel="external">Snapchat</a></div></div>${legalFooter}</footer><div class="cart-toast" role="status" aria-live="polite" data-cart-toast hidden></div>`,
   };
 }
 
@@ -396,8 +407,8 @@ export function documentHtml({
 }
 
 function editorialHome() {
-  return `<section class="home-delivery"><div class="shop-shell home-delivery-grid"><figure>${localPicture("/assets/discreet-delivery.webp", { alt: "Diskré, nøytral pakke klar for levering", width: 1600, height: 1200, sizes: "(max-width: 860px) calc(100vw - 28px), 560px" })}</figure><div><p class="shop-kicker">Fra lageret til døren</p><h2>Diskré hele veien.</h2><p>Ordren pakkes nøytralt og sendes fra norsk lager. Avsenderen står som BM AS, uten produktnavn på utsiden.</p><a class="store-button" href="/levering/">Slik leverer vi</a></div></div></section>
-<section class="shop-section home-editorial"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">BudMates guider</p><h2>Lær mer.</h2></div><a class="shop-text-link" href="/artikler/">Alle artikler →</a></div><div class="home-editorial-grid"><a href="/artikler/den-ultimate-guiden-til-rullepapir/"><span>01 / RULLEPAPIR</span><h3>Den ultimate guiden til papes.</h3><p>Merker, størrelser, papirtype og filter – forklart fra start.</p><strong>Les guiden →</strong></a><a href="/artikler/bong-guide-komplett/"><span>02 / BONG</span><h3>Den komplette bong-guiden.</h3><p>Materialer, størrelser, filtrering og hva du bør se etter.</p><strong>Les guiden →</strong></a><a href="/artikler/vaporizer-guide-komplett/"><span>03 / VAPORIZER</span><h3>Guide til vaporizere.</h3><p>Hvordan ulike modeller fungerer, vedlikehold og nyttige valg.</p><strong>Les guiden →</strong></a></div></div></section>
+  return `<section class="home-delivery"><div class="shop-shell home-delivery-grid"><figure>${localPicture("/assets/discreet-delivery.webp", { alt: "Diskré, nøytral pakke klar for levering", width: 1600, height: 1200, sizes: "(max-width: 860px) calc(100vw - 28px), 560px" })}</figure><div><p class="shop-kicker">Fra lageret til døren</p><h2>Diskré hele veien.</h2><p>Ordren pakkes nøytralt og sendes fra norsk lager. Avsenderen står som BM AS, uten produktnavn på utsiden.</p><a class="store-button" href="/pages/frakt">Slik leverer vi</a></div></div></section>
+<section class="shop-section home-editorial"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">BudMates guider</p><h2>Lær mer.</h2></div><a class="shop-text-link" href="/blogs/news">Alle artikler →</a></div><div class="home-editorial-grid"><a href="/blogs/news/den-ultimate-guiden-til-rullepapir"><span>01 / RULLEPAPIR</span><h3>Den ultimate guiden til papes.</h3><p>Merker, størrelser, papirtype og filter – forklart fra start.</p><strong>Les guiden →</strong></a><a href="/blogs/news/bong-guide-komplett"><span>02 / BONG</span><h3>Den komplette bong-guiden.</h3><p>Materialer, størrelser, filtrering og hva du bør se etter.</p><strong>Les guiden →</strong></a><a href="/blogs/news/vaporizer-guide-komplett"><span>03 / VAPORIZER</span><h3>Guide til vaporizere.</h3><p>Hvordan ulike modeller fungerer, vedlikehold og nyttige valg.</p><strong>Les guiden →</strong></a></div></div></section>
 <section class="service-band" aria-label="Kjøpsfordeler"><ul class="shop-shell"><li><strong>Fri frakt</strong><span>På ordre over 850 kr</span></li><li><strong>Diskré levering</strong><span>BM AS som avsender</span></li><li><strong>Norsk lager</strong><span>Sendes fra Vadsø</span></li><li><strong>Spør oss</strong><span>post@budmates.no</span></li></ul></section>`;
 }
 
@@ -416,7 +427,7 @@ export function renderHomePage(store) {
   const more = (store?.products || []).filter((product) => !shown.has(product.handle) && siteImage(product)).slice(0, 8);
   const heroCards = hero.map((product, index) => {
     const image = siteImage(product);
-    return `<a class="hero-product hero-product--${index + 1}" href="/products/${escapeHtml(product.handle)}/"><span>${index === 0 ? "Mest valgt" : "Fra utvalget"}</span>${image ? responsiveImage(image, { alt: image.alt || product.title, preferredWidth: 480, sizes: HERO_IMAGE_SIZES, fetchPriority: index === 0 ? "high" : undefined }) : ""}<strong>${escapeHtml(product.title)}</strong></a>`;
+    return `<a class="hero-product hero-product--${index + 1}" href="/products/${escapeHtml(product.handle)}"><span>${index === 0 ? "Mest valgt" : "Fra utvalget"}</span>${image ? responsiveImage(image, { alt: image.alt || product.title, preferredWidth: 480, sizes: HERO_IMAGE_SIZES, fetchPriority: index === 0 ? "high" : undefined }) : ""}<strong>${escapeHtml(product.title)}</strong></a>`;
   }).join("");
   const categoryCards = features.map((collection) => {
     const image = collectionImage(collection, store);
@@ -426,13 +437,13 @@ export function renderHomePage(store) {
       sizes: CATEGORY_IMAGE_SIZES,
       loading: "lazy",
     });
-    return `<a class="category-feature" href="/collections/${escapeHtml(collection.handle)}/">${media}<span>${escapeHtml(collection.title)}</span><small>${collection.products.length} produkter</small></a>`;
+    return `<a class="category-feature" href="/collections/${escapeHtml(collection.handle)}">${media}<span>${escapeHtml(collection.title)}</span><small>${collection.products.length} produkter</small></a>`;
   }).join("");
-  const body = `<section class="store-hero${hero.length ? "" : " store-hero--plain"}" data-storefront="home"><div class="shop-shell store-hero-grid"><div class="store-hero-copy"><p class="shop-kicker">Diskré pakking · Lager i Norge</p><h1>Norges beste<br><span>headshop.</span></h1><p>Rullepapir, bonger, grindere, vaporizere og tilbehør – samlet på ett ryddigere sted.</p><div class="store-actions"><a class="store-button" href="/collections/all/">Se alle produkter</a><a class="store-button store-button--ghost" href="/collections/bestselgere/">Bestselgere</a></div></div>${hero.length ? `<div class="hero-product-stack">${heroCards}</div>` : ""}</div></section>
-${categoryCards ? `<section class="shop-section shop-section--light"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">Populære kategorier</p><h2>Finn din greie.</h2></div><a class="shop-text-link" href="/collections/all/">Se hele utvalget →</a></div><div class="category-feature-grid">${categoryCards}</div></div></section>` : ""}
-${bestsellers.length ? `<section class="shop-section"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">Det kundene velger igjen</p><h2>Bestselgere.</h2></div><a class="shop-text-link" href="/collections/bestselgere/">Se alle →</a></div>${productGrid(bestsellers.slice(0, 8), "Populær")}</div></section>` : ""}
-${gpen.length ? `<section class="brand-feature"><div class="shop-shell brand-feature-grid"><div><p class="shop-kicker">Offisiell distributør</p><h2>Stündenglass<br>& G Pen.</h2><p>Gravity infusers, vaporizere og originalt tilbehør – tilgjengelig fra lager i Norge.</p><a class="store-button" href="/collections/gpen-stundenglass/">Se kolleksjonen</a></div><div class="brand-feature-products">${gpen.slice(0, 2).map((product) => productCard(product)).join("")}</div></div></section>` : ""}
-${more.length ? `<section class="shop-section shop-section--light"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">Fra utvalget</p><h2>Mer å se.</h2></div><a class="shop-text-link" href="/collections/all/">Se alt →</a></div>${productGrid(more)}</div></section>` : ""}
+  const body = `<section class="store-hero${hero.length ? "" : " store-hero--plain"}" data-storefront="home"><div class="shop-shell store-hero-grid"><div class="store-hero-copy"><p class="shop-kicker">Diskré pakking · Lager i Norge</p><h1>Norges beste<br><span>headshop.</span></h1><p>Rullepapir, bonger, grindere, vaporizere og tilbehør – samlet på ett ryddigere sted.</p><div class="store-actions"><a class="store-button" href="/collections/all">Se alle produkter</a><a class="store-button store-button--ghost" href="/collections/bestselgere">Bestselgere</a></div></div>${hero.length ? `<div class="hero-product-stack">${heroCards}</div>` : ""}</div></section>
+${categoryCards ? `<section class="shop-section shop-section--light"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">Populære kategorier</p><h2>Finn din greie.</h2></div><a class="shop-text-link" href="/collections/all">Se hele utvalget →</a></div><div class="category-feature-grid">${categoryCards}</div></div></section>` : ""}
+${bestsellers.length ? `<section class="shop-section"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">Det kundene velger igjen</p><h2>Bestselgere.</h2></div><a class="shop-text-link" href="/collections/bestselgere">Se alle →</a></div>${productGrid(bestsellers.slice(0, 8), "Populær")}</div></section>` : ""}
+${gpen.length ? `<section class="brand-feature"><div class="shop-shell brand-feature-grid"><div><p class="shop-kicker">Offisiell distributør</p><h2>Stündenglass<br>& G Pen.</h2><p>Gravity infusers, vaporizere og originalt tilbehør – tilgjengelig fra lager i Norge.</p><a class="store-button" href="/collections/gpen-stundenglass">Se kolleksjonen</a></div><div class="brand-feature-products">${gpen.slice(0, 2).map((product) => productCard(product)).join("")}</div></div></section>` : ""}
+${more.length ? `<section class="shop-section shop-section--light"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">Fra utvalget</p><h2>Mer å se.</h2></div><a class="shop-text-link" href="/collections/all">Se alt →</a></div>${productGrid(more)}</div></section>` : ""}
 ${editorialHome()}`;
   return documentHtml({
     title: "BudMates — Norges headshop på nett",
@@ -459,11 +470,11 @@ export function renderCollectionPage(store, handle) {
   const active = isAll ? "" : (NAV_ITEMS.find((item) => item.handle === handle)?.handle || "");
   const image = isAll ? "" : collectionImage(collection, store);
   const trail = breadcrumbs([{ href: "/", label: "Hjem" }, { label: title }]);
-  const body = `<header class="collection-hero" data-storefront="collection"><div class="shop-shell">${trail}<p class="shop-kicker">${escapeHtml(countLabel)}</p><h1>${escapeHtml(isAll ? "Alle produkter." : title)}</h1><p>${escapeHtml(description)}</p></div></header><section class="shop-section shop-section--light" aria-labelledby="collection-products"><div class="shop-shell"><h2 class="sr-only" id="collection-products">Produkter i ${escapeHtml(title)}</h2><div class="catalog-toolbar"><strong>${escapeHtml(countLabel)}</strong><a href="/sok/">${isAll ? "Søk i utvalget" : "Søk i hele butikken"}</a></div>${productGrid(members)}</div></section>`;
+  const body = `<header class="collection-hero" data-storefront="collection"><div class="shop-shell">${trail}<p class="shop-kicker">${escapeHtml(countLabel)}</p><h1>${escapeHtml(isAll ? "Alle produkter." : title)}</h1><p>${escapeHtml(description)}</p></div></header><section class="shop-section shop-section--light" aria-labelledby="collection-products"><div class="shop-shell"><h2 class="sr-only" id="collection-products">Produkter i ${escapeHtml(title)}</h2><div class="catalog-toolbar"><strong>${escapeHtml(countLabel)}</strong><a href="/search">${isAll ? "Søk i utvalget" : "Søk i hele butikken"}</a></div>${productGrid(members)}</div></section>`;
   return documentHtml({
     title: `${title} | BudMates`,
     description: metaDescription(collection?.seoDescription || description, description),
-    canonicalPath: `/collections/${handle}/`,
+    canonicalPath: `/collections/${handle}`,
     active,
     body,
     store,
@@ -508,20 +519,20 @@ export function renderProductPage(store, product, availability = {}) {
       priceCurrency: "NOK",
       price: String(variant.price),
       availability: availability[variant.id] === true ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-      url: `${SITE_ORIGIN}/products/${product.handle}/`,
+      url: `${SITE_ORIGIN}/products/${product.handle}`,
     })),
   });
   const descriptionHtml = formatDescription(product.description) || `<p>${escapeHtml(product.seoDescription || "")}</p>`;
   const trail = breadcrumbs([
     { href: "/", label: "Hjem" },
-    ...(crumbCollection ? [{ href: `/collections/${crumbCollection.handle}/`, label: crumbCollection.title }] : []),
+    ...(crumbCollection ? [{ href: `/collections/${crumbCollection.handle}`, label: crumbCollection.title }] : []),
     { label: product.title },
   ]);
   const body = `<section class="product-page shop-section--light" data-storefront="product"><div class="shop-shell">${trail}<div class="product-layout">${gallery}<div class="product-info"><p class="product-vendor">${escapeHtml(product.brand || "BudMates")}</p><h1>${escapeHtml(product.title)}</h1><div class="product-price" data-product-price aria-live="polite">${priceRange(variants)}</div><p class="product-shipping-note">Avgifter inkludert. Frakt beregnes i kassen.</p><form class="product-purchase" data-product-form>${variantSelect}<div class="product-buy-row"><label>Antall<span class="quantity-control"><button type="button" data-quantity-minus aria-label="Reduser antall">−</button><input type="number" value="1" min="1" max="20" inputmode="numeric" aria-label="Antall" data-quantity><button type="button" data-quantity-plus aria-label="Øk antall">+</button></span></label><button class="store-button store-button--buy" type="button" data-add-to-cart data-id="${escapeHtml(product.id)}" data-title="${escapeHtml(product.title)}" data-price="${escapeHtml(firstVariant?.price ?? "")}" data-image="${escapeHtml(imageUrl(image, 480))}" data-handle="${escapeHtml(product.handle)}" data-variant="${escapeHtml(firstVariant?.id || "")}" data-site-available="${available}"${available ? "" : " disabled"}>${available ? "Legg i handlekurven" : "Utsolgt"}</button></div></form><ul class="product-trust"><li>✓ Lager i Norge</li><li>✓ Diskré pakking</li><li>✓ Fri frakt over 850 kr</li></ul><section class="product-description" aria-label="Produktinformasjon">${descriptionHtml}</section></div></div></div></section>${related.length ? `<section class="shop-section"><div class="shop-shell"><div class="shop-section-head"><div><p class="shop-kicker">Andre så også på</p><h2>Mer i samme kategori.</h2></div></div>${productGrid(related)}</div></section>` : ""}`;
   return documentHtml({
     title: `${product.seoTitle || product.title} | BudMates`.replace(" | BudMates | BudMates", " | BudMates"),
     description: metaDescription(product.seoDescription || product.description, product.title),
-    canonicalPath: `/products/${product.handle}/`,
+    canonicalPath: `/products/${product.handle}`,
     active,
     body,
     store,
@@ -565,9 +576,9 @@ export function renderSitemap(store) {
   const products = store?.products || [];
   const paths = [
     ...EDITORIAL_PATHS,
-    "/collections/all/",
-    ...collections.map((collection) => `/collections/${collection.handle}/`),
-    ...products.map((product) => `/products/${product.handle}/`),
+    "/collections/all",
+    ...collections.map((collection) => `/collections/${collection.handle}`),
+    ...products.map((product) => `/products/${product.handle}`),
   ];
   const unique = [...new Set(paths)];
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${unique.map((path) => `  <url><loc>${SITE_ORIGIN}${path}</loc></url>`).join("\n")}\n</urlset>\n`;

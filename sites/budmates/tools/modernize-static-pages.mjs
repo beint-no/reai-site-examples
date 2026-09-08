@@ -7,17 +7,17 @@ const publicRoot = path.resolve(import.meta.dirname, "..", "public");
 const legalFooter = renderCompactLegalFooter({
   owner: "BudMates AS",
   locale: "nb-NO",
-  refundHref: "/vilkar/#angrerett",
-  privacyHref: "/personvern/",
-  termsHref: "/vilkar/",
+  refundHref: "/policies/refund-policy",
+  privacyHref: "/policies/privacy-policy",
+  termsHref: "/pages/salgsvilkar",
   className: "shop-footer-bottom shop-shell",
 });
 const legacyLegalFooter = renderCompactLegalFooter({
   owner: "BudMates AS",
   locale: "nb-NO",
-  refundHref: "/vilkar/#angrerett",
-  privacyHref: "/personvern/",
-  termsHref: "/vilkar/",
+  refundHref: "/policies/refund-policy",
+  privacyHref: "/policies/privacy-policy",
+  termsHref: "/pages/salgsvilkar",
   className: "footer-bottom shell",
 });
 const articleDimensions = new Map([
@@ -54,18 +54,18 @@ function modernize(html) {
     .replace('<meta name="viewport" content="width=device-width,initial-scale=1">', '<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark light">')
     .replace('<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">', '<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="preconnect" href="https://app.reai.no" crossorigin>')
     .replace(/<link rel="stylesheet" href="\/assets\/store\.css(?:\?v=\d+)?">/g, '<link rel="stylesheet" href="/assets/store.css?v=2">')
-    .replace(/<script(?: type="module")? src="\/assets\/store\.js\?v=\d+"(?: defer)?><\/script>/g, '<script type="module" src="/assets/store.js?v=9"></script>')
+    .replace(/<script(?: type="module")? src="\/assets\/store\.js\?v=\d+"(?: defer)?><\/script>/g, '<script type="module" src="/assets/store.js?v=10"></script>')
     .replace('<div class="shop-announcement"><div class="shop-shell"><span>Betal med Vipps</span><span>Fri frakt over 850 kr</span><span>69 kr under 850 kr</span><span>Diskré pakking</span></div></div>', '<aside class="shop-announcement" aria-label="Kjøpsfordeler"><ul class="shop-shell"><li>Betal med Vipps</li><li>Fri frakt over 850 kr</li><li>69 kr under 850 kr</li><li>Diskré pakking</li></ul></aside>')
     .replaceAll('<img src="/assets/brand/budmates-logo.png" alt="BudMates">', '<img src="/assets/brand/budmates-logo.png" alt="BudMates" width="200" height="64" decoding="async">')
     .replace('<button class="shop-menu-toggle" type="button" aria-label="Åpne meny" aria-expanded="false" data-nav-toggle>', '<button class="shop-menu-toggle" type="button" aria-label="Åpne meny" aria-expanded="false" aria-controls="shop-navigation" data-nav-toggle>')
     .replace('<nav class="shop-nav" aria-label="Hovedmeny" data-nav-links>', '<nav class="shop-nav" id="shop-navigation" aria-label="Hovedmeny" data-nav-links>')
-    .replaceAll('<a href="/faq/">Vanlige spørsmål</a></div><div><h2>Vilkår</h2>', '<a href="/faq/">Vanlige spørsmål</a><a href="https://www.instagram.com/budmates.no" rel="external">Instagram</a><a href="https://www.snapchat.com/add/budmates.no" rel="external">Snapchat</a></div><div><h2>Vilkår</h2>')
-    .replaceAll('<div><h2>Vilkår</h2><a href="/vilkar/">Salgsvilkår</a><a href="/personvern/">Personvern</a><a href="/artikler/">Artikler</a></div>', '')
-    .replaceAll('<li><a href="/personvern/">Personvern</a></li>', '')
+    .replaceAll('<a href="/pages/faq">Vanlige spørsmål</a></div><div><h2>Vilkår</h2>', '<a href="/pages/faq">Vanlige spørsmål</a><a href="https://www.instagram.com/budmates.no" rel="external">Instagram</a><a href="https://www.snapchat.com/add/budmates.no" rel="external">Snapchat</a></div><div><h2>Vilkår</h2>')
+    .replaceAll('<div><h2>Vilkår</h2><a href="/pages/salgsvilkar">Salgsvilkår</a><a href="/policies/privacy-policy">Personvern</a><a href="/blogs/news">Artikler</a></div>', '')
+    .replaceAll('<li><a href="/policies/privacy-policy">Personvern</a></li>', '')
     .replace(/<div class="shop-footer-bottom shop-shell"><span>© \d{4} BudMates AS · Org\.nr\. 929 151 291<\/span><div><a href="https:\/\/www\.instagram\.com\/budmates\.no">Instagram<\/a><a href="https:\/\/www\.snapchat\.com\/add\/budmates\.no">Snapchat<\/a><\/div><\/div>/g, legalFooter)
     .replace('<div class="footer-bottom shell"><span>© <span data-year></span> BudMates AS · Org.nr. 929 151 291</span><span>Kun for personer over 18 år</span></div>', legacyLegalFooter)
     .replace('<h2>9. Angrerett</h2>', '<h2 id="angrerett">9. Angrerett</h2>')
-    .replace(/<nav class="shop-breadcrumbs"><a href="\/">Hjem<\/a><span>\/<\/span><a href="\/artikler\/">Artikler<\/a><span>\/<\/span><span>([^<]+)<\/span><\/nav>/g, '<nav class="shop-breadcrumbs" aria-label="Brødsmulesti"><ol><li><a href="/">Hjem</a></li><li><a href="/artikler/">Artikler</a></li><li><span aria-current="page">$1</span></li></ol></nav>')
+    .replace(/<nav class="shop-breadcrumbs"><a href="\/">Hjem<\/a><span>\/<\/span><a href="\/artikler\/">Artikler<\/a><span>\/<\/span><span>([^<]+)<\/span><\/nav>/g, '<nav class="shop-breadcrumbs" aria-label="Brødsmulesti"><ol><li><a href="/">Hjem</a></li><li><a href="/blogs/news">Artikler</a></li><li><span aria-current="page">$1</span></li></ol></nav>')
     .replace(/<nav class="shop-breadcrumbs"><a href="\/">Hjem<\/a><span>\/<\/span><span>([^<]+)<\/span><\/nav>/g, '<nav class="shop-breadcrumbs" aria-label="Brødsmulesti"><ol><li><a href="/">Hjem</a></li><li><span aria-current="page">$1</span></li></ol></nav>');
 
   if (!result.includes('class="noscript-banner"')) {

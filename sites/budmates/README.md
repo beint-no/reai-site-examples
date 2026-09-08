@@ -14,8 +14,12 @@ Set `REAI_SITE_TOKEN` in the ignored `.dev.vars` file to a preview Site credenti
 The Worker provides these storefront routes:
 
 - `GET /` — homepage from published collections (`bestselgere` and similar)
-- `GET /products/{handle}/` — product page from `GET /site/v1/commerce/products/{handle}`
-- `GET /collections/{handle}/` and `/collections/all/`
+- `GET /products/{handle}` — product page from `GET /site/v1/commerce/products/{handle}`
+- `GET /collections/{handle}` and `/collections/all`
+- `GET /cart` and `/search?q={query}`
+- `GET /pages/om-oss`, `/pages/kontakt-oss`, `/pages/faq`, `/pages/frakt`, `/pages/salgsvilkar`
+- `GET /policies/privacy-policy` and `/policies/refund-policy`
+- `GET /blogs/news` and `/blogs/news/{handle}`
 - `GET /sitemap.xml` — published catalog plus remaining static routes
 - `GET /reai/site`
 - `GET /reai/catalog`
@@ -35,6 +39,14 @@ Product images are AVIF and come from the catalog image `url` plus its 320/480/6
 
 Leave `https://budmates.no` on Shopify until the client cutover.
 
+## URL compatibility
+
+Public paths match the original Shopify site, without trailing slashes. Static files use Cloudflare's `drop-trailing-slash` HTML handling. `routes.mjs` redirects old Worker bookmarks (`/handlekurv/`, `/sok/`, `/artikler/`, `/om/`, etc.) permanently to their canonical equivalents while preserving query strings. Collection-scoped product links redirect to `/products/{handle}`. Links, canonical metadata, structured data and the dynamic sitemap use the same paths.
+
+The original empty blog and `/pages/blogg-posts` redirect to `/blogs/news`. English `/en/...` links redirect to the Norwegian equivalent; the Worker does not yet offer translated storefront content. `/account/login` explains guest checkout and provides order support; customer authentication and Shopify account history are not implemented. The original privacy request page URLs provide email contact instead of embedding the Shopify privacy app.
+
+The September 8, 2026 comparison of both public sitemaps found all 25 articles and all 94 ReAI-published product handles aligned. Nine additional Shopify product handles return 404 from the ReAI product API. Those require publication in ReAI; routing must not replace them with a committed catalog or a Shopify API fallback. Empty `frontpage` and `ligher` collections remain excluded from navigation and the sitemap.
+
 ## Checks and deployment
 
 From the repository root:
@@ -45,6 +57,8 @@ From the repository root:
 ```
 
 The deployment is local-only and publishes to `budmates.respiro.workers.dev`.
+
+When authenticated through `npx wrangler login`, run the checks above, then `npx wrangler deploy --cwd sites/budmates` from the repository root. The repository deploy wrapper requires API-token environment variables and does not use the OAuth-only workflow.
 
 Before the first deploy, configure the secret for the Worker:
 
