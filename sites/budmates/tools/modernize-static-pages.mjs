@@ -53,7 +53,7 @@ function modernize(html) {
     .replace(/<link rel="preconnect" href="https:\/\/app\.reai\.no" crossorigin>/g, "")
     .replace('<meta name="viewport" content="width=device-width,initial-scale=1">', '<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark light">')
     .replace('<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">', '<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="preconnect" href="https://app.reai.no" crossorigin>')
-    .replace(/<link rel="stylesheet" href="\/assets\/store\.css(?:\?v=\d+)?">/g, '<link rel="stylesheet" href="/assets/store.css?v=2">')
+    .replace(/<link rel="stylesheet" href="\/assets\/store\.css(?:\?v=\d+)?">/g, '<link rel="stylesheet" href="/assets/store.css?v=3">')
     .replace(/<script(?: type="module")? src="\/assets\/store\.js\?v=\d+"(?: defer)?><\/script>/g, '<script type="module" src="/assets/store.js?v=10"></script>')
     .replace('<div class="shop-announcement"><div class="shop-shell"><span>Betal med Vipps</span><span>Fri frakt over 850 kr</span><span>69 kr under 850 kr</span><span>Diskré pakking</span></div></div>', '<aside class="shop-announcement" aria-label="Kjøpsfordeler"><ul class="shop-shell"><li>Betal med Vipps</li><li>Fri frakt over 850 kr</li><li>69 kr under 850 kr</li><li>Diskré pakking</li></ul></aside>')
     .replaceAll('<img src="/assets/brand/budmates-logo.png" alt="BudMates">', '<img src="/assets/brand/budmates-logo.png" alt="BudMates" width="200" height="64" decoding="async">')

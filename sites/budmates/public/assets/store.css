@@ -224,7 +224,7 @@ button, a { touch-action: manipulation; }
 .cart-item h2 a { color: inherit; text-decoration: none; }
 .cart-item p { margin: 0; color: #6c6e67; font-size: .8rem; }
 .cart-item-actions { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
-.cart-item-actions button { width: 44px; height: 44px; border: 1px solid #cfd0ca; border-radius: 50%; background: #fff; cursor: pointer; }
+.cart-item-actions button { width: 44px; height: 44px; border: 1px solid #cfd0ca; border-radius: 50%; color: var(--shop-ink); background: #fff; cursor: pointer; }
 .cart-item-actions button:last-child { width: auto; margin-left: 8px; padding-inline: 10px; border-radius: 999px; color: #8b3027; }
 .cart-item-price { font-weight: 850; white-space: nowrap; }
 .cart-summary { position: sticky; top: 145px; padding: 28px; border-radius: 16px; color: #fff; background: var(--shop-black); }
