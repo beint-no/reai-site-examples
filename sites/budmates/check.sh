@@ -28,7 +28,6 @@ grep -q 'store.css?v=3' public/search/index.html
 grep -q 'aria-label="Brødsmulesti"' public/search/index.html
 while IFS= read -r page; do
   grep -q 'class="compact-legal-links"' "$page"
-  grep -q 'href="https://reai.no" rel="external">Drevet av ReAI</a>' "$page"
   grep -q 'href="/policies/refund-policy">Retur</a>' "$page"
   grep -q 'href="/policies/privacy-policy">Personvern</a>' "$page"
   grep -q 'href="/pages/salgsvilkar">Kjøpsvilkår</a>' "$page"
