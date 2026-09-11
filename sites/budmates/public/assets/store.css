@@ -356,6 +356,7 @@ button, a { touch-action: manipulation; }
   .service-band .shop-shell > li { padding: 23px 18px; }
   .collection-hero .shop-shell { padding-block: 75px 65px; }
   .collection-hero h1, .simple-hero h1 { font-size: clamp(3.4rem, 17vw, 5rem); }
+  .cart-hero h1 { font-size: clamp(2rem, 10vw, 3rem); line-height: 1; }
   .product-page { padding-top: 28px; }
   .product-page .shop-breadcrumbs { margin-bottom: 25px; }
   .product-info h1 { font-size: 2.7rem; }
