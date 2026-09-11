@@ -1,7 +1,7 @@
 import { canonicalPath } from "./routes.mjs";
 import { renderCompactLegalFooter } from "../../packages/reai-cloudflare-storefront/footer.mjs";
 
-export const SITE_ORIGIN = "https://budmates.respiro.workers.dev";
+export const SITE_ORIGIN = "https://budmates.no";
 export const HANDLE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const STORE_SCRIPT = "/assets/store.js?v=10";
 export const STORE_STYLE = "/assets/store.css?v=3";

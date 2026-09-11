@@ -28,7 +28,7 @@ BudMates is a Norwegian online retailer of age-restricted smoking accessories an
 - Build the main nav from a curated subset of published collections. Do not use empty `frontpage` or the typo collection `ligher`.
 - Cart state lives in browser storage. Checkout posts opaque variant IDs and quantities to `/reai/checkout/start`, then redirects to ReAI hosted checkout. After a successful payment, ReAI returns the shopper to `/bestilling/fullfort/` on the Worker origin; that page clears `budmates-cart-v3`. Failed payments must stay on `app.reai.no`. Do not treat `/cart` as a success return or clear the cart there.
 - The contact form opens the visitor's email application; it does not collect data.
-- `https://budmates.respiro.workers.dev` uses a Site-scoped ReAI production credential. Keep Site `activeDomain` and `previewDomain` on that host. Do not cut over `budmates.no` until the client is ready.
+- `https://budmates.respiro.workers.dev` uses a Site-scoped ReAI production credential. The canonical live domain is `https://budmates.no`; `www.budmates.no` redirects to it. Keep the workers.dev host available for preview.
 
 ## Catalog source
 

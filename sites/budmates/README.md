@@ -33,11 +33,11 @@ Checkout validates public variant UUIDs and quantities at the Worker before ReAI
 
 ## Production checkout
 
-`https://budmates.respiro.workers.dev` uses a Site-scoped production credential with scopes `site:read`, `commerce:catalog:read`, `commerce:availability:read` and `commerce:checkout:create`. The Site `activeDomain` and `previewDomain` must be `budmates.respiro.workers.dev` so checkout return URLs are accepted.
+`https://budmates.respiro.workers.dev` uses a Site-scoped production credential with scopes `site:read`, `commerce:catalog:read`, `commerce:availability:read` and `commerce:checkout:create`. Set Site `activeDomain` to `budmates.no` and `previewDomain` to `budmates.respiro.workers.dev` so checkout return URLs are accepted on both hosts.
 
 Product images are AVIF and come from the catalog image `url` plus its 320/480/640/960/1280/1600/1920 `renditions`. Server-rendered category features, cards and galleries emit `srcset`, `sizes` and intrinsic dimensions, so the browser downloads the smallest useful immutable rendition without layout shifts. The Worker CSP allows `https://app.reai.no` in `img-src`. Shipping is `Standard` at 69 NOK, free from 850 NOK; that line stays as template copy until Site API exposes shipping methods.
 
-Leave `https://budmates.no` on Shopify until the client cutover.
+The canonical production hostname is `https://budmates.no`; `www.budmates.no` redirects to it. The workers.dev hostname remains available for preview.
 
 ## URL compatibility
 

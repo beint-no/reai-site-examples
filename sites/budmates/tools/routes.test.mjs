@@ -69,7 +69,7 @@ test("all static page links and metadata use canonical paths", async () => {
     for (const match of html.matchAll(/(?:href|action)="(\/[^"#?]*)(?:[?#][^"]*)?"/g)) {
       assert.equal(canonicalPath(match[1]), match[1], `${entry}: ${match[1]}`);
     }
-    assert.doesNotMatch(html, /https:\/\/budmates\.no\/(?:blogs|products|collections|pages|policies)\//, entry);
+    assert.doesNotMatch(html, /https:\/\/budmates\.respiro\.workers\.dev\/(?:blogs|products|collections|pages|policies)\//, entry);
   }
 });
 
