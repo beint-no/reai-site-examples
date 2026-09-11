@@ -33,13 +33,16 @@ export function canonicalPath(pathname) {
 }
 
 export function redirectStorefrontRequest({ request, url }) {
-  if (!["GET", "HEAD"].includes(request.method) || url.pathname.startsWith("/reai/")) return null;
-  const target = canonicalPath(url.pathname);
-  if (target === url.pathname) return null;
+  const hostname = url.hostname === "www.budmates.no" ? "budmates.no" : url.hostname;
+  const target = ["GET", "HEAD"].includes(request.method) && !url.pathname.startsWith("/reai/")
+    ? canonicalPath(url.pathname)
+    : url.pathname;
+  if (target === url.pathname && hostname === url.hostname) return null;
   const destination = new URL(url.href);
+  destination.hostname = hostname;
   destination.pathname = target;
   return new Response(null, {
-    status: 301,
+    status: hostname === url.hostname ? 301 : 308,
     headers: { Location: destination.href, "Cache-Control": "public, max-age=3600" },
   });
 }

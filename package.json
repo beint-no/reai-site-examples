@@ -24,7 +24,7 @@
   "allowScripts": {
     "esbuild@0.28.1": true,
     "fsevents@2.3.3": true,
-    "workerd@1.20260828.1": true
+    "workerd@1.20260910.1": true
   },
   "scripts": {
     "check": "npm run typecheck && npm run check:client-boundary && npm test && ./site.sh check all && npm run check:workers && npm run check:contract && npm run check:dependencies",
@@ -43,9 +43,9 @@
     "baseline 2025 with downstream"
   ],
   "devDependencies": {
-    "@cloudflare/workers-types": "5.20260829.1",
+    "@cloudflare/workers-types": "5.20260910.1",
     "openapi-typescript": "7.13.0",
     "typescript": "5.9.3",
-    "wrangler": "4.127.1"
+    "wrangler": "4.131.0"
   }
 }
