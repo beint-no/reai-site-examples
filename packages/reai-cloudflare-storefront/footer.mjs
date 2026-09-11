@@ -47,6 +47,7 @@ export function renderCompactLegalFooter({
   year = new Date().getFullYear(),
   className = "",
   labels = {},
+  showAttribution = true,
 } = {}) {
   const copy = Object.fromEntries(Object.entries({ ...COPY[language(locale)], ...labels })
     .map(([key, value]) => [key, requiredText(value, `labels.${key}`)]));
@@ -55,7 +56,7 @@ export function renderCompactLegalFooter({
   if (!Number.isInteger(numericYear) || numericYear < 2000) throw new TypeError("year must be a valid year");
   const copyright = `© ${numericYear} ${requiredText(owner, "owner")}`;
   const links = [
-    ["https://reai.no", copy.poweredBy, ' rel="external"'],
+    ...(showAttribution ? [["https://reai.no", copy.poweredBy, ' rel="external"']] : []),
     [requiredHref(refundHref, "refundHref"), copy.refund, ""],
     [requiredHref(privacyHref, "privacyHref"), copy.privacy, ""],
     [requiredHref(termsHref, "termsHref"), copy.terms, ""],
