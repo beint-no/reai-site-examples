@@ -351,3 +351,44 @@ test("strips the locale prefix for commerce matching and preserves it in redirec
   assert.equal(response.status, 301);
   assert.equal(response.headers.get("Location"), "https://shop.example/nb/products/example/?market=international");
 });
+
+
+test("a stalled catalog refresh does not block another request", { timeout: 2000 }, async (context) => {
+  const originalFetch = globalThis.fetch;
+  const originalCaches = globalThis.caches;
+  context.after(() => {
+    globalThis.fetch = originalFetch;
+    globalThis.caches = originalCaches;
+  });
+  globalThis.caches = { default: { async match() {}, async put() {} } };
+  const started = Promise.withResolvers();
+  const stalled = Promise.withResolvers();
+  let calls = 0;
+  const snapshot = () => new Response(JSON.stringify({ products: [], collections: [] }));
+  globalThis.fetch = async () => {
+    if (++calls === 1) {
+      started.resolve();
+      return stalled.promise;
+    }
+    return snapshot();
+  };
+  const worker = createReaiStorefrontWorker({ cacheKey: "independent-refresh", storefront, locale: "nb-NO", market: "default" });
+  const request = () => new Request("https://shop.example/reai/catalog");
+  const env = { REAI_SITE_TOKEN: "test-token" };
+  const first = worker.fetch(request(), env);
+  await started.promise;
+  try {
+    const second = await Promise.race([
+      worker.fetch(request(), env),
+      new Promise((_, reject) => {
+        const timer = setTimeout(() => reject(new Error("Second request blocked by first refresh")), 500);
+        context.after(() => clearTimeout(timer));
+      }),
+    ]);
+    assert.equal(second.status, 200);
+    assert.equal(calls, 2);
+  } finally {
+    stalled.resolve(snapshot());
+    await first;
+  }
+});

@@ -124,7 +124,6 @@ export function createReaiStorefrontWorker({
   const canonicalMarket = String(market).trim().toLowerCase();
   if (!MARKET_HANDLE.test(canonicalMarket)) throw new TypeError(`Invalid market: ${market}`);
   const storefrontCache = cacheRequest(`${cacheKey}:${canonicalMarket}:${canonicalLocale}`);
-  let storefrontRefreshPromise;
   const publicPath = (pathname) => {
     const value = pathname.startsWith("/") ? pathname : `/${pathname}`;
     return pathPrefix ? `${pathPrefix}${value === "/" ? "/" : value}` : value;
@@ -291,19 +290,15 @@ export function createReaiStorefrontWorker({
     } catch {}
   }
 
-  function refreshStorefront(env, cached) {
-    if (storefrontRefreshPromise) return storefrontRefreshPromise;
-    storefrontRefreshPromise = (async () => {
-      const refreshed = await buildStorefront(env, cached);
-      await writeCachedStorefront(refreshed.store, refreshed.etag);
-      return {
-        store: refreshed.store,
-        cacheStatus: refreshed.revalidated ? "REVALIDATED" : cached ? "REFRESH" : "MISS",
-      };
-    })().finally(() => {
-      storefrontRefreshPromise = null;
-    });
-    return storefrontRefreshPromise;
+  async function refreshStorefront(env, cached) {
+    // Worker I/O belongs to the invoking request. Sharing an in-flight promise
+    // can leave later visitors waiting on a canceled request's refresh forever.
+    const refreshed = await buildStorefront(env, cached);
+    await writeCachedStorefront(refreshed.store, refreshed.etag);
+    return {
+      store: refreshed.store,
+      cacheStatus: refreshed.revalidated ? "REVALIDATED" : cached ? "REFRESH" : "MISS",
+    };
   }
 
   async function getStorefront(env, executionContext) {
