@@ -6,6 +6,7 @@ import { renderCompactLegalFooter } from "../../../packages/reai-cloudflare-stor
 const publicRoot = path.resolve(import.meta.dirname, "..", "public");
 const legalFooter = renderCompactLegalFooter({
   owner: "BudMates AS",
+  labels: { poweredBy: "Bygd med ReAI" },
   locale: "nb-NO",
   refundHref: "/policies/refund-policy",
   privacyHref: "/policies/privacy-policy",
@@ -14,6 +15,7 @@ const legalFooter = renderCompactLegalFooter({
 });
 const legacyLegalFooter = renderCompactLegalFooter({
   owner: "BudMates AS",
+  labels: { poweredBy: "Bygd med ReAI" },
   locale: "nb-NO",
   refundHref: "/policies/refund-policy",
   privacyHref: "/policies/privacy-policy",
