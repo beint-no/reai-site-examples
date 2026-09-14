@@ -370,8 +370,7 @@ function chrome(store, active = "") {
   ].join("");
   const legalFooter = renderCompactLegalFooter({
     owner: "BudMates AS",
-    showAttribution: false,
-    labels: { label: "Juridisk informasjon" },
+    labels: { poweredBy: "Bygd med ReAI" },
     locale: "nb-NO",
     refundHref: "/policies/refund-policy",
     privacyHref: "/policies/privacy-policy",
