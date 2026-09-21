@@ -181,6 +181,15 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @description A cart line exceeding the currently purchasable quantity. Recheck on every checkout attempt. */
+        CheckoutStockIssue: {
+            /** Format: int32 */
+            maximumQuantity?: number;
+            /** Format: int32 */
+            requestedQuantity?: number;
+            /** Format: uuid */
+            variantId?: string;
+        };
         /**
          * @description ISO 4217 three-letter currency code.
          * @example NOK
@@ -194,6 +203,8 @@ export interface components {
         };
         /** @description RFC 9457 problem response */
         ProblemDetail: {
+            /** @example INSUFFICIENT_STOCK */
+            code?: string | null;
             /** @example variantId is not published on this site */
             detail?: string | null;
             /** @example variantId is not published on this site */
@@ -206,6 +217,7 @@ export interface components {
              * @example 400
              */
             status?: number;
+            stockIssues?: components["schemas"]["CheckoutStockIssue"][];
             /** @example Invalid request */
             title?: string | null;
             type?: string | null;
