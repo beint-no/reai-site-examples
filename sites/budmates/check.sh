@@ -22,9 +22,9 @@ grep -q 'data-search-results' public/search/index.html
 grep -q 'data-cart-root' public/cart/index.html
 grep -q "budmates-cart-v3" public/assets/store.js
 grep -q 'store.js?v=11' storefront.mjs
-grep -q 'store.css?v=4' storefront.mjs
+grep -q 'store.css?v=5' storefront.mjs
 grep -q 'store.js?v=11' public/search/index.html
-grep -q 'store.css?v=4' public/search/index.html
+grep -q 'store.css?v=5' public/search/index.html
 grep -q 'aria-label="Brødsmulesti"' public/search/index.html
 while IFS= read -r page; do
   grep -q 'class="compact-legal-links"' "$page"

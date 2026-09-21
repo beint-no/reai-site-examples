@@ -4,7 +4,7 @@ import { renderCompactLegalFooter } from "../../packages/reai-cloudflare-storefr
 export const SITE_ORIGIN = "https://budmates.no";
 export const HANDLE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const STORE_SCRIPT = "/assets/store.js?v=11";
-export const STORE_STYLE = "/assets/store.css?v=4";
+export const STORE_STYLE = "/assets/store.css?v=5";
 
 export const NAV_ITEMS = [
   { handle: "papes", label: "Papes" },
