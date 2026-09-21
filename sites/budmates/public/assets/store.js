@@ -305,6 +305,8 @@ addButton?.addEventListener('click', () => {
 const cartRoot = document.querySelector('[data-cart-root]');
 const checkoutButton = document.querySelector('[data-checkout-start]');
 const checkoutError = document.querySelector('[data-checkout-error]');
+let stockIssues = new Map();
+let checkoutPending = false;
 const checkoutLines = (items) => items
   .filter((item) => VARIANT_ID.test(item.variant || '') && item.quantity > 0)
   .map((item) => ({ variantId: item.variant, quantity: item.quantity }));
@@ -322,13 +324,14 @@ const syncCheckoutButton = (items) => {
 };
 
 async function startCheckout() {
-  if (!checkoutButton || checkoutButton.disabled) return;
+  if (!checkoutButton || checkoutButton.disabled || checkoutPending) return;
   const lines = checkoutLines(readCart());
   if (!lines.length) {
     setCheckoutError('Handlekurven er tom.');
     syncCheckoutButton([]);
     return;
   }
+  checkoutPending = true;
   checkoutButton.disabled = true;
   checkoutButton.setAttribute('aria-busy', 'true');
   checkoutButton.textContent = 'Sender til kassen …';
@@ -344,6 +347,17 @@ async function startCheckout() {
     });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
+      if (payload.code === 'INSUFFICIENT_STOCK' && Array.isArray(payload.stockIssues)) {
+        stockIssues = new Map(payload.stockIssues.filter((issue) =>
+          VARIANT_ID.test(issue.variantId || '') && Number.isInteger(issue.maximumQuantity)
+          && issue.maximumQuantity >= 0 && issue.maximumQuantity < issue.requestedQuantity,
+        ).map((issue) => [issue.variantId, issue]));
+        renderCart();
+        if (stockIssues.size) {
+          checkoutError?.focus();
+          return;
+        }
+      }
       throw new Error(payload.detail || payload.error || 'Kunne ikke starte kassen.');
     }
     if (!payload.checkoutUrl) throw new Error('Kunne ikke starte kassen.');
@@ -351,6 +365,8 @@ async function startCheckout() {
   } catch (error) {
     setCheckoutError(error.message || 'Kunne ikke starte kassen. Prøv igjen.');
     syncCheckoutButton(readCart());
+  } finally {
+    checkoutPending = false;
   }
 }
 
@@ -359,18 +375,28 @@ function renderCart() {
   const itemsNode = cartRoot.querySelector('[data-cart-items]');
   const subtotalNode = cartRoot.querySelector('[data-cart-subtotal]');
   const items = readCart();
-  setCheckoutError('');
+  stockIssues = new Map([...stockIssues].filter(([variantId, issue]) =>
+    items.some((item) => item.variant === variantId && item.quantity > issue.maximumQuantity),
+  ));
+  setCheckoutError(stockIssues.size ? 'Noen varer har ikke nok på lager. Endre antall eller fjern de merkede varene i handlekurven, og gå deretter til kassen igjen.' : '');
   syncCheckoutButton(items);
   if (!items.length) {
     itemsNode.innerHTML = '<div class="cart-empty"><h2>Handlekurven er tom.</h2><p>Finn noe du liker i hele utvalget.</p><a class="store-button" href="/collections/all">Se alle produkter</a></div>';
     subtotalNode.textContent = '0 kr';
     return;
   }
-  itemsNode.innerHTML = items.map((item, index) => `<article class="cart-item">
+  itemsNode.innerHTML = items.map((item, index) => {
+    const issue = stockIssues.get(item.variant);
+    const stockMessage = issue ? `<p class="cart-stock-error">${issue.maximumQuantity === 0
+      ? 'Utsolgt. Fjern varen for å fortsette.'
+      : `Du har valgt ${item.quantity} stk., men bare ${issue.maximumQuantity} stk. kan bestilles nå.`}</p>${issue.maximumQuantity > 0
+      ? `<button type="button" class="store-button" data-cart-action="adjust" data-index="${index}">Endre til ${issue.maximumQuantity} stk.</button>` : ''}` : '';
+    return `<article class="cart-item">
     ${item.image ? `<a href="/products/${item.handle}"><img src="${escapeHtml(item.image)}" alt="" width="120" height="120" loading="lazy" decoding="async"></a>` : ''}
-    <div><h2><a href="/products/${item.handle}">${escapeHtml(item.title)}</a></h2><p>${formatMoney(item.price)} per stykk</p><div class="cart-item-actions"><button type="button" data-cart-action="minus" data-index="${index}" aria-label="Reduser antall">−</button><strong>${item.quantity}</strong><button type="button" data-cart-action="plus" data-index="${index}" aria-label="Øk antall">+</button><button type="button" data-cart-action="remove" data-index="${index}">Fjern</button></div></div>
+    <div><h2><a href="/products/${item.handle}">${escapeHtml(item.title)}</a></h2><p>${formatMoney(item.price)} per stykk</p>${stockMessage}<div class="cart-item-actions"><button type="button" data-cart-action="minus" data-index="${index}" aria-label="Reduser antall">−</button><strong>${item.quantity}</strong><button type="button" data-cart-action="plus" data-index="${index}" aria-label="Øk antall">+</button><button type="button" data-cart-action="remove" data-index="${index}">Fjern</button></div></div>
     <div class="cart-item-price">${formatMoney(item.price * item.quantity)}</div>
-  </article>`).join('');
+  </article>`;
+  }).join('');
   subtotalNode.textContent = formatMoney(items.reduce((sum, item) => sum + item.price * item.quantity, 0));
 }
 
@@ -378,10 +404,15 @@ checkoutButton?.addEventListener('click', startCheckout);
 
 cartRoot?.addEventListener('click', (event) => {
   const button = event.target.closest('[data-cart-action]');
-  if (!button) return;
+  if (!button || checkoutPending) return;
   const items = readCart();
   const index = Number(button.dataset.index);
   if (!items[index]) return;
+  if (button.dataset.cartAction === 'adjust') {
+    const issue = stockIssues.get(items[index].variant);
+    if (!issue || issue.maximumQuantity <= 0) return;
+    items[index].quantity = issue.maximumQuantity;
+  }
   if (button.dataset.cartAction === 'plus') items[index].quantity = Math.min(20, items[index].quantity + 1);
   if (button.dataset.cartAction === 'minus') items[index].quantity = Math.max(1, items[index].quantity - 1);
   if (button.dataset.cartAction === 'remove') items.splice(index, 1);
