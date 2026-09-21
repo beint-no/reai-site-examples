@@ -395,4 +395,4 @@ button, a { touch-action: manipulation; }
 .compact-legal-links a:hover { color: var(--shop-green); }
 .compact-legal-links a + a::before { content: "·"; margin-inline: .55rem; color: currentcolor; opacity: .55; }
 
-.cart-item .cart-stock-error { color: #8b3027; margin-block: 10px; font-weight: 700; }
+.cart-item .cart-stock-error { color: #8b3027; margin-block: 10px 18px; font-weight: 700; }
