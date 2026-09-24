@@ -98,6 +98,7 @@ img { display: block; max-width: 100%; }
 .image-thumbnails button { width: 80px; aspect-ratio: 1; flex: 0 0 auto; padding: 3px; border: 1px solid var(--line); background: var(--soft); }
 .image-thumbnails button:hover, .image-thumbnails button:focus-visible, .image-thumbnails button[aria-pressed="true"] { border-color: var(--ink); }
 .image-thumbnails img { width: 100%; height: 100%; object-fit: contain; }
+.product-gallery [hidden] { display: none; }
 .product-details h1 { margin: 0; font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.08; letter-spacing: -.04em; }
 .product-price { margin: 21px 0 2px; font-size: 1.45rem; font-weight: 650; }
 .product-note { color: var(--muted); font-size: .82rem; }

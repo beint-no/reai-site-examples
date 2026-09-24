@@ -72,18 +72,19 @@ const toast = (message) => {
 const gallery = document.querySelector("[data-product-gallery]");
 const galleryImage = gallery?.querySelector("[data-main-product-image]");
 const thumbnails = [...(gallery?.querySelectorAll("[data-image-src]") || [])];
+let visibleThumbnails = thumbnails;
 let activeImage = 0;
 
 const showImage = (index) => {
-  if (!galleryImage || !thumbnails.length) return;
-  activeImage = (index + thumbnails.length) % thumbnails.length;
-  const thumbnail = thumbnails[activeImage];
+  if (!galleryImage || !visibleThumbnails.length) return;
+  activeImage = (index + visibleThumbnails.length) % visibleThumbnails.length;
+  const thumbnail = visibleThumbnails[activeImage];
   galleryImage.src = thumbnail.dataset.imageSrc;
   galleryImage.alt = thumbnail.dataset.imageAlt || "";
   galleryImage.removeAttribute("srcset");
   galleryImage.removeAttribute("sizes");
-  thumbnails.forEach((item, itemIndex) => item.setAttribute("aria-pressed", String(itemIndex === activeImage)));
-  gallery.querySelector("[data-gallery-count]").textContent = `${activeImage + 1} / ${thumbnails.length}`;
+  thumbnails.forEach((item) => item.setAttribute("aria-pressed", String(item === thumbnail)));
+  gallery.querySelector("[data-gallery-count]").textContent = `${activeImage + 1} / ${visibleThumbnails.length}`;
   const strip = gallery.querySelector(".image-thumbnails");
   const stripBounds = strip.getBoundingClientRect();
   const thumbnailBounds = thumbnail.getBoundingClientRect();
@@ -93,7 +94,7 @@ const showImage = (index) => {
   });
 };
 
-thumbnails.forEach((button, index) => button.addEventListener("click", () => showImage(index)));
+thumbnails.forEach((button) => button.addEventListener("click", () => showImage(visibleThumbnails.indexOf(button))));
 gallery?.querySelectorAll("[data-gallery-step]").forEach((button) => {
   button.addEventListener("click", () => showImage(activeImage + Number(button.dataset.galleryStep)));
 });
@@ -122,6 +123,8 @@ const addButton = document.querySelector("[data-add-to-cart]");
 const variantSelect = document.querySelector("[data-variant-select]");
 const optionSelects = [...document.querySelectorAll("[data-option-select]")];
 const productPrice = document.querySelector("[data-product-price]");
+const assignedImageIds = new Set([...(variantSelect?.options || [])].map((option) => option.dataset.imageId).filter(Boolean));
+let selectedVariantImageId;
 const syncVariant = () => {
   if (!addButton) return;
   const option = variantSelect?.selectedOptions[0];
@@ -133,6 +136,20 @@ const syncVariant = () => {
   addButton.disabled = !available || !VARIANT_ID.test(addButton.dataset.variant || "");
   addButton.textContent = !option && variantSelect ? "Kombinasjonen finnes ikke" : available ? "Legg i handlekurv" : "Ikke tilgjengelig";
   if (productPrice) productPrice.textContent = option || !variantSelect ? money(addButton.dataset.price) : "";
+  const imageId = option?.dataset.imageId || "";
+  if (imageId !== selectedVariantImageId && thumbnails.length) {
+    selectedVariantImageId = imageId;
+    visibleThumbnails = imageId
+      ? thumbnails.filter((thumbnail) => !assignedImageIds.has(thumbnail.dataset.imageId) || thumbnail.dataset.imageId === imageId)
+      : thumbnails;
+    thumbnails.forEach((thumbnail) => { thumbnail.hidden = !visibleThumbnails.includes(thumbnail); });
+    const selectedThumbnail = visibleThumbnails.find((thumbnail) => thumbnail.dataset.imageId === imageId);
+    showImage(selectedThumbnail ? visibleThumbnails.indexOf(selectedThumbnail) : 0);
+    addButton.dataset.image = (selectedThumbnail || visibleThumbnails[0]).dataset.imageCartSrc;
+    gallery.querySelectorAll("[data-gallery-step]").forEach((control) => { control.hidden = visibleThumbnails.length < 2; });
+    gallery.querySelector("[data-gallery-count]").hidden = visibleThumbnails.length < 2;
+    gallery.querySelector(".image-thumbnails").hidden = visibleThumbnails.length < 2;
+  }
 };
 variantSelect?.addEventListener("change", syncVariant);
 optionSelects.forEach((select) => select.addEventListener("change", () => {

@@ -27,9 +27,13 @@ const missingPaths = requiredPaths.filter((path) => !document.paths?.[path]);
 if (missingPaths.length) throw new Error(`Site API OpenAPI is missing paths: ${missingPaths.join(", ")}`);
 
 const imageProperties = document.components?.schemas?.ProductImage?.properties || {};
-const missingImageProperties = ["url", "alt", "width", "height", "renditions"].filter((name) => !imageProperties[name]);
+const missingImageProperties = ["id", "url", "alt", "width", "height", "renditions"].filter((name) => !imageProperties[name]);
 if (missingImageProperties.length) {
   throw new Error(`ProductImage is missing properties: ${missingImageProperties.join(", ")}`);
+}
+
+if (!document.components?.schemas?.SiteDeliveryVariantRes?.properties?.imageId) {
+  throw new Error("SiteDeliveryVariantRes is missing imageId");
 }
 
 const expectedTypes = await generateSiteApiTypes(document);
