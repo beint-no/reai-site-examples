@@ -66,7 +66,7 @@ export interface paths {
         put?: never;
         /**
          * Create an immutable checkout snapshot
-         * @description Call this from a trusted backend or Worker with a Site credential and Idempotency-Key. The request supplies the frozen checkout lines and optional returnUrl. Keep the Site credential server-side; never send it to the browser. Open the returned checkoutUrl in the shopper's browser to complete contact, shipping, and payment.
+         * @description Call this from a trusted backend or Worker with a Site credential and Idempotency-Key. The request supplies the frozen checkout lines and optional returnUrl. Keep the Site credential server-side; never send it to the browser. Open the returned checkoutUrl in the shopper's browser to complete contact, shipping, and payment. Submit bundle variant IDs and bundle counts without expanding components. Stock validation combines shared components across the whole cart and returns 409 INSUFFICIENT_STOCK with stockIssues when it cannot fit. Creating a session does not reserve stock; the components are atomically reserved when payment starts.
          */
         post: operations["createCheckoutSession"];
         delete?: never;
@@ -181,7 +181,7 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** @description A cart line exceeding the currently purchasable quantity. Recheck on every checkout attempt. */
+        /** @description A cart line exceeding the currently purchasable quantity. maximumQuantity keeps the other requested lines unchanged and accounts for shared bundle components. These per-line limits are not independent; recheck the adjusted cart on every checkout attempt. */
         CheckoutStockIssue: {
             /** Format: int32 */
             maximumQuantity?: number;
@@ -305,6 +305,16 @@ export interface components {
             net: number;
             vat: number;
         };
+        SiteDeliveryBundleItemRes: {
+            options: components["schemas"]["SiteDeliveryOptionRes"][];
+            /** Format: int32 */
+            quantity: number;
+            sku: string;
+            title: string;
+        };
+        SiteDeliveryBundleRes: {
+            items: components["schemas"]["SiteDeliveryBundleItemRes"][];
+        };
         SiteDeliveryCollectionDetailRes: {
             /** Format: int32 */
             catalogVersion: number;
@@ -408,6 +418,7 @@ export interface components {
             status: "enabled" | "disabled";
         };
         SiteDeliveryVariantRes: {
+            bundle?: components["schemas"]["SiteDeliveryBundleRes"] | null;
             compareAtPrice?: number | null;
             /** Format: uuid */
             id: string;
