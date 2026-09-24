@@ -1,6 +1,6 @@
 # Cloudflare deployment
 
-Every directory under `sites/` contains its own `wrangler.jsonc`, Worker entry point and static asset bundle. The repository installs one pinned Wrangler version and deploys only from a local checkout.
+Every directory under `sites/` contains its own `wrangler.jsonc`, Worker entry point and static asset bundle. Use the latest globally installed Wrangler and deploys only from a local checkout.
 
 ## Required environment
 

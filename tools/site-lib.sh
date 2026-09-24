@@ -3,7 +3,7 @@ set -euo pipefail
 
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 sites_root="$repository_root/sites"
-wrangler_bin="$repository_root/node_modules/.bin/wrangler"
+wrangler_bin="$(command -v wrangler || true)"
 hugo_bin="${HUGO_BIN:-}"
 if [ -z "$hugo_bin" ] && [ -x "$repository_root/.tools/bin/hugo" ]; then
   hugo_bin="$repository_root/.tools/bin/hugo"
@@ -38,8 +38,8 @@ require_site() {
 }
 
 require_wrangler() {
-  if [ ! -x "$wrangler_bin" ]; then
-    echo "Wrangler is not installed; run 'npm ci' in $repository_root" >&2
+  if [ -z "$wrangler_bin" ]; then
+    echo "Install the latest global Wrangler with npm install -g wrangler@latest" >&2
     return 1
   fi
 }
