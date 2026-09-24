@@ -1,5 +1,8 @@
 # ReAI Site API storefronts
 
+Install or update the shared Wrangler CLI with `npm install -g wrangler@latest`;
+`npm ci` installs the other repository dependencies.
+
 Cloudflare storefront implementations for the [ReAI Site API](https://app.reai.no/openapi/site/ui), built with semantic HTML, modern CSS and small browser-side JavaScript.
 
 The repository keeps the reusable API and Cloudflare integration separate from each storefront's rendering, content and visual system. Adding a storefront does not require changing the shared Worker or the validation workflow.
