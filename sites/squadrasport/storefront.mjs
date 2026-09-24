@@ -119,7 +119,7 @@ const footer = () => `<footer class="site-footer"><div class="footer-inner"><div
 
 export function documentHtml({ title, description, path, body, store = null }) {
   const canonical = `${SITE_ORIGIN}${path}`;
-  return `<!doctype html><html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff"><meta name="robots" content="noindex,nofollow"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><link rel="canonical" href="${escapeHtml(canonical)}"><link rel="icon" href="/assets/logo.png" type="image/png"><link rel="stylesheet" href="/assets/site.css?v=2"><script type="module" src="/assets/site.js?v=2"></script></head><body>${header(store)}<noscript><p class="noscript">JavaScript må være aktivert for handlekurv og kasse.</p></noscript><main id="main">${body}</main>${footer()}</body></html>`;
+  return `<!doctype html><html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff"><meta name="robots" content="noindex,nofollow"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><link rel="canonical" href="${escapeHtml(canonical)}"><link rel="icon" href="/assets/logo.png" type="image/png"><link rel="stylesheet" href="/assets/site.css?v=3"><script type="module" src="/assets/site.js?v=3"></script></head><body>${header(store)}<noscript><p class="noscript">JavaScript må være aktivert for handlekurv og kasse.</p></noscript><main id="main">${body}</main>${footer()}</body></html>`;
 }
 
 const breadcrumbs = (items) => `<nav class="breadcrumbs" aria-label="Brødsmulesti"><ol>${items.map((item, index) => `<li>${index === items.length - 1 ? `<span aria-current="page">${escapeHtml(item.label)}</span>` : `<a href="${escapeHtml(item.href)}">${escapeHtml(item.label)}</a>`}</li>`).join("")}</ol></nav>`;
@@ -150,8 +150,14 @@ export function renderProductPage(store, product, availability = {}) {
   const available = first ? availability[first.id] === true : false;
   const optionNames = [...new Set(variants.flatMap((variant) => (variant.options || []).map((option) => option.name)))];
   const image = images[0];
+  const galleryNavigation = images.length > 1
+    ? `<button class="gallery-control gallery-prev" type="button" data-gallery-step="-1" aria-label="Forrige bilde"><span aria-hidden="true">‹</span></button><button class="gallery-control gallery-next" type="button" data-gallery-step="1" aria-label="Neste bilde"><span aria-hidden="true">›</span></button><span class="gallery-count" data-gallery-count aria-live="polite">1 / ${images.length}</span>`
+    : "";
+  const thumbnailStrip = images.length > 1
+    ? `<div class="image-thumbnails">${images.map((item, index) => `<button type="button" data-image-src="${escapeHtml(imageUrl(item))}" data-image-alt="${escapeHtml(item.alt || product.title)}" aria-label="Vis produktbilde ${index + 1}" aria-pressed="${index === 0}">${responsiveImage(item, { alt: "", sizes: "90px", width: 320 })}</button>`).join("")}</div>`
+    : "";
   const gallery = images.length
-    ? `<div class="product-gallery"><div class="main-image">${responsiveImage(image, { alt: image.alt || product.title, sizes: "(max-width: 800px) 95vw, 48vw", eager: true, main: true })}</div>${images.length > 1 ? `<div class="image-thumbnails">${images.map((item, index) => `<button type="button" data-image-src="${escapeHtml(imageUrl(item))}" data-image-alt="${escapeHtml(item.alt || product.title)}" aria-label="Vis produktbilde ${index + 1}">${responsiveImage(item, { alt: "", sizes: "90px", width: 320 })}</button>`).join("")}</div>` : ""}</div>`
+    ? `<div class="product-gallery" data-product-gallery><div class="main-image" role="group" aria-label="Produktbilder"${images.length > 1 ? ' tabindex="0"' : ""}>${responsiveImage(image, { alt: image.alt || product.title, sizes: "(max-width: 800px) 95vw, 48vw", eager: true, main: true })}${galleryNavigation}</div>${thumbnailStrip}</div>`
     : '<div class="main-image"><span class="image-placeholder">SQUADRA</span></div>';
   const variantOptions = variants.length > 1 ? `${optionNames.map((name) => {
     const values = [...new Set(variants.flatMap((variant) => (variant.options || []).filter((option) => option.name === name).map((option) => option.value)))];

@@ -69,16 +69,54 @@ const toast = (message) => {
   toastTimeout = setTimeout(() => { node.hidden = true; }, 2800);
 };
 
-document.querySelectorAll("[data-image-src]").forEach((button) => {
-  button.addEventListener("click", () => {
-    const image = document.querySelector("[data-main-product-image]");
-    if (!image) return;
-    image.src = button.dataset.imageSrc;
-    image.alt = button.dataset.imageAlt || "";
-    image.removeAttribute("srcset");
-    image.removeAttribute("sizes");
+const gallery = document.querySelector("[data-product-gallery]");
+const galleryImage = gallery?.querySelector("[data-main-product-image]");
+const thumbnails = [...(gallery?.querySelectorAll("[data-image-src]") || [])];
+let activeImage = 0;
+
+const showImage = (index) => {
+  if (!galleryImage || !thumbnails.length) return;
+  activeImage = (index + thumbnails.length) % thumbnails.length;
+  const thumbnail = thumbnails[activeImage];
+  galleryImage.src = thumbnail.dataset.imageSrc;
+  galleryImage.alt = thumbnail.dataset.imageAlt || "";
+  galleryImage.removeAttribute("srcset");
+  galleryImage.removeAttribute("sizes");
+  thumbnails.forEach((item, itemIndex) => item.setAttribute("aria-pressed", String(itemIndex === activeImage)));
+  gallery.querySelector("[data-gallery-count]").textContent = `${activeImage + 1} / ${thumbnails.length}`;
+  const strip = gallery.querySelector(".image-thumbnails");
+  const stripBounds = strip.getBoundingClientRect();
+  const thumbnailBounds = thumbnail.getBoundingClientRect();
+  strip.scrollBy({
+    left: thumbnailBounds.left - stripBounds.left - (stripBounds.width - thumbnailBounds.width) / 2,
+    behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
   });
+};
+
+thumbnails.forEach((button, index) => button.addEventListener("click", () => showImage(index)));
+gallery?.querySelectorAll("[data-gallery-step]").forEach((button) => {
+  button.addEventListener("click", () => showImage(activeImage + Number(button.dataset.galleryStep)));
 });
+gallery?.addEventListener("keydown", (event) => {
+  if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+  event.preventDefault();
+  showImage(activeImage + (event.key === "ArrowRight" ? 1 : -1));
+});
+
+let touchStart;
+gallery?.querySelector(".main-image")?.addEventListener("touchstart", (event) => {
+  touchStart = { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY };
+}, { passive: true });
+gallery?.querySelector(".main-image")?.addEventListener("touchend", (event) => {
+  if (!touchStart) return;
+  const distanceX = event.changedTouches[0].clientX - touchStart.x;
+  const distanceY = event.changedTouches[0].clientY - touchStart.y;
+  touchStart = null;
+  if (Math.abs(distanceX) > 50 && Math.abs(distanceX) > Math.abs(distanceY) * 1.25) {
+    showImage(activeImage + (distanceX < 0 ? 1 : -1));
+  }
+}, { passive: true });
+gallery?.querySelector(".main-image")?.addEventListener("touchcancel", () => { touchStart = null; });
 
 const addButton = document.querySelector("[data-add-to-cart]");
 const variantSelect = document.querySelector("[data-variant-select]");
