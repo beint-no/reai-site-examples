@@ -231,8 +231,6 @@ export interface components {
              * @example 1200
              */
             height?: number;
-            /** Format: uuid */
-            id?: string;
             renditions?: components["schemas"]["ProductImageRendition"][];
             /** @example https://app.reai.no/media/product-images/018f3c2e-8b1a-7d3e-9c4f-5a6b7c8d9e0f/macbook-air-13-inch.avif */
             url?: string;
@@ -424,8 +422,6 @@ export interface components {
             compareAtPrice?: number | null;
             /** Format: uuid */
             id: string;
-            /** Format: uuid */
-            imageId?: string | null;
             options: components["schemas"]["SiteDeliveryOptionRes"][];
             price: number;
             sku: string;
