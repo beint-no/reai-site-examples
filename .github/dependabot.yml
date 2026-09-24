@@ -8,6 +8,10 @@ updates:
     groups:
       npm-development:
         dependency-type: development
+    ignore:
+      # Pinned for openapi-typescript until it supports the TypeScript 7 API.
+      - dependency-name: typescript-5
+        update-types: ["version-update:semver-major"]
     open-pull-requests-limit: 5
 
   - package-ecosystem: github-actions
