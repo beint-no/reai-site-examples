@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /cart
+Disallow: /search
+Disallow: /order/complete
+Disallow: /reai/
+Sitemap: https://squadrasport.no/sitemap.xml

@@ -15,7 +15,7 @@ async function sourceFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = [];
   for (const entry of entries) {
-    if (["node_modules", "public"].includes(entry.name)) continue;
+    if (["node_modules", "public", ".wrangler"].includes(entry.name)) continue;
     const target = path.join(directory, entry.name);
     if (entry.isDirectory()) files.push(...await sourceFiles(target));
     else if (/\.(?:js|mjs)$/.test(entry.name) && !/\.(?:test|type-test)\.mjs$/.test(entry.name)) files.push(target);

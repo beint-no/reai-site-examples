@@ -1,0 +1,29 @@
+{
+  "$schema": "../../https://unpkg.com/wrangler@latest/config-schema.json",
+  "name": "squadrasport",
+  "compatibility_date": "2026-09-24",
+  "workers_dev": true,
+  "main": "worker.js",
+  "routes": [
+    { "pattern": "squadrasport.no", "custom_domain": true },
+    { "pattern": "www.squadrasport.no/*", "zone_id": "235cf1c37eddd6ec33dfe7e919bac1a7" }
+  ],
+  "vars": {
+    "REAI_BASE_URL": "https://app.reai.no"
+  },
+  "previews": {
+    "vars": {
+      "REAI_BASE_URL": "https://app.reai.no"
+    }
+  },
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "html_handling": "drop-trailing-slash",
+    "run_worker_first": true
+  },
+  "observability": {
+    "enabled": true
+  }
+}
