@@ -9,5 +9,4 @@ node --check worker.js
 test ! -e public/products
 test ! -e public/collections
 test ! -e public/data/catalog.json
-grep -q '"CHECKOUT_ENABLED": "false"' wrangler.jsonc
 grep -q 'Disallow: /' public/robots.txt

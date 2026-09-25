@@ -410,7 +410,6 @@ addButton?.addEventListener("click", () => {
 const cartRoot = document.querySelector("[data-cart-root]");
 const checkoutButton = document.querySelector("[data-checkout-start]");
 const checkoutError = document.querySelector("[data-checkout-error]");
-let checkoutEnabled = false;
 let checkoutPending = false;
 
 function renderCart() {
@@ -423,8 +422,8 @@ function renderCart() {
     : '<div class="empty-state"><h2>Handlekurven er tom</h2><p>Finn noe du liker i butikken.</p><p><a href="/collections/all">Se alle produkter</a></p></div>';
   subtotal.textContent = money(items.reduce((sum, item) => sum + item.price * item.quantity, 0));
   if (checkoutButton) {
-    checkoutButton.disabled = !checkoutEnabled || !items.length || checkoutPending;
-    checkoutButton.textContent = checkoutEnabled ? "Gå til kassen" : "Kassen åpner ved lansering";
+    checkoutButton.disabled = !items.length || checkoutPending;
+    checkoutButton.textContent = "Gå til kassen";
   }
 }
 
@@ -443,15 +442,8 @@ cartRoot?.addEventListener("click", (event) => {
   saveCart(items);
 });
 
-if (cartRoot) {
-  fetch("/reai/storefront-config")
-    .then((response) => response.ok ? response.json() : Promise.reject())
-    .then((config) => { checkoutEnabled = config.checkoutEnabled === true; renderCart(); })
-    .catch(() => { checkoutEnabled = false; renderCart(); });
-}
-
 checkoutButton?.addEventListener("click", async () => {
-  if (!checkoutEnabled || checkoutPending) return;
+  if (checkoutPending) return;
   const lines = readCart().map((item) => ({ variantId: item.variant, quantity: item.quantity }));
   if (!lines.length) return;
   checkoutPending = true;
