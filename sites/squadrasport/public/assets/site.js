@@ -77,8 +77,9 @@ const thumbnails = [...(gallery?.querySelectorAll("[data-image-src]") || [])];
 let activeImage = 0;
 let displayedIndex = 0;
 let imageRequest = 0;
-let pendingImage;
+let pendingImageEntry;
 let galleryAnimations = [];
+const preloadedImages = new Map();
 
 const setGalleryStatus = (message) => {
   if (!galleryStatus) return;
@@ -86,14 +87,84 @@ const setGalleryStatus = (message) => {
   galleryStatus.hidden = !message;
 };
 
+const cancelImageEntry = (entry) => {
+  if (!entry || entry.ready || entry.canceled) return;
+  entry.canceled = true;
+  entry.image.removeAttribute("srcset");
+  entry.image.removeAttribute("src");
+};
+
+const createImageEntry = (index, priority) => {
+  const thumbnail = thumbnails[index];
+  const thumbnailImage = thumbnail.querySelector("img");
+  const image = document.createElement("img");
+  image.alt = thumbnail.dataset.imageAlt || "";
+  image.decoding = "async";
+  image.fetchPriority = priority;
+  if (thumbnailImage?.srcset) {
+    image.srcset = thumbnailImage.srcset;
+    image.sizes = "(max-width: 800px) 95vw, 48vw";
+  }
+  if (thumbnailImage?.width) image.width = thumbnailImage.width;
+  if (thumbnailImage?.height) image.height = thumbnailImage.height;
+  image.src = thumbnail.dataset.imageSrc;
+  const entry = { image, ready: false, canceled: false };
+  entry.promise = image.decode().then(
+    () => {
+      if (entry.canceled) return false;
+      entry.ready = true;
+      return true;
+    },
+    () => false,
+  ).then((loaded) => {
+    if (!loaded && preloadedImages.get(index) === entry) preloadedImages.delete(index);
+    return loaded;
+  });
+  return entry;
+};
+
+const prepareNextImages = (index) => {
+  if (thumbnails.length < 2) return;
+  const nextIndices = Array.from(
+    { length: Math.min(2, thumbnails.length - 1) },
+    (_, offset) => (index + offset + 1) % thumbnails.length,
+  );
+  for (const [cachedIndex, entry] of preloadedImages) {
+    if (nextIndices.includes(cachedIndex)) continue;
+    cancelImageEntry(entry);
+    preloadedImages.delete(cachedIndex);
+  }
+  const request = imageRequest;
+  const preload = async () => {
+    for (const nextIndex of nextIndices) {
+      if (request !== imageRequest) return;
+      let entry = preloadedImages.get(nextIndex);
+      if (!entry) {
+        entry = createImageEntry(nextIndex, "low");
+        preloadedImages.set(nextIndex, entry);
+      }
+      await entry.promise;
+    }
+  };
+  preload();
+};
+
 const showImage = async (index, direction = index >= activeImage ? 1 : -1) => {
   if (!displayedImage || !thumbnails.length) return;
   const nextIndex = (index + thumbnails.length) % thumbnails.length;
   activeImage = nextIndex;
   const request = ++imageRequest;
-  pendingImage?.removeAttribute("srcset");
-  pendingImage?.removeAttribute("src");
-  pendingImage = null;
+  const preparedImage = preloadedImages.get(nextIndex);
+  preloadedImages.delete(nextIndex);
+  if (pendingImageEntry !== preparedImage) cancelImageEntry(pendingImageEntry);
+  pendingImageEntry = null;
+  const keepNearbyPreloads = nextIndex === displayedIndex || preparedImage?.ready;
+  const nearbyIndices = new Set([1, 2].map((step) => (nextIndex + step) % thumbnails.length));
+  for (const [cachedIndex, entry] of preloadedImages) {
+    if (entry.ready || (keepNearbyPreloads && nearbyIndices.has(cachedIndex))) continue;
+    cancelImageEntry(entry);
+    preloadedImages.delete(cachedIndex);
+  }
   const thumbnail = thumbnails[nextIndex];
   thumbnails.forEach((item) => item.setAttribute("aria-pressed", String(item === thumbnail)));
   gallery.querySelector("[data-gallery-count]").textContent = `${nextIndex + 1} / ${thumbnails.length}`;
@@ -105,34 +176,22 @@ const showImage = async (index, direction = index >= activeImage ? 1 : -1) => {
     behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
   });
   if (nextIndex === displayedIndex) {
+    cancelImageEntry(preparedImage);
     setGalleryStatus("");
+    prepareNextImages(nextIndex);
     return;
   }
-  setGalleryStatus("Laster bilde …");
-  const thumbnailImage = thumbnail.querySelector("img");
-  const incomingImage = document.createElement("img");
-  incomingImage.alt = thumbnail.dataset.imageAlt || "";
-  incomingImage.decoding = "async";
-  incomingImage.fetchPriority = "high";
-  if (thumbnailImage?.srcset) {
-    incomingImage.srcset = thumbnailImage.srcset;
-    incomingImage.sizes = "(max-width: 800px) 95vw, 48vw";
-  }
-  if (thumbnailImage?.width) incomingImage.width = thumbnailImage.width;
-  if (thumbnailImage?.height) incomingImage.height = thumbnailImage.height;
-  pendingImage = incomingImage;
-  incomingImage.src = thumbnail.dataset.imageSrc;
-  try {
-    await incomingImage.decode();
-  } catch {
-    if (request === imageRequest) {
-      pendingImage = null;
-      setGalleryStatus("Kunne ikke laste bildet. Velg et annet eller prøv igjen.");
-    }
-    return;
-  }
+  const imageEntry = preparedImage || createImageEntry(nextIndex, "high");
+  imageEntry.image.fetchPriority = "high";
+  pendingImageEntry = imageEntry;
+  setGalleryStatus(imageEntry.ready ? "" : "Laster bilde …");
+  const loaded = await imageEntry.promise;
   if (request !== imageRequest) return;
-  pendingImage = null;
+  pendingImageEntry = null;
+  if (!loaded) {
+    setGalleryStatus("Kunne ikke laste bildet. Velg et annet eller prøv igjen.");
+    return;
+  }
   setGalleryStatus("");
 
   galleryAnimations.forEach((animation) => animation.cancel());
@@ -142,9 +201,9 @@ const showImage = async (index, direction = index >= activeImage ? 1 : -1) => {
   const outgoingImage = displayedImage;
   outgoingImage.removeAttribute("data-main-product-image");
   outgoingImage.setAttribute("aria-hidden", "true");
-  incomingImage.setAttribute("data-main-product-image", "");
-  galleryStage.append(incomingImage);
-  displayedImage = incomingImage;
+  imageEntry.image.setAttribute("data-main-product-image", "");
+  galleryStage.append(imageEntry.image);
+  displayedImage = imageEntry.image;
   displayedIndex = nextIndex;
 
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -155,7 +214,7 @@ const showImage = async (index, direction = index >= activeImage ? 1 : -1) => {
     const options = { duration: 260, easing: "cubic-bezier(.22,.61,.36,1)" };
     const animations = [
       outgoingImage.animate([{ transform: "translateX(0)" }, { transform: `translateX(${offset}%)` }], options),
-      incomingImage.animate([{ transform: `translateX(${-offset}%)` }, { transform: "translateX(0)" }], options),
+      imageEntry.image.animate([{ transform: `translateX(${-offset}%)` }, { transform: "translateX(0)" }], options),
     ];
     galleryAnimations = animations;
     Promise.allSettled(animations.map((animation) => animation.finished)).then(() => {
@@ -164,7 +223,12 @@ const showImage = async (index, direction = index >= activeImage ? 1 : -1) => {
       galleryAnimations = [];
     });
   }
+  prepareNextImages(nextIndex);
 };
+
+displayedImage?.decode().then(() => {
+  if (imageRequest === 0) prepareNextImages(displayedIndex);
+}).catch(() => {});
 
 thumbnails.forEach((button) => button.addEventListener("click", () => showImage(thumbnails.indexOf(button))));
 gallery?.querySelectorAll("[data-gallery-step]").forEach((button) => {
