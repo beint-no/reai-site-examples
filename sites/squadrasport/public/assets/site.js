@@ -70,18 +70,70 @@ const toast = (message) => {
 };
 
 const gallery = document.querySelector("[data-product-gallery]");
-const galleryImage = gallery?.querySelector("[data-main-product-image]");
+const galleryStage = gallery?.querySelector(".main-image");
+let displayedImage = gallery?.querySelector("[data-main-product-image]");
 const thumbnails = [...(gallery?.querySelectorAll("[data-image-src]") || [])];
 let activeImage = 0;
+let displayedIndex = 0;
+let imageRequest = 0;
+let galleryAnimations = [];
 
-const showImage = (index) => {
-  if (!galleryImage || !thumbnails.length) return;
-  activeImage = (index + thumbnails.length) % thumbnails.length;
-  const thumbnail = thumbnails[activeImage];
-  galleryImage.src = thumbnail.dataset.imageSrc;
-  galleryImage.alt = thumbnail.dataset.imageAlt || "";
-  galleryImage.removeAttribute("srcset");
-  galleryImage.removeAttribute("sizes");
+const showImage = async (index, direction = index >= activeImage ? 1 : -1) => {
+  if (!displayedImage || !thumbnails.length) return;
+  const nextIndex = (index + thumbnails.length) % thumbnails.length;
+  activeImage = nextIndex;
+  const request = ++imageRequest;
+  if (nextIndex === displayedIndex) return;
+  const thumbnail = thumbnails[nextIndex];
+  const thumbnailImage = thumbnail.querySelector("img");
+  const incomingImage = document.createElement("img");
+  incomingImage.alt = thumbnail.dataset.imageAlt || "";
+  incomingImage.decoding = "async";
+  if (thumbnailImage?.srcset) {
+    incomingImage.srcset = thumbnailImage.srcset;
+    incomingImage.sizes = "(max-width: 800px) 95vw, 48vw";
+  }
+  if (thumbnailImage?.width) incomingImage.width = thumbnailImage.width;
+  if (thumbnailImage?.height) incomingImage.height = thumbnailImage.height;
+  incomingImage.src = thumbnail.dataset.imageSrc;
+  try {
+    await incomingImage.decode();
+  } catch {
+    if (request === imageRequest) activeImage = displayedIndex;
+    return;
+  }
+  if (request !== imageRequest) return;
+
+  galleryAnimations.forEach((animation) => animation.cancel());
+  galleryStage.querySelectorAll("img").forEach((image) => {
+    if (image !== displayedImage) image.remove();
+  });
+  const outgoingImage = displayedImage;
+  outgoingImage.removeAttribute("data-main-product-image");
+  outgoingImage.setAttribute("aria-hidden", "true");
+  incomingImage.setAttribute("data-main-product-image", "");
+  galleryStage.append(incomingImage);
+  displayedImage = incomingImage;
+  displayedIndex = nextIndex;
+
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    outgoingImage.remove();
+    galleryAnimations = [];
+  } else {
+    const offset = direction >= 0 ? -100 : 100;
+    const options = { duration: 260, easing: "cubic-bezier(.22,.61,.36,1)" };
+    const animations = [
+      outgoingImage.animate([{ transform: "translateX(0)" }, { transform: `translateX(${offset}%)` }], options),
+      incomingImage.animate([{ transform: `translateX(${-offset}%)` }, { transform: "translateX(0)" }], options),
+    ];
+    galleryAnimations = animations;
+    Promise.allSettled(animations.map((animation) => animation.finished)).then(() => {
+      if (galleryAnimations !== animations) return;
+      outgoingImage.remove();
+      galleryAnimations = [];
+    });
+  }
+
   thumbnails.forEach((item) => item.setAttribute("aria-pressed", String(item === thumbnail)));
   gallery.querySelector("[data-gallery-count]").textContent = `${activeImage + 1} / ${thumbnails.length}`;
   const strip = gallery.querySelector(".image-thumbnails");
@@ -95,12 +147,16 @@ const showImage = (index) => {
 
 thumbnails.forEach((button) => button.addEventListener("click", () => showImage(thumbnails.indexOf(button))));
 gallery?.querySelectorAll("[data-gallery-step]").forEach((button) => {
-  button.addEventListener("click", () => showImage(activeImage + Number(button.dataset.galleryStep)));
+  button.addEventListener("click", () => {
+    const step = Number(button.dataset.galleryStep);
+    showImage(activeImage + step, step);
+  });
 });
 gallery?.addEventListener("keydown", (event) => {
   if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
   event.preventDefault();
-  showImage(activeImage + (event.key === "ArrowRight" ? 1 : -1));
+  const step = event.key === "ArrowRight" ? 1 : -1;
+  showImage(activeImage + step, step);
 });
 
 let touchStart;
@@ -113,10 +169,109 @@ gallery?.querySelector(".main-image")?.addEventListener("touchend", (event) => {
   const distanceY = event.changedTouches[0].clientY - touchStart.y;
   touchStart = null;
   if (Math.abs(distanceX) > 50 && Math.abs(distanceX) > Math.abs(distanceY) * 1.25) {
-    showImage(activeImage + (distanceX < 0 ? 1 : -1));
+    const step = distanceX < 0 ? 1 : -1;
+    showImage(activeImage + step, step);
   }
 }, { passive: true });
 gallery?.querySelector(".main-image")?.addEventListener("touchcancel", () => { touchStart = null; });
+
+const collectionToolbar = document.querySelector("[data-collection-toolbar]");
+const collectionGrid = document.querySelector("[data-collection-products] .product-grid");
+const collectionCards = [...(collectionGrid?.querySelectorAll(".product-card") || [])];
+if (collectionToolbar && collectionCards.length) {
+  collectionToolbar.hidden = false;
+  const priceFilter = collectionToolbar.querySelector("[data-price-filter]");
+  const priceForm = collectionToolbar.querySelector("[data-price-form]");
+  const minimumInput = priceForm.elements.min_price;
+  const maximumInput = priceForm.elements.max_price;
+  const priceError = collectionToolbar.querySelector("[data-price-error]");
+  const priceSummary = collectionToolbar.querySelector("[data-price-summary]");
+  const sortSelect = collectionToolbar.querySelector("[data-product-sort]");
+  const productCount = collectionToolbar.querySelector("[data-product-count]");
+  const filterEmpty = document.querySelector("[data-filter-empty]");
+  const originalOrder = new Map(collectionCards.map((card, index) => [card, index]));
+  const priceOf = (card) => card.hasAttribute("data-product-price") ? Number(card.dataset.productPrice) : null;
+  const parsePrice = (value) => value !== null && value.trim() !== "" && Number.isFinite(Number(value)) && Number(value) >= 0
+    ? Number(value) : null;
+  const initialUrl = new URL(location.href);
+  let minimum = parsePrice(initialUrl.searchParams.get("min_price"));
+  let maximum = parsePrice(initialUrl.searchParams.get("max_price"));
+  if (minimum !== null && maximum !== null && minimum > maximum) {
+    minimum = null;
+    maximum = null;
+  }
+  minimumInput.value = minimum === null ? "" : String(minimum);
+  maximumInput.value = maximum === null ? "" : String(maximum);
+  if (![...sortSelect.options].some((option) => option.value === initialUrl.searchParams.get("sort_by"))) {
+    sortSelect.value = "default";
+  } else {
+    sortSelect.value = initialUrl.searchParams.get("sort_by");
+  }
+
+  const updateCollection = () => {
+    const sort = sortSelect.value;
+    const sorted = [...collectionCards].sort((left, right) => {
+      if (sort === "default") return originalOrder.get(left) - originalOrder.get(right);
+      if (sort === "name-asc") {
+        return left.querySelector("h3").textContent.localeCompare(right.querySelector("h3").textContent, "nb-NO");
+      }
+      const leftPrice = priceOf(left);
+      const rightPrice = priceOf(right);
+      if (leftPrice === null) return rightPrice === null ? originalOrder.get(left) - originalOrder.get(right) : 1;
+      if (rightPrice === null) return -1;
+      return (sort === "price-asc" ? leftPrice - rightPrice : rightPrice - leftPrice)
+        || originalOrder.get(left) - originalOrder.get(right);
+    });
+    collectionGrid.replaceChildren(...sorted);
+    let visible = 0;
+    for (const card of collectionCards) {
+      const price = priceOf(card);
+      card.hidden = (minimum !== null || maximum !== null)
+        && (price === null || minimum !== null && price < minimum || maximum !== null && price > maximum);
+      if (!card.hidden) visible += 1;
+    }
+    productCount.textContent = `${visible} ${visible === 1 ? "produkt" : "produkter"}`;
+    filterEmpty.hidden = visible !== 0;
+    priceSummary.textContent = minimum !== null && maximum !== null ? `: ${money(minimum)}–${money(maximum)}`
+      : minimum !== null ? `: fra ${money(minimum)}`
+        : maximum !== null ? `: til ${money(maximum)}` : "";
+    const url = new URL(location.href);
+    if (minimum === null) url.searchParams.delete("min_price");
+    else url.searchParams.set("min_price", String(minimum));
+    if (maximum === null) url.searchParams.delete("max_price");
+    else url.searchParams.set("max_price", String(maximum));
+    if (sort === "default") url.searchParams.delete("sort_by");
+    else url.searchParams.set("sort_by", sort);
+    history.replaceState(null, "", url);
+  };
+
+  priceForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const nextMinimum = parsePrice(minimumInput.value);
+    const nextMaximum = parsePrice(maximumInput.value);
+    if (nextMinimum !== null && nextMaximum !== null && nextMinimum > nextMaximum) {
+      priceError.textContent = "Fra-prisen må være lavere enn til-prisen.";
+      priceError.hidden = false;
+      return;
+    }
+    priceError.hidden = true;
+    minimum = nextMinimum;
+    maximum = nextMaximum;
+    priceFilter.open = false;
+    updateCollection();
+  });
+  collectionToolbar.querySelector("[data-price-reset]").addEventListener("click", () => {
+    minimumInput.value = "";
+    maximumInput.value = "";
+    minimum = null;
+    maximum = null;
+    priceError.hidden = true;
+    priceFilter.open = false;
+    updateCollection();
+  });
+  sortSelect.addEventListener("change", updateCollection);
+  updateCollection();
+}
 
 const addButton = document.querySelector("[data-add-to-cart]");
 const variantSelect = document.querySelector("[data-variant-select]");
@@ -136,6 +291,7 @@ const syncVariant = () => {
 };
 variantSelect?.addEventListener("change", syncVariant);
 optionSelects.forEach((select) => select.addEventListener("change", () => {
+  const selected = Object.fromEntries(optionSelects.map((item) => [item.dataset.optionName, item.value]));
   const match = [...variantSelect.options].find((option) => {
     const values = JSON.parse(option.dataset.options || "{}");
     return optionSelects.every((item) => values[item.dataset.optionName] === selected[item.dataset.optionName]);
