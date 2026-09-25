@@ -8,4 +8,4 @@ Squadra Sport is a Norwegian sportswear and equipment retailer. The current publ
 - Keep the Site credential in the Worker secret. Never expose it in HTML, browser JavaScript, or Git.
 - The visible store currently advertises kit and volume discounts. Do not promise those discounts in the new checkout until their rules are confirmed and configured.
 - Checkout follows the BudMates flow: the cart starts a hosted ReAI checkout session directly. Adyen payment methods are active; completing checkout can create a real order and charge.
-- Do not move the production domain from Shopify as part of storefront development.
+- The live Cloudflare routes for `squadrasport.no` and `www.squadrasport.no` invoke this Worker. The original apex DNS record is backed up outside this repository for rollback; the Shopify `myshopify.com` catalog remains accessible.

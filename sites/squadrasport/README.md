@@ -10,9 +10,9 @@ Cloudflare Worker storefront for the Squadra Sport ReAI Site. Commerce data is r
 
 The cart starts ReAI hosted checkout directly, as on BudMates. Adyen payment methods are active, so completing checkout can create a real order and charge.
 
-The privacy, return, and sales-term pages are review drafts. See [LEGAL_REVIEW.md](LEGAL_REVIEW.md) for the merchant decisions and operational facts to confirm before moving the public domain.
+The privacy, return, and sales-term pages are review drafts. See [LEGAL_REVIEW.md](LEGAL_REVIEW.md) for the merchant decisions and operational facts to confirm with the merchant. The public domain is live at the merchant’s request while these confirmations remain open.
 
-The canonical domain remains on Shopify until the catalog, checkout, and preview are reviewed. Configure the ReAI Site preview domain before testing hosted checkout. Never commit a Site credential.
+The canonical domain is routed to this Worker through Cloudflare. The original apex DNS record is backed up outside the repository for rollback, and Shopify catalog JSON is available on the shop's `myshopify.com` hostname. Never commit a Site credential.
 
 The logo and two editorial hero photos were downloaded from the current public Squadra Sport Shopify site for this customer's replacement storefront. They are customer assets excluded from the repository's MIT license.
 
@@ -25,4 +25,4 @@ wrangler preview --name review
 wrangler preview secret put REAI_SITE_TOKEN --name review
 ```
 
-Enter the tenant Site credential when prompted. Reapply the preview secret after each `wrangler preview` deployment; a deployment can omit previously configured secrets. The local `.dev.vars` file is not uploaded to Cloudflare. Check the preview URL returned by Wrangler before sharing it. Creating a preview does not change the Shopify domain or deploy the production Worker.
+Enter the tenant Site credential when prompted. Reapply the preview secret after each `wrangler preview` deployment; a deployment can omit previously configured secrets. The local `.dev.vars` file is not uploaded to Cloudflare. Check the preview URL returned by Wrangler before sharing it. Creating a preview does not change the live routes or deploy the production Worker.

@@ -118,9 +118,9 @@ const header = (store) => `<a class="skip-link" href="#main">Hopp til innhold</a
 
 const footer = () => `<footer class="site-footer"><div class="footer-inner"><div><a class="footer-brand" href="/">SQUADRA SPORT</a><p>Sport og lagutstyr.</p></div><div><h2>Handle</h2><a href="/collections/all">Alle produkter</a><a href="/search">Søk</a><a href="/cart">Handlekurv</a></div><div><h2>Informasjon</h2><a href="/pages/contact">Kontakt</a><a href="/pages/terms">Kjøpsvilkår</a><a href="/policies/refund-policy">Retur</a><a href="/policies/privacy-policy">Personvern</a></div></div>${renderCompactLegalFooter({ owner: "Squadra Sport AS", locale: "nb-NO", privacyHref: "/policies/privacy-policy", refundHref: "/policies/refund-policy", termsHref: "/pages/terms", className: "legal-footer" })}</footer><div class="cart-toast" data-cart-toast role="status" aria-live="polite" hidden></div>`;
 
-export function documentHtml({ title, description, path, body, store = null }) {
+export function documentHtml({ title, description, path, body, store = null, robots = "index,follow" }) {
   const canonical = `${SITE_ORIGIN}${path}`;
-  return `<!doctype html><html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff"><meta name="robots" content="noindex,nofollow"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><link rel="canonical" href="${escapeHtml(canonical)}"><link rel="icon" href="/assets/logo.png" type="image/png"><link rel="stylesheet" href="/assets/site.css?v=7"><script type="module" src="/assets/site.js?v=9"></script></head><body>${header(store)}<noscript><p class="noscript">JavaScript må være aktivert for handlekurv og kasse.</p></noscript><main id="main">${body}</main>${footer()}</body></html>`;
+  return `<!doctype html><html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff"><meta name="robots" content="${robots}"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><link rel="canonical" href="${escapeHtml(canonical)}"><link rel="icon" href="/assets/logo.png" type="image/png"><link rel="stylesheet" href="/assets/site.css?v=7"><script type="module" src="/assets/site.js?v=9"></script></head><body>${header(store)}<noscript><p class="noscript">JavaScript må være aktivert for handlekurv og kasse.</p></noscript><main id="main">${body}</main>${footer()}</body></html>`;
 }
 
 const breadcrumbs = (items) => `<nav class="breadcrumbs" aria-label="Brødsmulesti"><ol>${items.map((item, index) => `<li>${index === items.length - 1 ? `<span aria-current="page">${escapeHtml(item.label)}</span>` : `<a href="${escapeHtml(item.href)}">${escapeHtml(item.label)}</a>`}</li>`).join("")}</ol></nav>`;
@@ -180,6 +180,7 @@ export const renderNotFoundPage = (store) => documentHtml({
   path: "/404",
   body: '<section class="message-page"><div class="content-width"><p class="eyebrow">404</p><h1>Vi finner ikke siden.</h1><p>Prøv å søke etter produktet eller gå til forsiden.</p><a class="button" href="/">Til forsiden</a></div></section>',
   store,
+  robots: "noindex,nofollow",
 });
 
 export const renderUnavailablePage = (store) => documentHtml({
@@ -188,6 +189,7 @@ export const renderUnavailablePage = (store) => documentHtml({
   path: "/",
   body: '<section class="message-page"><div class="content-width"><h1>Vi får ikke vist utvalget akkurat nå.</h1><p>Prøv igjen om litt.</p><a class="button" href="/">Til forsiden</a></div></section>',
   store,
+  robots: "noindex,nofollow",
 });
 
 export function renderSitemap(store) {
@@ -218,5 +220,5 @@ export function renderStaticPage(kind) {
     ...legalPages,
   }[kind];
   if (!content) throw new RangeError(`Unknown static page: ${kind}`);
-  return documentHtml({ title: `${content.title} | Squadra Sport`, description: content.description || content.title, path: content.path, body: content.body });
+  return documentHtml({ title: `${content.title} | Squadra Sport`, description: content.description || content.title, path: content.path, body: content.body, robots: ["cart", "search", "complete"].includes(kind) ? "noindex,nofollow" : "index,follow" });
 }

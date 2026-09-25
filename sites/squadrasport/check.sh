@@ -9,4 +9,5 @@ node --check worker.js
 test ! -e public/products
 test ! -e public/collections
 test ! -e public/data/catalog.json
-grep -q 'Disallow: /' public/robots.txt
+grep -q '^Sitemap: https://squadrasport.no/sitemap.xml$' public/robots.txt
+! grep -q '^Disallow: /$' public/robots.txt
