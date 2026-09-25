@@ -1,4 +1,5 @@
 import { renderCompactLegalFooter } from "../../packages/reai-cloudflare-storefront/footer.mjs";
+import { legalPages } from "./legal-pages.mjs";
 
 export const SITE_ORIGIN = "https://squadrasport.no";
 export const HANDLE = /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/;
@@ -119,7 +120,7 @@ const footer = () => `<footer class="site-footer"><div class="footer-inner"><div
 
 export function documentHtml({ title, description, path, body, store = null }) {
   const canonical = `${SITE_ORIGIN}${path}`;
-  return `<!doctype html><html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff"><meta name="robots" content="noindex,nofollow"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><link rel="canonical" href="${escapeHtml(canonical)}"><link rel="icon" href="/assets/logo.png" type="image/png"><link rel="stylesheet" href="/assets/site.css?v=4"><script type="module" src="/assets/site.js?v=4"></script></head><body>${header(store)}<noscript><p class="noscript">JavaScript må være aktivert for handlekurv og kasse.</p></noscript><main id="main">${body}</main>${footer()}</body></html>`;
+  return `<!doctype html><html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff"><meta name="robots" content="noindex,nofollow"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><link rel="canonical" href="${escapeHtml(canonical)}"><link rel="icon" href="/assets/logo.png" type="image/png"><link rel="stylesheet" href="/assets/site.css?v=5"><script type="module" src="/assets/site.js?v=4"></script></head><body>${header(store)}<noscript><p class="noscript">JavaScript må være aktivert for handlekurv og kasse.</p></noscript><main id="main">${body}</main>${footer()}</body></html>`;
 }
 
 const breadcrumbs = (items) => `<nav class="breadcrumbs" aria-label="Brødsmulesti"><ol>${items.map((item, index) => `<li>${index === items.length - 1 ? `<span aria-current="page">${escapeHtml(item.label)}</span>` : `<a href="${escapeHtml(item.href)}">${escapeHtml(item.label)}</a>`}</li>`).join("")}</ol></nav>`;
@@ -189,7 +190,7 @@ export const renderUnavailablePage = (store) => documentHtml({
 });
 
 export function renderSitemap(store) {
-  const paths = ["/", "/pages/contact", "/collections/all",
+  const paths = ["/", "/pages/contact", ...Object.values(legalPages).map((page) => page.path), "/collections/all",
     ...(store?.collections || []).map((collection) => `/collections/${collection.handle}`),
     ...(store?.products || []).map((product) => `/products/${product.handle}`)];
   return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${[...new Set(paths)].map((path) => `<url><loc>${SITE_ORIGIN}${path}</loc></url>`).join("")}</urlset>`;
@@ -213,19 +214,8 @@ export function renderStaticPage(kind) {
       title: "Takk for bestillingen", path: "/order/complete",
       body: '<section class="message-page" data-order-complete><div class="content-width"><p class="eyebrow">Bestilling</p><h1>Takk for handelen.</h1><p>Du får en bekreftelse på e-post når bestillingen er registrert.</p><a class="button" href="/collections/all">Fortsett å handle</a></div></section>',
     },
-    privacy: {
-      title: "Personvern", path: "/policies/privacy-policy",
-      body: '<section class="message-page"><div class="content-width"><h1>Personvern</h1><p>Oppdatert personvernerklæring publiseres før den nye butikken åpner. Kontakt <a href="mailto:info@squadrasport.no">info@squadrasport.no</a> ved spørsmål.</p></div></section>',
-    },
-    refund: {
-      title: "Retur", path: "/policies/refund-policy",
-      body: '<section class="message-page"><div class="content-width"><h1>Retur</h1><p>Returvilkår publiseres før den nye butikken åpner. Kontakt <a href="mailto:info@squadrasport.no">info@squadrasport.no</a> ved spørsmål.</p></div></section>',
-    },
-    terms: {
-      title: "Kjøpsvilkår", path: "/pages/terms",
-      body: '<section class="message-page"><div class="content-width"><h1>Kjøpsvilkår</h1><p>Kjøpsvilkår publiseres før den nye butikken åpner. Kontakt <a href="mailto:info@squadrasport.no">info@squadrasport.no</a> ved spørsmål.</p></div></section>',
-    },
+    ...legalPages,
   }[kind];
   if (!content) throw new RangeError(`Unknown static page: ${kind}`);
-  return documentHtml({ title: `${content.title} | Squadra Sport`, description: content.title, path: content.path, body: content.body });
+  return documentHtml({ title: `${content.title} | Squadra Sport`, description: content.description || content.title, path: content.path, body: content.body });
 }

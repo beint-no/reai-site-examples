@@ -3,6 +3,7 @@ set -euo pipefail
 
 node tools/generate-pages.mjs --check
 node --check storefront.mjs
+node --check legal-pages.mjs
 node --check public/assets/site.js
 node --check worker.js
 test ! -e public/products

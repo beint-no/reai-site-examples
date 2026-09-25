@@ -113,6 +113,18 @@ img { display: block; max-width: 100%; }
 .message-page { min-height: 45vh; padding-block: 85px; }
 .message-page p { max-width: 700px; }
 .message-page .button { margin-top: 20px; }
+.policy-page .page-heading { padding-block: clamp(42px, 5vw, 70px); }
+.policy-page .page-heading p:last-child { margin-bottom: 0; }
+.policy-content { max-width: 840px; padding-block: clamp(35px, 5vw, 65px) 85px; }
+.policy-content section + section { margin-top: 38px; padding-top: 35px; border-top: 1px solid var(--line); }
+.policy-content h2 { margin: 0 0 12px; font-size: clamp(1.25rem, 2vw, 1.65rem); line-height: 1.2; letter-spacing: -.025em; }
+.policy-content p, .policy-content li { line-height: 1.7; }
+.policy-content p { margin: 0 0 14px; }
+.policy-content p:last-child { margin-bottom: 0; }
+.policy-content ul { margin: 0; padding-left: 21px; }
+.policy-content li + li { margin-top: 12px; }
+.policy-content a { text-underline-offset: 3px; }
+.policy-content .policy-form { padding: 26px; border: 1px solid var(--line); background: var(--soft); }
 
 .cart-layout { display: grid; grid-template-columns: 1fr 340px; gap: 50px; }
 .cart-item { display: grid; grid-template-columns: 100px 1fr auto; gap: 17px; padding: 20px 0; border-bottom: 1px solid var(--line); }
