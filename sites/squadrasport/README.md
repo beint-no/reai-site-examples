@@ -8,7 +8,7 @@ Cloudflare Worker storefront for the Squadra Sport ReAI Site. Commerce data is r
 2. Copy `.dev.vars.example` to `.dev.vars` and set `REAI_SITE_TOKEN`.
 3. Run `npm ci`, `./site.sh check squadrasport`, and `./site.sh dev squadrasport` from the repository root.
 
-The Worker is deliberately configured with `CHECKOUT_ENABLED=false`. Enable checkout only after merchant onboarding, shipping and legal terms are approved, and a complete order has passed testing.
+The production Worker keeps `CHECKOUT_ENABLED=false`. The review preview permits checkout only after a reviewer enters the access code at `/review/checkout-access`; the code is stored as the preview-only `CHECKOUT_ACCESS_CODE` secret. Access expires after one hour. Do not use the review checkout for customer orders while shipping and legal terms are still under review.
 
 The privacy, return, and sales-term pages are review drafts. See [LEGAL_REVIEW.md](LEGAL_REVIEW.md) for the merchant decisions and operational facts to confirm before enabling checkout.
 
@@ -23,6 +23,7 @@ Use Wrangler 4.135.0 or later with Cloudflare access to create an isolated previ
 ```sh
 wrangler preview --name review
 wrangler preview secret put REAI_SITE_TOKEN --name review
+wrangler preview secret put CHECKOUT_ACCESS_CODE --name review
 ```
 
-Enter a Site credential for the Squadra Sport tenant when prompted. The local `.dev.vars` file is not uploaded to Cloudflare. Check the preview URL returned by Wrangler before sharing it; checkout is disabled in the preview configuration. Creating a preview does not change the Shopify domain or deploy the production Worker.
+Enter the tenant Site credential and a long random reviewer code when prompted. Reapply both preview secrets after each `wrangler preview` deployment; a deployment can omit previously configured secrets. The local `.dev.vars` file is not uploaded to Cloudflare. Check the preview URL returned by Wrangler before sharing it. Without the reviewer code, checkout stays disabled. Creating a preview does not change the Shopify domain or deploy the production Worker.

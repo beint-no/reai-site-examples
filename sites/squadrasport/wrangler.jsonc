@@ -11,7 +11,7 @@
   "previews": {
     "vars": {
       "REAI_BASE_URL": "https://app.reai.no",
-      "CHECKOUT_ENABLED": "false"
+      "CHECKOUT_ENABLED": "true"
     }
   },
   "assets": {
