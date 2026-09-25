@@ -113,6 +113,7 @@ img { display: block; max-width: 100%; }
 .gallery-prev { left: 12px; }
 .gallery-next { right: 12px; }
 .gallery-count { position: absolute; z-index: 1; right: 12px; bottom: 12px; padding: 4px 10px; border-radius: 20px; background: #fffffff0; font-size: .75rem; font-weight: 650; }
+.gallery-status { position: absolute; z-index: 1; top: 12px; left: 50%; max-width: calc(100% - 24px); padding: 6px 10px; transform: translateX(-50%); border-radius: 20px; background: #fffffff0; font-size: .75rem; text-align: center; pointer-events: none; }
 .image-thumbnails { display: flex; width: 100%; gap: 9px; overflow-x: auto; margin-top: 9px; }
 .image-thumbnails button { width: 80px; aspect-ratio: 1; flex: 0 0 auto; padding: 3px; border: 1px solid var(--line); background: var(--soft); }
 .image-thumbnails button:hover, .image-thumbnails button:focus-visible, .image-thumbnails button[aria-pressed="true"] { border-color: var(--ink); }

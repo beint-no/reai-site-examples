@@ -71,38 +71,69 @@ const toast = (message) => {
 
 const gallery = document.querySelector("[data-product-gallery]");
 const galleryStage = gallery?.querySelector(".main-image");
+const galleryStatus = gallery?.querySelector("[data-gallery-status]");
 let displayedImage = gallery?.querySelector("[data-main-product-image]");
 const thumbnails = [...(gallery?.querySelectorAll("[data-image-src]") || [])];
 let activeImage = 0;
 let displayedIndex = 0;
 let imageRequest = 0;
+let pendingImage;
 let galleryAnimations = [];
+
+const setGalleryStatus = (message) => {
+  if (!galleryStatus) return;
+  galleryStatus.textContent = message;
+  galleryStatus.hidden = !message;
+};
 
 const showImage = async (index, direction = index >= activeImage ? 1 : -1) => {
   if (!displayedImage || !thumbnails.length) return;
   const nextIndex = (index + thumbnails.length) % thumbnails.length;
   activeImage = nextIndex;
   const request = ++imageRequest;
-  if (nextIndex === displayedIndex) return;
+  pendingImage?.removeAttribute("srcset");
+  pendingImage?.removeAttribute("src");
+  pendingImage = null;
   const thumbnail = thumbnails[nextIndex];
+  thumbnails.forEach((item) => item.setAttribute("aria-pressed", String(item === thumbnail)));
+  gallery.querySelector("[data-gallery-count]").textContent = `${nextIndex + 1} / ${thumbnails.length}`;
+  const strip = gallery.querySelector(".image-thumbnails");
+  const stripBounds = strip.getBoundingClientRect();
+  const thumbnailBounds = thumbnail.getBoundingClientRect();
+  strip.scrollBy({
+    left: thumbnailBounds.left - stripBounds.left - (stripBounds.width - thumbnailBounds.width) / 2,
+    behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+  });
+  if (nextIndex === displayedIndex) {
+    setGalleryStatus("");
+    return;
+  }
+  setGalleryStatus("Laster bilde …");
   const thumbnailImage = thumbnail.querySelector("img");
   const incomingImage = document.createElement("img");
   incomingImage.alt = thumbnail.dataset.imageAlt || "";
   incomingImage.decoding = "async";
+  incomingImage.fetchPriority = "high";
   if (thumbnailImage?.srcset) {
     incomingImage.srcset = thumbnailImage.srcset;
     incomingImage.sizes = "(max-width: 800px) 95vw, 48vw";
   }
   if (thumbnailImage?.width) incomingImage.width = thumbnailImage.width;
   if (thumbnailImage?.height) incomingImage.height = thumbnailImage.height;
+  pendingImage = incomingImage;
   incomingImage.src = thumbnail.dataset.imageSrc;
   try {
     await incomingImage.decode();
   } catch {
-    if (request === imageRequest) activeImage = displayedIndex;
+    if (request === imageRequest) {
+      pendingImage = null;
+      setGalleryStatus("Kunne ikke laste bildet. Velg et annet eller prøv igjen.");
+    }
     return;
   }
   if (request !== imageRequest) return;
+  pendingImage = null;
+  setGalleryStatus("");
 
   galleryAnimations.forEach((animation) => animation.cancel());
   galleryStage.querySelectorAll("img").forEach((image) => {
@@ -133,16 +164,6 @@ const showImage = async (index, direction = index >= activeImage ? 1 : -1) => {
       galleryAnimations = [];
     });
   }
-
-  thumbnails.forEach((item) => item.setAttribute("aria-pressed", String(item === thumbnail)));
-  gallery.querySelector("[data-gallery-count]").textContent = `${activeImage + 1} / ${thumbnails.length}`;
-  const strip = gallery.querySelector(".image-thumbnails");
-  const stripBounds = strip.getBoundingClientRect();
-  const thumbnailBounds = thumbnail.getBoundingClientRect();
-  strip.scrollBy({
-    left: thumbnailBounds.left - stripBounds.left - (stripBounds.width - thumbnailBounds.width) / 2,
-    behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
-  });
 };
 
 thumbnails.forEach((button) => button.addEventListener("click", () => showImage(thumbnails.indexOf(button))));
