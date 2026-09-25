@@ -8,6 +8,12 @@
     "REAI_BASE_URL": "https://app.reai.no",
     "CHECKOUT_ENABLED": "false"
   },
+  "previews": {
+    "vars": {
+      "REAI_BASE_URL": "https://app.reai.no",
+      "CHECKOUT_ENABLED": "false"
+    }
+  },
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",

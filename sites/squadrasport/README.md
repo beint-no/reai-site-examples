@@ -15,3 +15,14 @@ The privacy, return, and sales-term pages are review drafts. See [LEGAL_REVIEW.m
 The canonical domain remains on Shopify until the catalog, checkout, and preview are reviewed. Configure the ReAI Site preview domain before testing hosted checkout. Never commit a Site credential.
 
 The logo and two editorial hero photos were downloaded from the current public Squadra Sport Shopify site for this customer's replacement storefront. They are customer assets excluded from the repository's MIT license.
+
+## Hosted review preview
+
+Use Wrangler 4.135.0 or later with Cloudflare access to create an isolated preview. From this site directory:
+
+```sh
+wrangler preview --name review
+wrangler preview secret put REAI_SITE_TOKEN --name review
+```
+
+Enter a Site credential for the Squadra Sport tenant when prompted. The local `.dev.vars` file is not uploaded to Cloudflare. Check the preview URL returned by Wrangler before sharing it; checkout is disabled in the preview configuration. Creating a preview does not change the Shopify domain or deploy the production Worker.
