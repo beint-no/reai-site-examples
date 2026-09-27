@@ -9,6 +9,7 @@ const NAVIGATION = [
   ["volleyball", "Volleyball"],
   ["handball", "Håndball"],
   ["basketball", "Basketball"],
+  ["futsal", "Futsal"],
   ["innebandy", "Innebandy"],
   ["baller", "Baller"],
   ["trening", "Trening"],
@@ -34,9 +35,16 @@ const plainText = (value = "") => String(value)
   .replace(/\s+/g, " ")
   .trim();
 
-const productDescription = (value = "") => plainText(value)
-  .split(/(?<=[.!?])\s+/)
-  .filter((sentence) => !/(?:rabatt|pakkepris)/i.test(sentence))
+const productDescription = (value = "") => String(value)
+  .replace(/<script[\s\S]*?<\/script>/gi, " ")
+  .replace(/<style[\s\S]*?<\/style>/gi, " ")
+  .replace(/<\/(?:p|div)>|<br\s*\/?>/gi, "\n")
+  .replace(/<[^>]*>/g, " ")
+  .replace(/&nbsp;/gi, " ")
+  .replace(/&amp;/gi, "&")
+  .split(/\r?\n|(?<=[.!?])\s+/)
+  .map((part) => part.trim())
+  .filter((part) => part && !/(?:\d+\s*%\s*rabatt|pakkepris)/i.test(part))
   .join(" ");
 
 const money = (value) => new Intl.NumberFormat("nb-NO", {
@@ -61,6 +69,14 @@ const imageUrl = (image, preferredWidth = 960) => {
 };
 
 const productImage = (product) => product?.images?.[0] || null;
+
+const productBrand = (store, product) => {
+  if (product.brand && product.brand !== "Squadra Sport") return product.brand;
+  const memberships = (store?.collections || []).filter((collection) => collection.products?.some((member) => member.handle === product.handle));
+  if (memberships.some((collection) => collection.handle === "medisinsk") || /sixtus/i.test(product.title)) return "Sixtus";
+  if (memberships.some((collection) => /(?:overdel|shorts|spilletroyer|treningsbukse|hettegensere)/.test(collection.handle)) || /\berre[aà]\b/i.test(`${product.title} ${product.description || ""}`)) return "Erreà";
+  return product.brand || "Squadra Sport";
+};
 
 const responsiveImage = (image, { alt = "", sizes = "100vw", width = 960, eager = false, main = false } = {}) => {
   const src = imageUrl(image, width);
@@ -92,17 +108,17 @@ export const productByHandle = (store, handle) => (store?.products || [])
 export const collectionByHandle = (store, handle) => (store?.collections || [])
   .find((collection) => collection.handle === handle) || null;
 
-const productCard = (product) => {
+const productCard = (store, product) => {
   if (!product?.handle) return "";
   const image = productImage(product);
   const prices = (product.variants || []).map((variant) => Number(variant.price))
     .filter((price) => Number.isFinite(price));
   const lowestPrice = prices.length ? Math.min(...prices) : null;
-  return `<article class="product-card"${lowestPrice !== null ? ` data-product-price="${lowestPrice}"` : ""}><a class="product-card-image" href="/products/${escapeHtml(product.handle)}">${image ? responsiveImage(image, { alt: image.alt || product.title, sizes: "(max-width: 700px) 45vw, 23vw", width: 480 }) : '<span class="image-placeholder">SQUADRA</span>'}</a><div class="product-card-copy"><p>${escapeHtml(product.brand || "Squadra Sport")}</p><h3><a href="/products/${escapeHtml(product.handle)}">${escapeHtml(product.title || product.handle)}</a></h3>${lowestPrice !== null ? `<strong>${money(lowestPrice)}</strong>` : ""}</div></article>`;
+  return `<article class="product-card"${lowestPrice !== null ? ` data-product-price="${lowestPrice}"` : ""}><a class="product-card-image" href="/products/${escapeHtml(product.handle)}">${image ? responsiveImage(image, { alt: image.alt || product.title, sizes: "(max-width: 700px) 45vw, 23vw", width: 480 }) : '<span class="image-placeholder">SQUADRA</span>'}</a><div class="product-card-copy"><p>${escapeHtml(productBrand(store, product))}</p><h3><a href="/products/${escapeHtml(product.handle)}">${escapeHtml(product.title || product.handle)}</a></h3>${lowestPrice !== null ? `<strong>${money(lowestPrice)}</strong>` : ""}</div></article>`;
 };
 
-const productGrid = (products) => {
-  const cards = products.map(productCard).filter(Boolean);
+const productGrid = (store, products) => {
+  const cards = products.map((product) => productCard(store, product)).filter(Boolean);
   return cards.length
     ? `<div class="product-grid">${cards.join("")}</div>`
     : '<div class="empty-state"><h2>Produkter kommer snart</h2><p>Utvalget vises her når det er publisert.</p></div>';
@@ -111,7 +127,11 @@ const productGrid = (products) => {
 const navigation = (store) => {
   const known = store ? new Set((store.collections || []).map((collection) => collection.handle)) : null;
   return NAVIGATION.filter(([handle]) => !known || known.has(handle))
-    .map(([handle, label]) => `<a href="/collections/${handle}">${label}</a>`).join("");
+    .map(([handle, label]) => {
+      const children = (store?.collections || []).filter((collection) => collection.handle.startsWith(`${handle}-`) && collection.handle !== handle);
+      if (!children.length) return `<a href="/collections/${handle}">${label}</a>`;
+      return `<div class="nav-group"><a href="/collections/${handle}">${label}</a><details><summary aria-label="Vis underkategorier for ${label}"></summary><div class="nav-submenu">${children.map((child) => `<a href="/collections/${escapeHtml(child.handle)}">${escapeHtml(child.title.replace(new RegExp(`^${label}\\s*[-–]\\s*`, "i"), ""))}</a>`).join("")}</div></details></div>`;
+    }).join("");
 };
 
 const header = (store) => `<a class="skip-link" href="#main">Hopp til innhold</a><header class="site-header"><div class="header-inner"><a class="brand" href="/" aria-label="Squadra Sport, forside"><img src="/assets/logo.png" alt="Squadra Sport" width="128" height="52"></a><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav" data-menu-toggle>Meny</button><nav id="main-nav" aria-label="Hovedmeny" data-main-nav>${navigation(store)}<a href="/collections/all">Alle produkter</a><a href="/pages/contact">Kontakt</a></nav><div class="header-tools"><a href="/search" aria-label="Søk">Søk</a><a href="/cart" aria-label="Handlekurv">Kurv <span data-cart-count>0</span></a></div></div></header>`;
@@ -120,17 +140,17 @@ const footer = () => `<footer class="site-footer"><div class="footer-inner"><div
 
 export function documentHtml({ title, description, path, body, store = null, robots = "index,follow" }) {
   const canonical = `${SITE_ORIGIN}${path}`;
-  return `<!doctype html><html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff"><meta name="robots" content="${robots}"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><link rel="canonical" href="${escapeHtml(canonical)}"><link rel="icon" href="/assets/logo.png" type="image/png"><link rel="stylesheet" href="/assets/site.css?v=7"><script type="module" src="/assets/site.js?v=9"></script></head><body>${header(store)}<noscript><p class="noscript">JavaScript må være aktivert for handlekurv og kasse.</p></noscript><main id="main">${body}</main>${footer()}</body></html>`;
+  return `<!doctype html><html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff"><meta name="robots" content="${robots}"><title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}"><link rel="canonical" href="${escapeHtml(canonical)}"><link rel="icon" href="/assets/logo.png" type="image/png"><link rel="stylesheet" href="/assets/site.css?v=8"><script type="module" src="/assets/site.js?v=10"></script></head><body>${header(store)}<noscript><p class="noscript">JavaScript må være aktivert for handlekurv og kasse.</p></noscript><main id="main">${body}</main>${footer()}</body></html>`;
 }
 
 const breadcrumbs = (items) => `<nav class="breadcrumbs" aria-label="Brødsmulesti"><ol>${items.map((item, index) => `<li>${index === items.length - 1 ? `<span aria-current="page">${escapeHtml(item.label)}</span>` : `<a href="${escapeHtml(item.href)}">${escapeHtml(item.label)}</a>`}</li>`).join("")}</ol></nav>`;
 
 export function renderHomePage(store) {
   const products = (store?.products || []).slice(0, 8);
-  const categories = NAVIGATION.slice(0, 5)
+  const categories = NAVIGATION.slice(0, 6)
     .map(([handle, label]) => collectionByHandle(store, handle) && `<a href="/collections/${handle}">${label}<span>Se utvalget ↗</span></a>`)
     .filter(Boolean).join("");
-  const body = `<section class="home-hero"><div class="hero-images"><img src="/assets/hero-volleyball.jpg" alt="Volleyballspillere på banen" width="1600" height="1067" fetchpriority="high"><img src="/assets/hero-volleyball-player.jpg" alt="Volleyballspiller i drakt" width="1125" height="1687"></div><div class="hero-shade"></div><div class="hero-copy"><p>Squadra Sport</p><h1>Utstyr for laget.</h1><a class="button button-light" href="/collections/all">Se alle produkter</a></div></section><section class="section"><div class="section-heading"><div><p class="eyebrow">Fra butikken</p><h2>Finn utstyret ditt</h2></div><a href="/collections/all">Hele utvalget ↗</a></div>${categories ? `<div class="category-links">${categories}</div>` : ""}${productGrid(products)}</section><section class="sports-band"><p>Fotball · Volleyball · Håndball · Basketball · Innebandy</p><h2>For trening, kamp og lag.</h2><a class="button" href="/pages/contact">Kontakt oss</a></section>`;
+  const body = `<section class="home-hero"><div class="hero-images"><img src="/assets/hero-volleyball.jpg" alt="Italias kvinnelandslag i volleyball" width="1600" height="1067" fetchpriority="high"><img src="/assets/hero-volleyball-player.jpg" alt="Volleyballspiller i Erreà-drakt" width="1125" height="1687"></div><div class="hero-shade"></div><div class="hero-copy"><p>Squadra Sport</p><h1>Utstyr for laget.</h1><a class="button button-light" href="/collections/all">Se alle produkter</a></div></section><section class="section"><div class="section-heading"><div><p class="eyebrow">Fra butikken</p><h2>Finn utstyret ditt</h2></div><a href="/collections/all">Hele utvalget ↗</a></div>${categories ? `<div class="category-links">${categories}</div>` : ""}${productGrid(store, products)}</section><section class="sports-band"><p>Fotball · Volleyball · Håndball · Basketball · Innebandy</p><h2>For trening, kamp og lag.</h2><a class="button" href="/pages/contact">Kontakt oss</a></section>`;
   return documentHtml({ title: "Squadra Sport | Sport og lagutstyr", description: "Sportsklær og utstyr for laget fra Squadra Sport.", path: "/", body, store });
 }
 
@@ -140,8 +160,10 @@ export function renderCollectionPage(store, handle) {
   const products = handle === "all" ? (store?.products || []) : (collection?.products || [])
     .map((member) => productByHandle(store, member.handle) || member);
   const description = plainText(collection?.seoDescription || collection?.description || "Utforsk utvalget hos Squadra Sport.");
+  const visibleDescription = String(collection?.description || collection?.seoDescription || description)
+    .split(/\r?\n/).map(plainText).join("\n").trim();
   const toolbar = `<div class="collection-toolbar" data-collection-toolbar hidden><details class="price-filter" data-price-filter><summary>Pris <span data-price-summary></span></summary><form data-price-form><div class="price-fields"><label>Fra (kr)<input type="number" name="min_price" min="0" step="0.01" inputmode="decimal" placeholder="0" aria-label="Laveste pris i kroner"></label><label>Til (kr)<input type="number" name="max_price" min="0" step="0.01" inputmode="decimal" placeholder="Ingen grense" aria-label="Høyeste pris i kroner"></label></div><p class="price-error" data-price-error role="alert" hidden></p><div class="price-actions"><button type="submit">Bruk filter</button><button type="button" data-price-reset>Nullstill</button></div></form></details><label class="collection-sort">Sorter <select data-product-sort><option value="default">Anbefalt</option><option value="price-asc">Pris: lav til høy</option><option value="price-desc">Pris: høy til lav</option><option value="name-asc">Navn: A til Å</option></select></label><span class="collection-count" data-product-count aria-live="polite"></span></div>`;
-  const body = `<section class="page-heading"><div class="content-width">${breadcrumbs([{ label: "Hjem", href: "/" }, { label: title }])}<p class="eyebrow">${products.length} produkter</p><h1>${escapeHtml(title)}</h1><p>${escapeHtml(description)}</p></div></section><section class="section"><div class="section-heading"><h2>Produkter</h2><a href="/search">Søk i butikken ↗</a></div>${toolbar}<div data-collection-products>${productGrid(products)}</div><div class="empty-state collection-empty" data-filter-empty hidden><h2>Ingen produkter i dette prisområdet</h2><p>Prøv en annen pris, eller nullstill filteret.</p></div></section>`;
+  const body = `<section class="page-heading"><div class="content-width">${breadcrumbs([{ label: "Hjem", href: "/" }, { label: title }])}<p class="eyebrow">${products.length} produkter</p><h1>${escapeHtml(title)}</h1><p>${escapeHtml(visibleDescription)}</p></div></section><section class="section"><div class="section-heading"><h2>Produkter</h2><a href="/search">Søk i butikken ↗</a></div>${toolbar}<div data-collection-products>${productGrid(store, products)}</div><div class="empty-state collection-empty" data-filter-empty hidden><h2>Ingen produkter i dette prisområdet</h2><p>Prøv en annen pris, eller nullstill filteret.</p></div></section>`;
   return documentHtml({ title: `${title} | Squadra Sport`, description, path: `/collections/${handle}`, body, store });
 }
 
@@ -170,7 +192,7 @@ export function renderProductPage(store, product, availability = {}) {
     ? '<p class="product-note">Bildene kan vise en annen farge enn den du har valgt.</p>'
     : "";
   const description = productDescription(product.description || product.seoDescription || "");
-  const body = `<section class="product-page"><div class="content-width">${breadcrumbs([{ label: "Hjem", href: "/" }, { label: "Produkter", href: "/collections/all" }, { label: product.title }])}<div class="product-layout">${gallery}<div class="product-details"><p class="eyebrow">${escapeHtml(product.brand || "Squadra Sport")}</p><h1>${escapeHtml(product.title)}</h1><p class="product-price" data-product-price>${first ? money(first.price) : ""}</p><p class="product-note">Frakt beregnes i kassen.</p><div class="product-form">${variantOptions}${colorImageNote}<label class="quantity-label">Antall<input type="number" min="1" max="20" value="1" inputmode="numeric" data-quantity></label><button class="button" type="button" data-add-to-cart data-id="${escapeHtml(product.id)}" data-handle="${escapeHtml(product.handle)}" data-title="${escapeHtml(product.title)}" data-image="${escapeHtml(imageUrl(image, 480))}" data-variant="${escapeHtml(first?.id || "")}" data-price="${escapeHtml(first?.price || "")}" data-available="${available}"${available ? "" : " disabled"}>${available ? "Legg i handlekurv" : "Ikke tilgjengelig"}</button></div>${description ? `<div class="description"><h2>Om produktet</h2><p>${escapeHtml(description)}</p></div>` : ""}</div></div></div></section>`;
+  const body = `<section class="product-page"><div class="content-width">${breadcrumbs([{ label: "Hjem", href: "/" }, { label: "Produkter", href: "/collections/all" }, { label: product.title }])}<div class="product-layout">${gallery}<div class="product-details"><p class="eyebrow">${escapeHtml(productBrand(store, product))}</p><h1>${escapeHtml(product.title)}</h1><p class="product-price" data-product-price>${first ? money(first.price) : ""}</p><p class="product-note">Frakt beregnes i kassen.</p><div class="product-form">${variantOptions}${colorImageNote}<label class="quantity-label">Antall<input type="number" min="1" max="20" value="1" inputmode="numeric" data-quantity></label><button class="button" type="button" data-add-to-cart data-id="${escapeHtml(product.id)}" data-handle="${escapeHtml(product.handle)}" data-title="${escapeHtml(product.title)}" data-image="${escapeHtml(imageUrl(image, 480))}" data-variant="${escapeHtml(first?.id || "")}" data-price="${escapeHtml(first?.price || "")}" data-available="${available}"${available ? "" : " disabled"}>${available ? "Legg i handlekurv" : "Ikke tilgjengelig"}</button></div>${description ? `<div class="description"><h2>Om produktet</h2><p>${escapeHtml(description)}</p></div>` : ""}</div></div></div></section>`;
   return documentHtml({ title: `${product.seoTitle || product.title} | Squadra Sport`, description: productDescription(product.seoDescription || description || product.title).slice(0, 155), path: `/products/${product.handle}`, body, store });
 }
 

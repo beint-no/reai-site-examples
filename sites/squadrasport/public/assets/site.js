@@ -484,14 +484,21 @@ const searchProducts = async (query) => {
     const response = await fetch("/reai/catalog");
     if (!response.ok) throw new Error();
     const catalog = await response.json();
+    const brandFor = (product) => {
+      if (product.brand && product.brand !== "Squadra Sport") return product.brand;
+      const memberships = (catalog.collections || []).filter((collection) => collection.products?.some((member) => member.handle === product.handle));
+      if (memberships.some((collection) => collection.handle === "medisinsk") || /sixtus/i.test(product.title)) return "Sixtus";
+      if (memberships.some((collection) => /(?:overdel|shorts|spilletroyer|treningsbukse|hettegensere)/.test(collection.handle)) || /\berre[aà]\b/i.test(`${product.title} ${product.description || ""}`)) return "Erreà";
+      return product.brand || "Squadra Sport";
+    };
     const products = (catalog.products || []).filter((product) =>
-      `${product.title || ""} ${product.brand || ""}`.toLocaleLowerCase("nb-NO")
+      `${product.title || ""} ${brandFor(product)}`.toLocaleLowerCase("nb-NO")
         .includes(query.toLocaleLowerCase("nb-NO")));
     searchStatus.textContent = products.length ? `${products.length} treff` : "Ingen produkter funnet.";
     searchResults.innerHTML = products.map((product) => {
       const image = product.images?.[0];
       const prices = (product.variants || []).map((variant) => Number(variant.price));
-      return `<article class="product-card"><a class="product-card-image" href="/products/${escapeHtml(product.handle)}">${image?.url ? `<img src="${escapeHtml(image.url)}" alt="${escapeHtml(image.alt || product.title)}" loading="lazy">` : '<span class="image-placeholder">SQUADRA</span>'}</a><div class="product-card-copy"><h3><a href="/products/${escapeHtml(product.handle)}">${escapeHtml(product.title)}</a></h3>${prices.length ? `<strong>${money(Math.min(...prices))}</strong>` : ""}</div></article>`;
+      return `<article class="product-card"><a class="product-card-image" href="/products/${escapeHtml(product.handle)}">${image?.url ? `<img src="${escapeHtml(image.url)}" alt="${escapeHtml(image.alt || product.title)}" loading="lazy">` : '<span class="image-placeholder">SQUADRA</span>'}</a><div class="product-card-copy"><p>${escapeHtml(brandFor(product))}</p><h3><a href="/products/${escapeHtml(product.handle)}">${escapeHtml(product.title)}</a></h3>${prices.length ? `<strong>${money(Math.min(...prices))}</strong>` : ""}</div></article>`;
     }).join("");
   } catch {
     searchStatus.textContent = "Søket er midlertidig utilgjengelig.";
