@@ -40,10 +40,10 @@ img { display: block; max-width: 100%; }
 .menu-toggle { display: none; border: 1px solid var(--ink); border-radius: 0; padding: 7px 11px; background: white; }
 
 .home-hero { position: relative; display: grid; min-height: min(58vw, 590px); overflow: hidden; place-items: end start; color: white; background: #172026; }
-.hero-images { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr 1fr; }
+.hero-images { position: absolute; inset: 0; display: grid; grid-template-columns: 1.15fr .85fr; }
 .hero-images img { width: 100%; height: 100%; object-fit: cover; }
 .hero-images img:first-child { object-position: center 44%; }
-.hero-images img:last-child { object-position: center 46%; }
+.hero-images img:last-child { object-position: center 90%; }
 .hero-shade { position: absolute; inset: 0; background: linear-gradient(0deg, #000b, transparent 70%), linear-gradient(90deg, #0007, transparent 55%); }
 .hero-copy { position: relative; z-index: 1; width: min(calc(100% - 80px), var(--width)); padding: 60px 24px; text-align: left; }
 .hero-copy p { margin: 0 0 12px; font-size: .88rem; font-weight: 600; letter-spacing: .28em; text-transform: uppercase; }
@@ -97,6 +97,9 @@ img { display: block; max-width: 100%; }
 .collection-sort select { min-height: 44px; max-width: 210px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 3px; background: white; }
 .collection-count { margin-left: auto; color: var(--muted); font-size: .84rem; }
 .collection-empty { margin-top: 25px; }
+.collection-categories { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 30px; padding-bottom: 8px; scrollbar-width: thin; }
+.collection-categories a { flex: none; padding: 10px 15px; border: 1px solid var(--line); border-radius: 3px; font-size: .88rem; text-decoration: none; white-space: nowrap; }
+.collection-categories a:hover, .collection-categories a[aria-current="page"] { border-color: var(--ink); color: white; background: var(--ink); }
 .sports-band { padding: clamp(70px, 9vw, 120px) 24px; color: white; background: #182532; text-align: center; }
 .sports-band p { margin: 0 0 17px; font-size: .73rem; letter-spacing: .15em; text-transform: uppercase; }
 .sports-band h2 { margin: 0 0 30px; font-size: clamp(2rem, 4vw, 4rem); letter-spacing: -.04em; }
