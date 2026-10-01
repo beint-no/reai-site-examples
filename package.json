@@ -42,7 +42,7 @@
     "baseline 2025 with downstream"
   ],
   "devDependencies": {
-    "@cloudflare/workers-types": "5.20260924.1",
+    "@cloudflare/workers-types": "5.20260928.1",
     "typescript": "7.0.2"
   }
 }
