@@ -1,5 +1,8 @@
 # Storefront architecture
 
+This guide describes the Site API storefront examples. For static websites and
+content/data ownership, start with [website kinds](concepts.md#static-websites-and-site-api-websites).
+
 The browser, Worker and ReAI have separate responsibilities. The browser never
 holds the Site credential. The Worker owns page rendering and the integration
 boundary; ReAI owns publication, market prices, availability and checkout state.
