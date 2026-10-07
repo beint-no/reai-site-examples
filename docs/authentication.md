@@ -28,7 +28,7 @@ For a design in this repository:
 
 ```sh
 # Set the plaintext through Wrangler's prompt, not a committed config.
-npx wrangler secret put REAI_SITE_CREDENTIAL --cwd examples/everyday-store
+npx wrangler secret put REAI_SITE_CREDENTIAL --cwd templates/storefront
 ```
 
 Local `.dev.vars` files are ignored. Production tokens are Cloudflare Worker

@@ -2,7 +2,7 @@ name: Checks
 
 on:
   pull_request:
-    paths: ['examples/**', 'starter/**', 'packages/**', 'tools/**', 'docs/**', '*.md', 'package*.json', 'tsconfig.json', '.github/workflows/**']
+    paths: ['demo/**', 'templates/**', 'wrangler.jsonc', 'starter/**', 'packages/**', 'tools/**', 'docs/**', '*.md', 'package*.json', 'tsconfig.json', '.github/workflows/**']
   push:
     branches: [main]
 

@@ -1,9 +1,9 @@
 {
   "$schema": "https://unpkg.com/wrangler/config-schema.json",
-  "name": "test-reai-everyday-store",
+  "name": "local-reai-storefront-template",
   "main": "worker.js",
   "compatibility_date": "2026-09-28",
-  "workers_dev": true,
+  "workers_dev": false,
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",

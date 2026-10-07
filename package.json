@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "version": "1.0.0",
-  "description": "Public ReAI Sites guide, generic examples and standalone storefront export",
+  "description": "One complete ReAI demo store, Site API guide and standalone storefront template",
   "license": "MIT",
   "engines": {
     "node": ">=26",
@@ -30,16 +30,17 @@
     "check": "npm run typecheck && npm run check:client-boundary && npm test && npm run build && npm run check:workers && npm run check:docs && npm run check:contract && npm run check:dependencies",
     "typecheck": "tsc --project tsconfig.json",
     "check:client-boundary": "node tools/check-site-api-boundary.mjs",
-    "test": "node --test packages/reai-cloudflare-storefront/*.test.mjs packages/reai-site-client/*.test.mjs starter/src/*.test.js tools/*.test.mjs",
-    "build": "node tools/examples.mjs build all",
-    "check:workers": "node tools/examples.mjs check all",
+    "test": "node --test packages/reai-cloudflare-storefront/*.test.mjs packages/reai-site-client/*.test.mjs starter/src/*.test.js tools/*.test.mjs demo/src/*.test.mjs demo/tools/*.test.mjs",
+    "build": "node tools/examples.mjs build storefront",
+    "check:workers": "wrangler deploy --dry-run && node tools/examples.mjs check storefront",
     "check:docs": "node tools/check-docs.mjs",
     "check:contract": "node tools/check-openapi.mjs",
     "check:dependencies": "npm audit --audit-level=high",
     "generate:site-api": "node tools/generate-site-api.mjs",
-    "dev": "node tools/examples.mjs dev",
-    "demo": "node tools/demo-server.mjs",
-    "export": "node tools/export-storefront.mjs"
+    "dev": "wrangler dev",
+    "demo": "node tools/demo-preview.mjs",
+    "export": "node tools/export-storefront.mjs",
+    "deploy": "npm run check && wrangler deploy"
   },
   "browserslist": [
     "baseline 2025 with downstream"

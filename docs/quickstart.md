@@ -1,69 +1,53 @@
-# Run a design and connect ReAI
+# Run the demo or export a client starter
 
-## Try the fictional demo
-
-Requires Node.js 26+ and npm 11.19+ for this examples repository.
+## Explore locally
 
 ```sh
 npm ci
-npm run demo -- everyday-store
-# Stop with Ctrl+C before using the same port for another theme.
-npm run demo -- studio-store
+npm run demo
 ```
 
-Open `http://127.0.0.1:8787`. Set `DEMO_PORT` to choose another loopback port.
-The demo supplies an explicit synthetic catalog, marks responses noindex and
-rejects checkout creation. It does not connect to a real tenant, create a Site,
-read a production credential or change hosting. Its product illustrations are
-abstract SVGs, not merchant photographs.
+Open the printed loopback URL. This explicit offline preview uses the fictional
+seed definitions and rejects checkout. It exercises design, routes, variants,
+collections, cart and public API exploration without an account or token.
 
-The demo harness is separate from the deployable Worker. Missing credentials or
-ReAI failures in the normal Worker remain setup/error states; they never cause a
-silent switch to mock products.
+## Connect the Worker
 
-## Connect an actual test Site
+Choose one authorized demo tenant/Site. Follow [management](management.md) to
+configure a market, publish the demo products and collections, and issue a scoped
+credential. Use the live management OpenAPI for request fields. Keep operator
+credentials and internal IDs outside this public source tree.
 
-1. Create a Site under the intended ReAI tenant and enable commerce if needed.
-2. Configure a market and publish products with that market's prices. Importing
-   a catalog from another system alone does not publish it to the Site.
-3. Create a Site credential with `site:read`, `commerce:catalog:read` and
-   `commerce:checkout:create`. Use a test Site appropriate to the work. The
-   advanced cached integration additionally requires availability read.
-4. Configure the Site preview domain before testing hosted checkout return URLs.
+Create ignored .dev.vars at the repository root:
+
+```text
+REAI_SITE_CREDENTIAL=<Site-scoped delivery token>
+```
+
+Run npm run dev. wrangler.jsonc selects the backend, market and explicit checkout
+mode. The Worker discovers allowed locales from Site metadata. Configure Norwegian
+and English in ReAI to demonstrate translated product/collection data.
+
+## Enable checkout deliberately
+
+Verify the actual payment environment and merchant readiness first. A test
+company or preview credential does not automatically use Adyen TEST. Use
+DEMO_CHECKOUT_ENABLED=true only with a verified DEMO_PAYMENT_MODE=test or live.
+The public UI must accurately disclose that mode. Do not run real payment tests
+or promise a redeemable gift card without an implemented service.
+
+Register active/preview domains in the Site to permit checkout return URLs.
+The Worker sends only public variant IDs and quantities; ReAI validates the final
+amount and returns its hosted checkout URL. [Checkout details](checkout.md).
+
+## Export a private starter
 
 ```sh
-cp examples/everyday-store/.dev.vars.example examples/everyday-store/.dev.vars
-# Edit the ignored file; never put its contents into Git.
-npm run dev -- everyday-store
+npm run export -- storefront /absolute/path/to/new-private-repo
 ```
 
-Use `REAI_API_BASE_URL=https://app.reai.no` and put your server-side credential in
-`REAI_SITE_CREDENTIAL`. The starter selects the Site's default market and its
-configured default locale. English and Norwegian UI are included. These simple
-examples do not include a shopper-facing market selector.
-
-Catalog responses can be explored in [the delivery API explorer](https://app.reai.no/openapi/site/ui).
-For local hosted checkout, use a public HTTPS test hostname configured on the
-Site; a loopback hostname is not a substitute for the Site's approved domains.
-
-## Adapt for a client
-
-```sh
-npm run export -- studio-store /absolute/path/to/new-private-repo
-cd /absolute/path/to/new-private-repo
-npm install
-npm run check
-```
-
-Export requires a new directory and refuses to overwrite an existing checkout.
-It includes the Worker, browser assets, chosen CSS, generated Site client and
-local instructions. It excludes the offline catalog and demo harness. Commit
-the resulting package-lock.json after the first install; use npm ci afterward.
-
-Initialize a **private** repository for the client. Replace the test Worker
-identifier, configure approved merchant copy, policies and production domains,
-and install the secret before publishing. See [repository ownership](repositories.md).
-
-Run `npm run check` in this repository before changing the shared examples. It
-checks runtime behavior, contract types, source boundaries, documentation links,
-export behavior, dependency security and both Worker dry-run bundles.
+The exporter refuses an existing destination and includes required code/assets,
+with no hub dependency or offline fixtures. Create the private client repository,
+fill in its AGENTS.md business brief and deployment identity, generate/commit its
+lockfile, run its checks and configure its own Site credential. This operation
+does not create a tenant, deploy a Worker or grant access.

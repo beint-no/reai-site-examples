@@ -27,9 +27,12 @@ Use it to render a catalog without one request per product or collection. Its
 catalogVersion and HTTP ETag support revalidation. Availability is separate:
 a cached catalog is not proof that inventory is currently available.
 
-The beginner examples render from the storefront snapshot and leave stock
-validation to checkout. The advanced package batches availability for product
-pages. Neither uses Shopify or WooCommerce at runtime.
+The demo renders from the storefront snapshot and batches availability for
+product pages. Checkout validates stock again. There is no Shopify or WooCommerce
+runtime dependency.
+
+Delivery prices already include VAT. Management product price lists store net
+amounts; never add VAT again to delivered prices in the storefront.
 
 ## Images
 

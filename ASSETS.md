@@ -1,16 +1,15 @@
-# Generic asset provenance
+# Asset provenance
 
-The starter's mark is a generic geometric SVG. The editorial hero was generated
-for the generic ReAI storefront starter; it is not a photograph of any merchant
-or an assertion about products sold by a store. The offline example product
-illustrations are original abstract SVG shapes authored for this repository.
-The fictional product names, prices and collections exist only in the explicit
-demo fixture. They are not production catalog data.
+The demo's gift, mug, heart, cloud, confetti, sun and geometric mark are original
+SVG illustrations authored for this repository. They depict fictional demo
+products and are supplied under MIT. The optional setup command rasterizes them
+and uploads them to ReAI, which serves the public product media and renditions.
+The deployed Worker never imports the seed catalog as a live data fallback.
 
-These original generic assets and source are supplied under this repo's MIT
-license. ReAI-hosted product images and content used after connecting a real
-Site remain governed by the merchant's rights; the example license does not
-grant rights to that runtime content.
+The starter's mark is a generic SVG; its editorial hero was generated for the
+generic ReAI storefront starter and does not depict a merchant or actual stock.
+Keep the MIT source attribution when exporting the starter.
 
-Do not add customer-owned names, photographs, logos or editorial content to
-this public repository. Client adaptations must be private.
+Real merchant content and ReAI-hosted media remain governed by their owners'
+rights. The repository license grants no rights to customer assets. Do not add
+customer names, photographs, logos or private content to this public repository.

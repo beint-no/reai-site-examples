@@ -1,0 +1,160 @@
+{
+  "name": "ReAI Lekebutikken",
+  "products": [
+    {
+      "handle": "heia-reai",
+      "title": "Heia, ReAI!",
+      "description": "Litt ekstra medvind til et veldig nysgjerrig regnskapssystem. Velg et demo-bidrag på 100, 500 eller 1 000 kr. Ingen varer sendes. Dette er et testprodukt, ikke en veldedig donasjon.",
+      "variants": [
+        {
+          "title": "En liten high five",
+          "price": 100
+        },
+        {
+          "title": "Et skikkelig heiarop",
+          "price": 500
+        },
+        {
+          "title": "Stående applaus",
+          "price": 1000
+        }
+      ],
+      "collection": "god-karma",
+      "art": "heart",
+      "en": {
+        "title": "Go, ReAI!",
+        "description": "A little tailwind for a very curious accounting system. Choose a 100, 500 or 1,000 kr demo contribution. No goods are sent. This is a test product, not a charitable donation."
+      }
+    },
+    {
+      "handle": "motivasjon-til-greg",
+      "title": "Motivasjon til Greg",
+      "description": "En symbolsk kopp pågangsmot. Bivirkninger kan inkludere én ekstra idé og et entusiastisk «bare en liten forbedring». Digitalt demo-produkt; ingen kaffe eller motivasjon leveres.",
+      "variants": [
+        {
+          "title": "Litt pågangsmot",
+          "price": 49
+        },
+        {
+          "title": "Maksimal Greg-energi",
+          "price": 149
+        }
+      ],
+      "collection": "kontor-magi",
+      "art": "mug",
+      "en": {
+        "title": "Motivation for Greg",
+        "description": "A symbolic cup of optimism. Side effects may include one extra idea and an enthusiastic “just one small improvement”. A digital demo product; no coffee or motivation is delivered."
+      }
+    },
+    {
+      "handle": "reai-gavekort",
+      "title": "ReAI gavekort",
+      "description": "Et gavekort i demonstrasjonsformat. Prøv beløpsvarianter og checkout uten å love noen en ekte gave. Produktet gir ingen saldo, innløsningskode eller rett til ReAI-tjenester.",
+      "variants": [
+        {
+          "title": "250 kr demo",
+          "price": 250
+        },
+        {
+          "title": "500 kr demo",
+          "price": 500
+        },
+        {
+          "title": "1 000 kr demo",
+          "price": 1000
+        }
+      ],
+      "collection": "smarte-gaver",
+      "art": "gift",
+      "en": {
+        "title": "ReAI gift card",
+        "description": "A gift card in demonstration format. Explore amount variants and checkout without making a real gift promise. This product creates no balance, redemption code or entitlement to ReAI services."
+      }
+    },
+    {
+      "handle": "zen-i-innboksen",
+      "title": "Zen i innboksen",
+      "description": "Et lite, fiktivt øyeblikk uten uleste meldinger. Vi kan ikke love det, men vi kan vise et digitalt produkt med en enkel variant.",
+      "variants": [
+        {
+          "title": "En liten pause",
+          "price": 79
+        }
+      ],
+      "collection": "kontor-magi",
+      "art": "cloud",
+      "en": {
+        "title": "Inbox zen",
+        "description": "A fictional moment without unread messages. We cannot promise it, but we can demonstrate a digital product with one variant."
+      }
+    },
+    {
+      "handle": "kvitteringskonfetti",
+      "title": "Kvitteringskonfetti",
+      "description": "For deg som vil feire at bilaget faktisk ble funnet. Et fiktivt produkt for å utforske bilder, varianter og tilgjengelighet.",
+      "variants": [
+        {
+          "title": "Solgul",
+          "price": 129
+        },
+        {
+          "title": "ReAI-blå",
+          "price": 129
+        }
+      ],
+      "collection": "kontor-magi",
+      "art": "confetti",
+      "en": {
+        "title": "Receipt confetti",
+        "description": "Celebrate finding that receipt. A fictional product for exploring images, options and availability."
+      }
+    },
+    {
+      "handle": "mandagsmot",
+      "title": "Mandagsmot",
+      "description": "En liten dose mandagsoptimisme. Demonstrerer produktgrupper og publisering. Digitalt demo-produkt, ingen fysisk levering.",
+      "variants": [
+        {
+          "title": "Standard dose",
+          "price": 99
+        }
+      ],
+      "collection": "god-karma",
+      "art": "sun",
+      "en": {
+        "title": "Monday courage",
+        "description": "A small dose of Monday optimism. Demonstrates collections and publication. A digital demo product with no physical delivery."
+      }
+    }
+  ],
+  "collections": [
+    {
+      "handle": "god-karma",
+      "title": "God karma",
+      "description": "Små testbidrag. Store smil.",
+      "en": {
+        "title": "Good karma",
+        "description": "Small test contributions. Big smiles."
+      }
+    },
+    {
+      "handle": "kontor-magi",
+      "title": "Kontormagi",
+      "description": "Ting som kanskje gjør mandagen litt hyggeligere.",
+      "en": {
+        "title": "Office magic",
+        "description": "Things that might make Monday a little nicer."
+      }
+    },
+    {
+      "handle": "smarte-gaver",
+      "title": "Smarte gaver",
+      "description": "Gavmildhet, i demonstrasjonsformat.",
+      "en": {
+        "title": "Smart gifts",
+        "description": "Generosity, in demonstration format."
+      }
+    }
+  ]
+}

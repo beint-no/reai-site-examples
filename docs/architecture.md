@@ -1,65 +1,35 @@
-# Storefront architecture
+# One demo Worker
 
-This guide describes the Site API storefront examples. For static websites and
-content/data ownership, start with [website kinds](concepts.md#static-websites-and-site-api-websites).
+The browser, demo Worker and ReAI have separate responsibilities. The browser
+stores only its cart and calls same-origin public routes; it never holds a Site
+credential. The Worker renders pages and uses the generated delivery client.
+ReAI owns published business data and checkout state.
 
-The browser, Worker and ReAI have separate responsibilities. The browser never
-holds the Site credential. The Worker owns page rendering and the integration
-boundary; ReAI owns publication, market prices, availability and checkout state.
-
-## Source layout
-
-| Directory | Purpose |
+| Directory | Responsibility |
 | --- | --- |
-| `starter/src/` | Shared beginner storefront rendering, editable information copy and browser-facing checkout boundary |
-| `starter/public/` | Generic CSS, browser cart script, reusable mark and generated editorial hero |
-| `examples/<design>/` | Theme override, Worker entrypoint and independent Wrangler configuration |
-| `examples/demo-data/` | Explicit fictional fixtures used only by the local offline demo |
-| `packages/reai-site-client/` | Native JS client and generated delivery OpenAPI declarations |
-| `packages/reai-cloudflare-storefront/` | Optional advanced cache, availability, localization and proxy integration |
-| `tools/` | Build, offline demo, standalone export and validation |
+| demo/src/worker.mjs | Site/market/locale discovery, API calls, route validation and checkout boundary |
+| demo/src/storefront.mjs | Page rendering, responsive image metadata and static explanations |
+| demo/public/assets/ | Original design, browser cart, search and API explorer |
+| demo/seed/ | Fictional operator seed definitions; not deployed runtime data |
+| packages/reai-site-client/ | Native client checked against generated delivery declarations |
+| packages/reai-cloudflare-storefront/ | Reusable advanced integration for other private client implementations |
+| starter/ and templates/storefront/ | Simple standalone operational template export |
 
-`npm run build` combines the base assets with each theme under its ignored
-`examples/<design>/public/` directory. Each design's Worker imports the same
-starter renderer. Theme differences do not fork authentication or checkout.
+The demo uses one coherent storefront snapshot for home and shop, direct product
+and collection detail reads, and uncached batch availability on product pages.
+The API playground exercises Site, storefront, catalog, collections, product and
+collection detail, single and batch availability. Checkout is demonstrated through
+the cart, never as an unsafe arbitrary request in the explorer.
 
-## Beginner integration
+Static feature/about/privacy pages work without ReAI. Missing configuration and
+upstream errors stay explicit; the deployed Worker never imports seed fixtures.
+The separate Node preview intercepts only a synthetic origin and disables payment.
 
-The starter obtains Site identity and the selected default market, then reads
-one coherent `commerce/storefront` projection. It renders homepage, collections,
-product pages, cart and editable information pages. Requests go through the
-contract-checked Site client. There is no runtime Shopify/WooCommerce request
-and no committed live catalog.
+Checkout requires same-origin JSON, a bounded cart/body, valid UUIDs/quantities and
+an idempotency key retained across retries. The server supplies the return URL and
+accepts only the configured ReAI HTTPS checkout origin. A return redirect does not
+prove payment, so it neither fabricates success nor clears the cart.
 
-The browser stores variant UUIDs and quantities in its cart. `/catalog.json`
-exposes public products for cart labels and estimated totals. `/checkout/start`
-validates same-origin JSON requests, bounds request size, validates line shapes
-and delegates checkout session creation to ReAI.
-
-The beginner renderer deliberately has no shared Cache API layer and no separate
-live availability UI. Prices and stock are authoritatively validated by ReAI at
-checkout. It is a starting point; use the advanced integration when the storefront
-needs batch stock checks, richer market/locale routing or caching.
-
-## Advanced integration
-
-`packages/reai-cloudflare-storefront` provides a generated-client-backed server
-boundary with configurable renderers, same-origin `/reai/*` routes, market/locale
-contexts and batch availability. Its [package guide](../packages/reai-cloudflare-storefront/README.md)
-documents the renderer exports and hooks.
-
-Its storefront cache is fresh for 60 seconds, may serve stale data while
-revalidating for the following five minutes, and retains a last snapshot for a
-day for transient upstream errors. It keys data by market and locale and uses
-ETags for revalidation. Availability is separate and uncached. Do not equate a
-Worker application cache hit with a `Cf-Cache-Status: HIT` response.
-
-## Errors and credentials
-
-Missing runtime bindings render a setup state. Upstream failures render a generic
-unavailable state. Checkout errors can retain public stock conflict information;
-credentials and private tenant records must never enter browser responses.
-
-The offline demo is an explicit Node process that intercepts only its synthetic
-upstream origin. It never changes the production Worker's behavior. Exports
-include neither that server nor its catalog fixtures.
+For [static versus Site API](concepts.md#static-websites-and-site-api-websites),
+start with the concepts guide. For optional reusable cache/renderer integration,
+see [the package guide](../packages/reai-cloudflare-storefront/AGENTS.md).
