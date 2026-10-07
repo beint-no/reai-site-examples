@@ -19,16 +19,19 @@ const products = blueprint.products.map((p, i) => ({
   brand: "ReAI Demo",
   seoTitle: p.title,
   images: [],
-  variants: p.variants.map((v) => ({
+  variants: p.variants.map((v, index) => ({
     id: uuid(next++),
     price: v.price,
-    sku: `DEMO-${next}`,
+    sku: `REAI-DEMO-${p.handle}-${index + 1}`,
     options: [{ name: "Dose", value: v.title }],
     vatRate: 25,
   })),
 }));
 const collections = blueprint.collections.map((c, i) => ({
-  ...c,
+  handle: c.handle,
+  title: c.title,
+  description: c.description,
+  seoTitle: c.title,
   id: uuid(50 + i),
   products: products.filter(
     (p) =>
@@ -38,6 +41,7 @@ const collections = blueprint.collections.map((c, i) => ({
 }));
 const store = {
   catalogVersion: 1,
+  marketId: uuid(9002),
   marketHandle: "default",
   locale: "nb-NO",
   currency: "NOK",
@@ -49,13 +53,23 @@ globalThis.fetch = async (input, init) => {
   const url = new URL(input);
   if (url.origin !== "http://demo-api.invalid") return upstream(input, init);
   const locale = url.searchParams.get("locale") || "nb-NO",
-    context = { marketHandle: "default", locale, currency: "NOK" };
+    context = {
+      marketId: uuid(9002),
+      marketHandle: "default",
+      locale,
+      currency: "NOK",
+    };
   if (url.pathname.endsWith("/site"))
     return Response.json({
-      id: uuid(1),
+      id: uuid(9001),
       name: "ReAI Lekebutikken",
+      sourceLocale: "nb-NO",
+      status: "enabled",
       markets: [
         {
+          id: uuid(9002),
+          name: "Demo Norge",
+          countries: ["NO"],
           handle: "default",
           locales: ["nb-NO", "en"],
           defaultLocale: "nb-NO",
@@ -70,12 +84,25 @@ globalThis.fetch = async (input, init) => {
   const translatedCollections = locale.startsWith("en")
     ? collections.map((c, i) => ({ ...c, ...blueprint.collections[i].en }))
     : collections;
+  const collectionDetails = translatedCollections.map((c) => ({
+    ...c,
+    products: c.products.map((p) => {
+      const item = translatedProducts.find((x) => x.id === p.id);
+      return {
+        id: item.id,
+        handle: item.handle,
+        title: item.title,
+        brand: item.brand,
+        price: item.variants[0].price,
+      };
+    }),
+  }));
   if (url.pathname.endsWith("/storefront"))
     return Response.json({
       ...store,
       locale,
       products: translatedProducts,
-      collections: translatedCollections,
+      collections: collectionDetails,
     });
   if (url.pathname.endsWith("/catalog"))
     return Response.json({
@@ -85,21 +112,25 @@ globalThis.fetch = async (input, init) => {
       collections: undefined,
     });
   if (url.pathname.endsWith("/collections"))
-    return Response.json({ ...context, collections: translatedCollections });
+    return Response.json({
+      ...context,
+      catalogVersion: 1,
+      collections: collectionDetails.map(({ products, ...summary }) => summary),
+    });
   if (url.pathname.includes("/products/")) {
     const product = translatedProducts.find(
       (p) => p.handle === url.pathname.split("/").pop(),
     );
     return product
-      ? Response.json({ ...product, ...context })
+      ? Response.json({ ...product, ...context, catalogVersion: 1 })
       : Response.json({}, { status: 404 });
   }
   if (url.pathname.includes("/collections/")) {
-    const c = translatedCollections.find(
+    const c = collectionDetails.find(
       (c) => c.handle === url.pathname.split("/").pop(),
     );
     return c
-      ? Response.json({ ...c, ...context })
+      ? Response.json({ ...c, ...context, catalogVersion: 1 })
       : Response.json({}, { status: 404 });
   }
   if (url.pathname.endsWith("/availability"))
@@ -188,8 +219,14 @@ const server = http.createServer(async (req, res) => {
             "LOKAL VISNING · API-FIKSTUR",
           )
           .replace("REAI SITE API, IN ACTION", "LOCAL PREVIEW · API FIXTURE")
-          .replace("Data fra ReAI ·", "Lokal, fiktiv katalog ·")
-          .replace("Data from ReAI ·", "Local fictional catalog ·"),
+          .replace(
+            "Data fra ReAI · Katalog, priser og varianter. Ikke hardkodet magi.",
+            "Fiktiv lokal testkatalog · Produksjonen leser data fra ReAI.",
+          )
+          .replace(
+            "Data from ReAI · Catalog, prices and variants. No hardcoded magic.",
+            "Fictional local catalog · Production reads data from ReAI.",
+          ),
       );
     }
     res.end(body);
