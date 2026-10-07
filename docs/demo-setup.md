@@ -58,6 +58,10 @@ storefront, catalog, product/collection detail, responsive images and availabili
 Enable checkout only after the backend payment mode and merchant disclosures are
 confirmed. Set DEMO_CHECKOUT_ENABLED=true and DEMO_PAYMENT_MODE=test or live in the
 reviewed Worker configuration; the label must agree with the actual provider.
+For live payments, set DEMO_MERCHANT_NAME and DEMO_MERCHANT_ORG_NUMBER to the
+verified recipient. Missing merchant name disables live checkout. The published
+demo uses production Adyen LIVE and identifies its recipient before checkout;
+the offline preview remains payment-free.
 Merely setting test in this Worker does not switch Adyen into TEST.
 
 Follow [Cloudflare publishing](cloudflare-deployment.md) for the custom domain and
