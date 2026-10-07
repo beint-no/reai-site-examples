@@ -699,6 +699,14 @@ em {
 .fineprint {
   font-size: 0.77rem;
 }
+.payment-disclosure {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  margin: 20px 0;
+}
+.payment-disclosure p {
+  font-size: 0.95rem;
+}
 .cart-row {
   display: grid;
   grid-template-columns: 70px 1fr 70px;

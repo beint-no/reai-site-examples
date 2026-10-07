@@ -1,5 +1,5 @@
 // @ts-check
-/** @typedef {{ REAI_SITE_CREDENTIAL?: string, REAI_API_BASE_URL?: string, DEMO_MARKET?: string, DEMO_CHECKOUT_ENABLED?: string, DEMO_PAYMENT_MODE?: string, ASSETS: Fetcher }} DemoEnv */
+/** @typedef {{ REAI_SITE_CREDENTIAL?: string, REAI_API_BASE_URL?: string, DEMO_MARKET?: string, DEMO_CHECKOUT_ENABLED?: string, DEMO_PAYMENT_MODE?: string, DEMO_MERCHANT_NAME?: string, DEMO_MERCHANT_ORG_NUMBER?: string, ASSETS: Fetcher }} DemoEnv */
 import { ReaiSiteClient } from "../../packages/reai-site-client/client.mjs";
 import {
   HANDLE,
@@ -59,13 +59,16 @@ export default {
             : "nb-NO";
     const paymentMode =
       ["test", "live"].includes(env.DEMO_PAYMENT_MODE || "") &&
-      env.DEMO_CHECKOUT_ENABLED === "true"
+      env.DEMO_CHECKOUT_ENABLED === "true" &&
+      (env.DEMO_PAYMENT_MODE !== "live" || !!env.DEMO_MERCHANT_NAME?.trim())
         ? env.DEMO_PAYMENT_MODE
         : "disabled";
     let context = {
       locale,
       paymentMode,
       configured: !!env.REAI_SITE_CREDENTIAL,
+      merchantName: env.DEMO_MERCHANT_NAME?.trim(),
+      merchantOrgNumber: env.DEMO_MERCHANT_ORG_NUMBER?.trim(),
       checkoutOrigin: new URL(env.REAI_API_BASE_URL || "https://app.reai.no")
         .origin,
     };
