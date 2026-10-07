@@ -171,3 +171,42 @@ test("unsafe upstream checkout destination is rejected", async () =>
         ? site()
         : Response.json({ checkoutUrl: "https://other.invalid/collect" }),
   ));
+
+test("all field-guide pages are credential-free and use the selected language", async () => {
+  for (const slug of ['payments', 'shipping', 'discounts', 'catalog', 'markets', 'integration']) {
+    for (const lang of ['en', 'nb']) {
+      const r = await worker.fetch(new Request(`https://demosite.reai.no/learn/${slug}/?lang=${lang}`), { ASSETS: env.ASSETS }, {});
+      assert.equal(r.status, 200);
+      assert.equal(r.headers.get('Content-Language'), lang === 'en' ? 'en' : 'nb-NO');
+      assert.doesNotMatch(await r.text(), /not-public-secret/);
+    }
+  }
+});
+
+test("product-list explorer forwards the selected market/locale through the Site client", async () => mocked(async () => {
+  const r = await worker.fetch(new Request('https://demosite.reai.no/reai/products?lang=en'), env, {});
+  assert.equal(r.status, 200);
+  assert.deepEqual(await r.json(), { products: [] });
+}, async (input, init) => {
+  if (String(input).endsWith('/site')) return site();
+  const url = new URL(input);
+  assert.equal(url.pathname, '/site/v1/commerce/products');
+  assert.equal(url.searchParams.get('market'), 'default');
+  assert.equal(url.searchParams.get('locale'), 'en');
+  assert.equal(init.headers.get('Authorization'), 'Bearer not-public-secret');
+  return Response.json({ products: [] });
+}));
+
+test("collection pages preserve API ordering while resolving lightweight members", async () => mocked(async () => {
+  const r = await worker.fetch(new Request('https://demosite.reai.no/collections/ordered/'), env, {});
+  assert.equal(r.status, 200);
+  const html = await r.text();
+  assert.ok(html.indexOf('/products/second/') < html.indexOf('/products/first/'));
+}, async (input) => {
+  if (String(input).endsWith('/site')) return site();
+  if (String(input).includes('/storefront')) return Response.json({
+    locale: 'nb-NO', currency: 'NOK', collections: [],
+    products: ['first', 'second'].map((handle) => ({ id: handle, handle, title: handle, images: [], variants: [{ price: 100 }] })),
+  });
+  return Response.json({ handle: 'ordered', title: 'Ordered', products: [{id: 'second'}, {id: 'first'}] });
+}));

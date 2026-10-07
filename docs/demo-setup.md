@@ -30,7 +30,13 @@ node demo/tools/setup.mjs --tenant-id <authorized-demo-tenant-id> --apply --writ
 If the tenant's online store module is disabled, explicitly enable it in ReAI or
 add --enable-online-store. Setup creates/reuses the named demo Site and NOK price
 list, digital product variants, product images/metadata, English translations,
-publication and three collections. Seed amounts are the displayed gross prices;
+publication, three manual collections and one brand-based automated collection.
+It also seeds an illustrative compare-at price and three market-scoped demo codes:
+REAI-DEMO10 (10% catalog-wide), REAI-MAGI20 (20% on Kontormagi with 100 NOK
+eligible undiscounted gross minimum), and REAI-FRAKT (free shipping only).
+Customers enter codes in hosted checkout; session creation does not accept a code.
+Free shipping has no effect on this digital catalog. Existing conflicting rules
+stop setup rather than silently overwrite an operator change. Seed amounts are the displayed gross prices;
 Image uploads use a content fingerprint for idempotent retries and librsvg to
 preserve the original gradients and SVG filters.
 setup derives net price-list entries from the approved VAT code and tenant VAT

@@ -6,6 +6,7 @@ resources/ for convenience; clients have no runtime dependency on either repo.
 
 ## What lives here
 
+- demo/content/: bilingual educational lessons and delivery-operation coverage.
 - demo/src/: server-rendered demo storefront, static explanations, public API
   explorer and bounded same-origin hosted checkout startup.
 - demo/public/: original reusable design, CSS, browser-local cart and illustrations.
@@ -42,7 +43,10 @@ Never commit tokens, private customer data, or raw tenant/catalog exports.
 
 wrangler.jsonc targets only reai-demo-store at https://demosite.reai.no.
 npm run deploy checks and deploys locally; CI validates only.
-Set REAI_SITE_CREDENTIAL as a Worker secret. The published demo uses Adyen LIVE
+Set REAI_SITE_CREDENTIAL as a Worker secret. The published field guide at /features/ explains payments, shipping, discounts,
+catalog, markets and integration; /api/ exercises all nine delivery reads.
+Shipping and inventory bundles are documented capabilities, not fulfillment
+promises for this digital catalog. The published demo uses Adyen LIVE
 and clearly labels real payments and the configured recipient. Offline preview
 always disables checkout. Checkout requires an explicit enabled binding, a
 verified payment mode and a named merchant for live payments. A preview, Site

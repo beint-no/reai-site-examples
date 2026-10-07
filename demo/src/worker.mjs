@@ -3,6 +3,7 @@
 import { ReaiSiteClient } from "../../packages/reai-site-client/client.mjs";
 import {
   HANDLE,
+  learningRoutes,
   renderHome,
   renderShop,
   renderProduct,
@@ -102,6 +103,7 @@ export default {
           "/api",
           "/checkout/return",
           "/cart",
+          ...learningRoutes,
         ].includes(path)
       ) {
         const html =
@@ -244,6 +246,7 @@ export default {
         if (endpoint === "site") return response(site, 200, true);
         if (endpoint === "storefront") result = client.storefront(delivery);
         else if (endpoint === "catalog") result = client.catalog(delivery);
+        else if (endpoint === "products") result = client.products(delivery);
         else if (endpoint === "collections")
           result = client.collections(delivery);
         else if (
@@ -285,11 +288,14 @@ export default {
         if (!HANDLE.test(handle))
           return response(renderError(404, context), 404);
         const collection = await data(client.collection(handle, delivery));
-        const ids = new Set(collection.products.map((p) => p.id));
+        const byId = new Map(store.products.map((p) => [p.id, p]));
         return finish(
           renderShop(store, context, {
             ...collection,
-            products: store.products.filter((p) => ids.has(p.id)),
+            products: collection.products.flatMap((p) => {
+              const full = byId.get(p.id);
+              return full ? [full] : [];
+            }),
           }),
           context,
         );

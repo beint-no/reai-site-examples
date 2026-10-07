@@ -22,6 +22,7 @@ const products = blueprint.products.map((p, i) => ({
   variants: p.variants.map((v, index) => ({
     id: uuid(next++),
     price: v.price,
+    compareAtPrice: v.compareAtPrice ?? null,
     sku: `REAI-DEMO-${p.handle}-${index + 1}`,
     options: [{ name: "Dose", value: v.title }],
     vatRate: 25,
@@ -35,7 +36,7 @@ const collections = blueprint.collections.map((c, i) => ({
   id: uuid(50 + i),
   products: products.filter(
     (p) =>
-      blueprint.products.find((x) => x.handle === p.handle).collection ===
+      c.type === "automated" || blueprint.products.find((x) => x.handle === p.handle).collection ===
       c.handle,
   ),
 }));
@@ -104,6 +105,8 @@ globalThis.fetch = async (input, init) => {
       products: translatedProducts,
       collections: collectionDetails,
     });
+  if (url.pathname.endsWith("/products"))
+    return Response.json({ ...context, catalogVersion: 1, products: translatedProducts });
   if (url.pathname.endsWith("/catalog"))
     return Response.json({
       ...store,

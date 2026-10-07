@@ -39,8 +39,9 @@ if (!apply) {
           prices: p.variants.map((v) => v.price),
           stockItem: false,
         })),
-        collections: seed.collections.map((c) => c.handle),
-        checkout: "unchanged; disabled in Worker by default",
+        collections: seed.collections.map((c) => ({handle:c.handle, type:c.type || "manual"})),
+        discounts: seed.discounts,
+        checkout: "unchanged; provider and Worker payment configuration are separate",
       },
       null,
       2,
@@ -225,7 +226,8 @@ for (const definition of seed.products) {
     await management(
       `/api/product-price-lists/${priceList.id}/prices/${variant.productVariantId}`,
       "PUT",
-      { sellingPrice: netPriceForDisplay(definition.variants[i].price, rate) },
+      { sellingPrice: netPriceForDisplay(definition.variants[i].price, rate),
+        compareAtPrice: definition.variants[i].compareAtPrice == null ? null : netPriceForDisplay(definition.variants[i].compareAtPrice, rate) },
     );
   }
   if (!product.images.length) {
@@ -283,15 +285,19 @@ for (const [i, c] of seed.collections.entries()) {
     handle: c.handle,
     title: c.title,
     description: c.description,
-    productHandles,
+    ...(c.type === "automated" ? {} : { productHandles }),
     published: true,
-    type: "manual",
-    sort: "manual",
+    type: c.type || "manual",
+    ...(c.rules ? { rules: c.rules } : {}),
+    sort: c.type === "automated" ? "title" : "manual",
     sortOrder: i,
   };
-  if (!collections.some((x) => x.handle === c.handle))
+  const existing = collections.find((x) => x.handle === c.handle);
+  if (existing && (existing.type !== body.type || (c.rules && JSON.stringify(existing.rules) !== JSON.stringify(c.rules))))
+    throw new Error(`Demo collection rule conflict for ${c.handle}.`);
+  if (!existing)
     await management(`${base}/commerce/collections`, "POST", body);
-  else
+  else if (!c.type || c.type === "manual")
     await management(
       `${base}/commerce/collections/${c.handle}/products`,
       "PUT",
@@ -303,6 +309,26 @@ for (const [i, c] of seed.collections.entries()) {
       "PUT",
       c.en,
     );
+}
+// Codes are scoped to the dedicated demo market; never inspect or rewrite other Sites.
+const configuredMarkets = await management(`${base}/commerce/markets`);
+const demoMarket = configuredMarkets.find((m) => m.handle === "default");
+const discountBase = `${base}/commerce/markets/${demoMarket.id}/discounts`;
+const configuredCollections = await management(`${base}/commerce/collections`);
+const existingDiscounts = await management(discountBase);
+for (const definition of seed.discounts) {
+  const { collectionHandle, ...rule } = definition;
+  const collectionId = collectionHandle ? configuredCollections.find((c) => c.handle === collectionHandle)?.id : null;
+  if (collectionHandle && !collectionId) throw new Error("Demo discount collection is missing.");
+  const body = { ...rule, collectionId, includesFreeShipping: rule.includesFreeShipping || false,
+    minimumProductGross: rule.minimumProductGross ?? null, enabled: true, endsAt: null };
+  const existing = existingDiscounts.find((d) => d.code === rule.code);
+  if (existing) {
+    if (Object.entries(body).some(([key, value]) => existing[key] !== value) || existing.status !== "active")
+      throw new Error(`Demo discount conflict for ${rule.code}; review changed rules explicitly.`);
+  } else {
+    await management(discountBase, "POST", { ...body, startsAt: new Date().toISOString() });
+  }
 }
 if (args.includes("--write-credential")) {
   const credential = await management(`${base}/credentials`, "POST", {
