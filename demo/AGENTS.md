@@ -6,7 +6,8 @@ original illustrated objects, clear demo labels and accessible mobile layouts.
 Do not add unrelated example Workers or copy real client brands/data here.
 
 src/worker.mjs owns upstream integration and trusted checkout startup;
-src/storefront.mjs owns HTML/editorial copy. public/assets/demo.js owns the local
+src/storefront.mjs owns HTML; content/education.mjs owns the bilingual field guide
+and complete delivery-operation coverage (verified against live OpenAPI). public/assets/demo.js owns the local
 cart, filters and read-only API explorer; demo.css owns presentation. seed/catalog.json
 contains fictional product definitions, not a runtime/live catalog.
 
@@ -21,3 +22,8 @@ not clear the cart or claim payment was completed from a URL parameter alone.
 
 Run npm run check and inspect desktop/mobile, navigation, variants, cart and errors
 before publishing. Root AGENTS.md owns commands and deployment policy.
+
+The connected demo has manual and automated collections, a fictional compare-at
+price and namespaced market discount codes entered in hosted checkout. Shipping
+and inventory bundles are explained platform capabilities; digital demo goods
+never create shipments. Keep these boundaries explicit.

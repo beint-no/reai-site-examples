@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import { operations } from "../demo/content/education.mjs";
+
 import { readFile } from "node:fs/promises";
 
 import {
@@ -25,6 +27,13 @@ const requiredPaths = [
 
 const missingPaths = requiredPaths.filter((path) => !document.paths?.[path]);
 if (missingPaths.length) throw new Error(`Site API OpenAPI is missing paths: ${missingPaths.join(", ")}`);
+
+const contractOperations = Object.entries(document.paths).flatMap(([path, methods]) =>
+  Object.keys(methods).filter((method) => ["get", "post", "put", "patch", "delete"].includes(method))
+    .map((method) => `${method.toUpperCase()} ${path}`));
+const documentedOperations = operations.map(([, method, path]) => `${method} ${path}`);
+if (JSON.stringify([...contractOperations].sort()) !== JSON.stringify([...documentedOperations].sort()))
+  throw new Error("Demo educational operation coverage differs from the live Site contract.");
 
 const imageProperties = document.components?.schemas?.ProductImage?.properties || {};
 const missingImageProperties = ["url", "alt", "width", "height", "renditions"].filter((name) => !imageProperties[name]);

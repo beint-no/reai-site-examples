@@ -117,7 +117,8 @@
       "variants": [
         {
           "title": "Standard dose",
-          "price": 99
+          "price": 99,
+          "compareAtPrice": 149
         }
       ],
       "collection": "god-karma",
@@ -155,6 +156,43 @@
         "title": "Smart gifts",
         "description": "Generosity, in demonstration format."
       }
+    },
+    {
+      "handle": "alle-demo-objekter",
+      "title": "Alle demo-objekter",
+      "description": "En automatisk samling basert på merket ReAI Demo. ReAI holder medlemskapet oppdatert.",
+      "type": "automated",
+      "rules": {
+        "match": "and",
+        "conditions": [
+          {
+            "field": "brand",
+            "op": "equals",
+            "value": "ReAI Demo"
+          }
+        ]
+      },
+      "en": {
+        "title": "All demo objects",
+        "description": "An automated collection based on the ReAI Demo brand. ReAI keeps membership up to date."
+      }
+    }
+  ],
+  "discounts": [
+    {
+      "code": "REAI-DEMO10",
+      "percentage": 10
+    },
+    {
+      "code": "REAI-MAGI20",
+      "percentage": 20,
+      "collectionHandle": "kontor-magi",
+      "minimumProductGross": 100
+    },
+    {
+      "code": "REAI-FRAKT",
+      "percentage": 0,
+      "includesFreeShipping": true
     }
   ]
 }

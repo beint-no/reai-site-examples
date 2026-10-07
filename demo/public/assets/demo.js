@@ -224,7 +224,9 @@ document
   .querySelector("[data-api-explorer]")
   ?.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const data = new FormData(e.currentTarget),
+    const form = e.currentTarget;
+    await populateApiSample(form);
+    const data = new FormData(form),
       endpoint = data.get("endpoint"),
       resource = String(data.get("resource") || ""),
       output = document.querySelector("[data-api-output]");
@@ -241,9 +243,32 @@ document
 save();
 renderCart();
 
-const apiForm=document.querySelector('[data-api-explorer]');
-const requestedProduct=new URL(location.href).searchParams.get('product')||'';
-if(apiForm && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(requestedProduct)) {
- apiForm.querySelector('[name="endpoint"]').value='product';
- apiForm.querySelector('[name="resource"]').value=requestedProduct;
+const apiForm = document.querySelector('[data-api-explorer]');
+if (apiForm) {
+  const params = new URL(location.href).searchParams;
+  const product = params.get('product');
+  const endpoint = product ? 'product' : params.get('endpoint');
+  const resource = product || params.get('resource') || '';
+  const select = apiForm.querySelector('[name="endpoint"]');
+  if (Array.from(select.options).some((option) => option.value === endpoint)) {
+    select.value = endpoint;
+    apiForm.querySelector('[name="resource"]').value = resource.slice(0, 4000);
+  }
+}
+
+async function populateApiSample(form) {
+  const endpoint = form.querySelector('[name="endpoint"]').value;
+  const resource = form.querySelector('[name="resource"]');
+  if (resource.value.trim()) return;
+  if (endpoint === 'product') resource.value = 'heia-reai';
+  if (endpoint === 'collection') resource.value = 'alle-demo-objekter';
+  if (['availability', 'availabilities'].includes(endpoint)) {
+    try {
+      const response = await fetch('/reai/products');
+      if (!response.ok) return;
+      const data = await response.json();
+      const variants = data.products.flatMap((p) => p.variants.map((v) => v.id));
+      resource.value = endpoint === 'availability' ? variants[0] || '' : variants.slice(0, 2).join(',');
+    } catch { /* The explorer displays the resulting HTTP error if sample lookup fails. */ }
+  }
 }

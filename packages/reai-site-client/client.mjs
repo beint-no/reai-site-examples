@@ -22,6 +22,8 @@ const STOREFRONT_PATH = "/site/v1/commerce/storefront";
 /** @type {keyof SiteApiPaths} */
 const CATALOG_PATH = "/site/v1/commerce/catalog";
 /** @type {keyof SiteApiPaths} */
+const PRODUCTS_PATH = "/site/v1/commerce/products";
+/** @type {keyof SiteApiPaths} */
 const PRODUCT_PATH = "/site/v1/commerce/products/{handle}";
 /** @type {keyof SiteApiPaths} */
 const COLLECTIONS_PATH = "/site/v1/commerce/collections";
@@ -136,6 +138,16 @@ export class ReaiSiteClient {
     const headers = new Headers();
     if (operationHeaders["If-None-Match"]) headers.set("If-None-Match", operationHeaders["If-None-Match"]);
     return new SiteApiResponse(await this.#request(CATALOG_PATH, query, { headers }));
+  }
+
+  /**
+   * @param {DeliveryContext} context
+   * @returns {Promise<SiteApiResponse<SiteCatalog>>}
+   */
+  async products(context) {
+    /** @type {SiteApiOperations["products"]["parameters"]["query"]} */
+    const query = context;
+    return new SiteApiResponse(await this.#request(PRODUCTS_PATH, query));
   }
 
   /**

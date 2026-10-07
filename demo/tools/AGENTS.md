@@ -3,7 +3,8 @@
 setup.mjs uses the authenticated management API, outside the deployable Worker.
 Run without --apply to print the plan. Apply requires an explicit tenant ID,
 authorized management token and approved VAT code. It only creates/reuses the
-named demo Site, price list and REAI-DEMO-* products. SKU/publication conflicts
+named demo Site, price list, REAI-DEMO-* products, seeded collections and
+namespaced demo-market discount codes. SKU/publication conflicts
 stop setup; unrelated Sites/products must never be overwritten or deleted.
 
 Original SVG art is rasterized with librsvg and uploaded as product media with
