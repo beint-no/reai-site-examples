@@ -1,0 +1,55 @@
+{
+  "name": "reai-site-examples",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Public ReAI Sites guide, generic examples and standalone storefront export",
+  "license": "MIT",
+  "engines": {
+    "node": ">=26",
+    "npm": ">=11.19"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">=26",
+      "onFail": "error"
+    },
+    "packageManager": {
+      "name": "npm",
+      "version": ">=11.19",
+      "onFail": "error"
+    }
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "fsevents@2.3.3": true,
+    "workerd@1.20261006.1": true
+  },
+  "scripts": {
+    "check": "npm run typecheck && npm run check:client-boundary && npm test && npm run build && npm run check:workers && npm run check:docs && npm run check:contract && npm run check:dependencies",
+    "typecheck": "tsc --project tsconfig.json",
+    "check:client-boundary": "node tools/check-site-api-boundary.mjs",
+    "test": "node --test packages/reai-cloudflare-storefront/*.test.mjs packages/reai-site-client/*.test.mjs starter/src/*.test.js tools/*.test.mjs",
+    "build": "node tools/examples.mjs build all",
+    "check:workers": "node tools/examples.mjs check all",
+    "check:docs": "node tools/check-docs.mjs",
+    "check:contract": "node tools/check-openapi.mjs",
+    "check:dependencies": "npm audit --audit-level=high",
+    "generate:site-api": "node tools/generate-site-api.mjs",
+    "dev": "node tools/examples.mjs dev",
+    "demo": "node tools/demo-server.mjs",
+    "export": "node tools/export-storefront.mjs"
+  },
+  "browserslist": [
+    "baseline 2025 with downstream"
+  ],
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261007.1",
+    "typescript": "7.0.2",
+    "wrangler": "4.148.0"
+  },
+  "overrides": {
+    "sharp": "0.35.5"
+  }
+}
