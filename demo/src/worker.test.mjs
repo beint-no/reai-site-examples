@@ -173,7 +173,7 @@ test("unsafe upstream checkout destination is rejected", async () =>
   ));
 
 test("all field-guide pages are credential-free and use the selected language", async () => {
-  for (const slug of ['payments', 'shipping', 'discounts', 'catalog', 'markets', 'integration']) {
+  for (const slug of ['payments', 'business', 'shipping', 'discounts', 'catalog', 'markets', 'integration']) {
     for (const lang of ['en', 'nb']) {
       const r = await worker.fetch(new Request(`https://demosite.reai.no/learn/${slug}/?lang=${lang}`), { ASSETS: env.ASSETS }, {});
       assert.equal(r.status, 200);

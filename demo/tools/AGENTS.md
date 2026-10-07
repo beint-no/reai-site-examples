@@ -17,3 +17,9 @@ can leave completed setup steps in place; rerun after fixing the cause.
 
 This command never changes Adyen, enables Worker checkout, deploys or changes DNS.
 Preview/live Site credential environments do not establish payment-provider mode.
+
+commerce-options.mjs separately enables Site-specific company/invoice checkout
+and free demo-only store pickup, with explicit flags and --apply. It preflights
+Site/domains/market and pickup conflicts, preserves carrier methods and safely
+reuses existing configuration. It never creates orders, issues invoices or sends
+EHF. Pickup is hidden for digital-only carts. Commands live in docs/demo-setup.md.

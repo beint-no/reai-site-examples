@@ -1,7 +1,7 @@
 // Educational copy is static; the connected shop and explorer use ReAI delivery data.
 export const lessons = [
   {
-    slug: 'payments', icon: '↗', tag: ['EKTE CHECKOUT', 'REAL CHECKOUT'],
+    slug: 'payments', shortTitle: ['Betaling', 'Payments'], icon: '↗', tag: ['EKTE CHECKOUT', 'REAL CHECKOUT'],
     title: ['Én checkout. Mange måter å betale.', 'One checkout. Many ways to pay.'],
     summary: ['ReAI tar kurven videre til Adyen, med betalingsmåter som passer kunden og butikken.', 'ReAI takes the cart to Adyen, with payment methods suited to the shopper and merchant.'],
     intro: ['Kort, Vipps eller en digital lommebok? Butikken leverer kurven. ReAI og Adyen håndterer resten av betalingsflyten.', 'Card, Vipps or a digital wallet? The store supplies the cart. ReAI and Adyen handle the payment flow.'],
@@ -16,14 +16,35 @@ export const lessons = [
       { title: ['Et nettsted trenger ikke å behandle kortdata', 'A website does not need to handle card data'], text: ['Site-nøkkelen blir på Worker. Nettleseren sender variant-ID og antall, aldri en pris som ReAI må stole på. Den åpner kun checkout-URL-en fra den godkjente ReAI-serveren. Hosted checkout håndterer betalingsvalg og eventuelle ekstra autentiseringstrinn.', 'The Site credential stays on the Worker. The browser sends variant IDs and quantities, never a price ReAI must trust. It opens only the checkout URL from the approved ReAI server. Hosted checkout handles payment selection and any additional authentication steps.'] },
       { title: ['Et demo-domene gjør ikke betalingen til en test', 'A demo domain does not make a payment a test'], text: ['Adyen TEST og LIVE er ulike betalingsmiljøer. Et preview-domene eller en tenant med «test» i navnet bytter ikke betalingsmiljø. Se betalingsmodus og mottaker før checkout. Du kan utforske kurv og checkout uten å fullføre en betaling.', 'Adyen TEST and LIVE are separate payment environments. A preview domain or a tenant with “test” in its name does not change the payment environment. Check the payment mode and recipient before checkout. You can explore the cart and checkout without completing a payment.'] },
     ],
-    links: [['/cart/', ['Se kurven', 'See the cart']], ['https://docs.adyen.com/payment-methods/', ['Adyens betalingsmåter', 'Adyen payment methods']]],
+    links: [['/cart/', ['Se kurven', 'See the cart']], ['/learn/business/', ['Bedrift og faktura', 'Business and invoicing']], ['https://docs.adyen.com/payment-methods/', ['Adyens betalingsmåter', 'Adyen payment methods']]],
     code: 'POST /site/v1/commerce/checkout-sessions?market=default&locale=nb-NO\nIdempotency-Key: <unique UUID>\n\n{ "lines": [{ "variantId": "<public variant UUID>", "quantity": 1 }],\n  "returnUrl": "https://demosite.reai.no/checkout/return/" }',
     codeLabel: ['Kallet fra Worker → ReAI. Site-nøkkelen sendes bare fra serveren.', 'Worker → ReAI request. The Site credential is sent only from the server.'],
   },
   {
-    slug: 'shipping', icon: '◇', tag: ['INTEGRERT I REAI', 'INTEGRATED IN REAI'],
+    slug: 'business', shortTitle: ['B2B / EHF', 'B2B / EHF'], icon: 'B2B', tag: ['BEDRIFT + FAKTURA', 'BUSINESS + INVOICING'],
+    title: ['Bedrift i kurven. EHF i regnskapet.', 'Business in the cart. EHF in the books.'],
+    summary: ['Firmasøk, fakturaordre og EHF via Peppol. En ordre, en sendt faktura og en betaling er tre ulike steg.', 'Company search, invoice orders and EHF over Peppol. An order, a sent invoice and a payment are three separate steps.'],
+    intro: ['Trenger bedriften faktura fremfor kortbetaling? Samme checkout kan ta imot begge deler. ReAI knytter ordren til firmaet og følger fakturaen videre.', 'Does your business need an invoice rather than a card payment? The same checkout can accept both. ReAI connects the order to the company and follows the invoice onward.'],
+    steps: [
+      ['Åpne checkout, velg Bedrift og finn et norsk firma med firmasøket.', 'Open checkout, choose Company and find a Norwegian company using company search.'],
+      ['Velg Faktura og kontroller kontaktopplysninger, rabatt og levering. Sluttknappen oppretter en ekte, ubetalt ordre.', 'Choose Invoice and review contact details, discount and delivery. The final button creates a real, unpaid order.'],
+      ['Selger behandler ordren og utsteder faktura i ReAI. EHF kan sendes til en mottaker som er registrert i Peppol-nettverket.', 'The merchant processes the order and issues an invoice in ReAI. EHF can be sent to a recipient registered in the Peppol network.'],
+      ['Fakturalevering og betaling følges separat. EHF-levering betyr ikke at fakturaen er betalt.', 'Invoice delivery and payment are tracked separately. EHF delivery does not mean the invoice is paid.'],
+    ],
+    sections: [
+      { title: ['EHF er mer enn en PDF', 'EHF is more than a PDF'], text: ['EHF er strukturert elektronisk fakturadata som kan behandles av mottakerens økonomisystem. ReAI støtter norske EHF-fakturaer og kreditnotaer gjennom Peppol. Mottaker må kunne motta dokumenttypen i nettverket; et organisasjonsnummer eller et firmasøk alene er ikke en leveringsbekreftelse.', 'EHF is structured electronic invoice data that the recipient’s accounting system can process. ReAI supports Norwegian EHF invoices and credit notes through Peppol. The recipient must support the document type in the network; an organization number or company search alone is not a delivery confirmation.'] },
+      { title: ['Fra fakturaordre til sendt faktura', 'From invoice order to sent invoice'], text: ['Fakturavalg i checkout oppretter en ordre, ikke en ferdig utstedt EHF-faktura. For norske firmakunder med gyldig organisasjonsnummer velger ReAI normalt EHF på ordren. Ved fakturautstedelse forsøkes EHF når det er valgt og støttet. Konfigurert faktura-e-post brukes som alternativ når EHF ikke kan leveres. Selger kan kontrollere faktura og leveringshistorikk i ReAI.', 'Choosing Invoice in checkout creates an order, not an already-issued EHF invoice. For Norwegian business customers with a valid organization number, ReAI normally selects EHF on the order. On invoice issuance, EHF is attempted when selected and supported. The configured invoice email is used as an alternative when EHF cannot be delivered. The merchant can inspect the invoice and delivery history in ReAI.'] },
+      { title: ['Aktivert i denne demoen', 'Enabled in this demo'], text: ['Bedrift og fakturaordre er aktivert for Lekebutikkens Site hos Better Integration. Tenanten er allerede EHF-registrert og har en aktiv NOK-mottakerkonto. Dette bekrefter oppsett, ikke at en bestemt utgående faktura er levert. Du kan utforske valg og firmasøk uten å sende en ordre. Fullfører du, er det en ekte ordre — ikke en simulering.', 'Company checkout and invoice orders are enabled for the demo Site at Better Integration. The tenant is already EHF-registered and has an active NOK receiving account. This confirms configuration, not delivery of a particular outgoing invoice. You can explore the options and company search without submitting an order. Completing checkout creates a real order, not a simulation.'] },
+      { title: ['Faktura er ikke Adyen-betaling', 'An invoice is not an Adyen payment'], text: ['Fakturaalternativet oppretter en ubetalt ordre uten å trekke kortet via Adyen. Betalingsfrist og mottakerkonto styres av fakturaoppsettet i ReAI. Kort og lommebøker bruker den separate Adyen-flyten. Rabatter og fysisk levering valideres i checkout også for fakturaordrer.', 'The invoice option creates an unpaid order without charging a card through Adyen. Payment terms and receiving account come from ReAI invoice configuration. Cards and wallets use the separate Adyen flow. Discounts and physical delivery are validated in checkout for invoice orders too.'] },
+    ],
+    links: [['/cart/', ['Utforsk checkout', 'Explore checkout']], ['/learn/shipping/', ['Frakt og hent selv', 'Shipping and local pickup']], ['https://www.anskaffelser.no/kategorispesifik-veiledning/fagsystemer-digitale-anskaffelser/elektronisk-handelsformat-ehf', ['DFØ: Slik fungerer EHF', 'DFØ: How EHF works']]],
+    code: '# Enable company checkout for one Site (operator only)\nPUT /api/sites/{siteId}/commerce/business-sales\n{ "enabled": true }\n\n# Create the usual Site checkout session.\n# Company search and invoice choice happen in hosted checkout.\n# The merchant issues the invoice later in ReAI;\n# checkout does not submit an EHF invoice itself.',
+    codeLabel: ['Oppsett bruker management-API-et. Site-nøkkelen gir ingen tilgang til fakturaer eller bankkontoer.', 'Configuration uses the management API. The Site credential gives no access to invoices or bank accounts.'],
+  },
+  {
+    slug: 'shipping', shortTitle: ['Frakt', 'Shipping'], icon: '◇', tag: ['INTEGRERT I REAI', 'INTEGRATED IN REAI'],
     title: ['Fra handlekurv til hentested.', 'From shopping cart to pickup point.'],
-    summary: ['Markedets fraktregler, Bring og PostNord, hentesteder og videre booking — i samme plattform.', 'Market shipping rules, Bring and PostNord, pickup locations and later booking — in one platform.'],
+    summary: ['Bring og PostNord, hentesteder og hent selv hos selger. Ulike leveringsvalg, samme ordre.', 'Bring and PostNord, pickup points and collection from the merchant. Different delivery choices, one order.'],
     intro: ['Frakt er mer enn et tall på siste side. ReAI kobler butikkens prisregler til leveringsmåter, adresse og pakkens egenskaper.', 'Shipping is more than a number on the last page. ReAI connects merchant price rules to delivery methods, address and parcel details.'],
     steps: [
       ['Butikken konfigurerer leveringsmåter og kundepriser per marked.', 'The merchant configures delivery methods and customer prices per market.'],
@@ -34,14 +55,15 @@ export const lessons = [
     sections: [
       { title: ['Bring + PostNord', 'Bring + PostNord'], text: ['ReAI støtter kombinasjoner av transportør og leveringstype, blant annet postkasse, hentested, pakkeboks, hjemlevering og bedrift. Ikke alle typer finnes hos begge transportører eller for alle pakker. Butikkhenting kan også konfigureres. Støttede kombinasjoner finnes i management-API-et.', 'ReAI supports carrier and delivery-method combinations including mailbox, pickup point, parcel locker, home delivery and business. Not every method is available with both carriers or for every parcel. Store pickup can also be configured. Supported combinations are listed in the management API.'] },
       { title: ['Kundepris og transportørkostnad er ulike ting', 'Customer price and carrier cost are different things'], text: ['Checkout bruker butikkens konfigurerte priser, eventuell fraktfri grense og vektregel. Dette er ikke et sanntidspristilbud fra transportøren. Lokalt tilgjengelige valg garanterer heller ikke at en fremtidig booking blir godkjent. Hentesteder kontrolleres for det valgte alternativet.', 'Checkout uses configured merchant prices, any free-shipping threshold and weight rule. This is not a live carrier-cost quote. Locally eligible options also do not guarantee a future booking will be accepted. Pickup locations are checked for the selected option.'] },
-      { title: ['Hva skjer i akkurat denne demoen?', 'What happens in this particular demo?'], text: ['Demoens marked har fraktregler, men alle produktene er digitale demo-produkter. Derfor krever kurven ingen fysisk levering. Vi oppretter ingen forsendelse for motivasjon eller innboks-zen. En fysisk butikk må ha fraktmodul, avsender, pakkemål og gyldige produktvekter før transportørflyten kan prøves.', 'The demo market has shipping rules, but every product is a digital demo product. The cart therefore requires no physical delivery. We create no shipment for motivation or inbox zen. A physical store needs the shipping module, sender, parcel dimensions and valid product weights before the carrier flow can be exercised.'] },
+      { title: ['Hent selv hos selger', 'Collect from the merchant'], text: ['Butikkhenting er et eget, gratis leveringsvalg med selgers henteinstruksjoner. Det bruker verken Bring/PostNord-hentested eller transportørbooking. Checkout lagrer henteinstruksjonene på ordren; kunden trenger ingen leveringsadresse for dette valget. Det kan kombineres med kortbetaling eller en B2B-fakturaordre.', 'Store pickup is a separate, free delivery choice with merchant collection instructions. It uses neither a Bring/PostNord pickup point nor carrier booking. Checkout saves the collection instructions on the order; this option requires no delivery address. It can be combined with card payment or a B2B invoice order.'] },
+      { title: ['Hva skjer i akkurat denne demoen?', 'What happens in this particular demo?'], text: ['Demoens marked har fire transportørvalg og «Hent selv · kun demo / demo only». Alle nåværende produkter er digitale, så checkout viser ingen leverings- eller hentevalg for disse kurvene. Demo-henting lover ingen fysisk vare eller hentested. En ekte butikk må erstatte henteinstruksjonene med reell adresse og rutiner. Transportørfrakt krever også fraktmodul, avsender, pakkemål og gyldige produktvekter.', 'The demo market has four carrier methods and “Hent selv · kun demo / demo only”. All current products are digital, so checkout shows no delivery or pickup choices for those carts. Demo pickup promises no physical goods or collection location. A real store must replace the collection instructions with its actual address and process. Carrier shipping also needs the shipping module, sender, parcel dimensions and valid product weights.'] },
     ],
     links: [['https://app.reai.no/openapi/public/ui', ['Se fraktkontrakten', 'Read the shipping contract']], ['/learn/discounts/', ['Fraktfrihet og rabattkoder', 'Free shipping and discount codes']]],
     code: 'GET /api/sites/shipping-options\nPOST /api/sites/{siteId}/commerce/markets/{marketId}/shipping-methods\nPOST /api/sites/{siteId}/commerce/markets/{marketId}/shipping-methods/pickup\n\n# Management API: authenticated operator, explicit X-Tenant-Id.\n# Shipping selection happens in hosted checkout, not /site/v1 reads.',
     codeLabel: ['Oppsett for operatøren. Management-nøkkel skal aldri være i nettsiden.', 'Operator configuration. A management credential must never be in the website.'],
   },
   {
-    slug: 'discounts', icon: '%', tag: ['PRØV I CHECKOUT', 'TRY IN CHECKOUT'],
+    slug: 'discounts', shortTitle: ['Rabatter', 'Discounts'], icon: '%', tag: ['PRØV I CHECKOUT', 'TRY IN CHECKOUT'],
     title: ['Rabatter med litt mer hjerne.', 'Discounts with a little more brain.'],
     summary: ['Prosent, samlingsregler, minstebeløp og fraktfrihet. ReAI regner — nettleseren gjetter ikke.', 'Percentages, collection rules, minimum spend and free shipping. ReAI calculates — the browser does not guess.'],
     intro: ['Rabattkoder hører hjemme der priser og regler bor. Her kan du prøve både en kode for hele katalogen og en for én samling.', 'Discount codes belong where prices and rules live. Here you can try both a whole-catalog code and a collection-scoped code.'],
@@ -62,7 +84,7 @@ export const lessons = [
     codeLabel: ['Bare management-API-et oppretter regler. Hosted checkout validerer innløsing.', 'Only the management API creates rules. Hosted checkout validates redemption.'],
   },
   {
-    slug: 'catalog', icon: '✳', tag: ['LIVE PRODUKTDATA', 'LIVE PRODUCT DATA'],
+    slug: 'catalog', shortTitle: ['Katalog', 'Catalog'], icon: '✳', tag: ['LIVE PRODUKTDATA', 'LIVE PRODUCT DATA'],
     title: ['En katalog. Mange små superkrefter.', 'One catalog. Many little superpowers.'],
     summary: ['Varianter, bilder, manuelle og automatiske samlinger, pris og lager — med én datakilde.', 'Variants, images, manual and automated collections, prices and stock — with one source of truth.'],
     intro: ['Produkter administreres i ReAI og publiseres til en bestemt Site. Denne siden lager ikke sin egen parallelle produktdatabase.', 'Products are managed in ReAI and published to a specific Site. This website does not create a second product database.'],
@@ -82,7 +104,7 @@ export const lessons = [
     codeLabel: ['Leveringsdata er Site-avgrenset. Hemmelige forretningsdata blir i ReAI.', 'Delivery data is Site-scoped. Private business data stays in ReAI.'],
   },
   {
-    slug: 'markets', icon: 'NO / EN', tag: ['PRØV SPRÅKKNAPPEN', 'TRY THE LANGUAGE BUTTON'],
+    slug: 'markets', shortTitle: ['Marked', 'Markets'], icon: 'NO / EN', tag: ['PRØV SPRÅKKNAPPEN', 'TRY THE LANGUAGE BUTTON'],
     title: ['Samme butikk. Riktig kontekst.', 'Same store. Right context.'],
     summary: ['Marked velger valuta og prisliste. Språk velger oversettelse. De gjør ulike jobber.', 'Market selects currency and price list. Locale selects translation. They do different jobs.'],
     intro: ['Bytt mellom norsk og engelsk her. Designet er det samme; publiserte produkt- og samlingstekster leveres i riktig språk.', 'Switch between Norwegian and English here. The design stays the same; published product and collection copy is delivered in the selected language.'],
@@ -101,7 +123,7 @@ export const lessons = [
     codeLabel: ['Demoen har ett marked og to språk — ikke automatisk valutakonvertering.', 'The demo has one market and two locales — no automatic currency conversion.'],
   },
   {
-    slug: 'integration', icon: '{ }', tag: ['FRA NETTSIDE TIL PLATTFORM', 'FROM WEBSITE TO PLATFORM'],
+    slug: 'integration', shortTitle: ['Integrasjon', 'Integration'], icon: '{ }', tag: ['FRA NETTSIDE TIL PLATTFORM', 'FROM WEBSITE TO PLATFORM'],
     title: ['Design fritt. Hold dataene samlet.', 'Design freely. Keep data together.'],
     summary: ['Statisk nettsted, Site API, management-API og ordre/regnskap. Hvem gjør hva?', 'Static website, Site API, management API and orders/accounting. Who does what?'],
     intro: ['ReAI er både datakilde og handelsplattform. Nettsiden kan være helt selvstendig, med sitt eget repo og sin egen deploy.', 'ReAI is both a data source and commerce platform. The website can stay independent, with its own repository and deployment.'],

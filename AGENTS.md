@@ -43,8 +43,9 @@ Never commit tokens, private customer data, or raw tenant/catalog exports.
 
 wrangler.jsonc targets only reai-demo-store at https://demosite.reai.no.
 npm run deploy checks and deploys locally; CI validates only.
-Set REAI_SITE_CREDENTIAL as a Worker secret. The published field guide at /features/ explains payments, shipping, discounts,
-catalog, markets and integration; /api/ exercises all nine delivery reads.
+Set REAI_SITE_CREDENTIAL as a Worker secret. The published field guide at /features/
+explains payments, B2B/EHF, shipping/pickup, discounts, catalog, markets and
+integration; /api/ exercises all nine delivery reads.
 Shipping and inventory bundles are documented capabilities, not fulfillment
 promises for this digital catalog. The published demo uses Adyen LIVE
 and clearly labels real payments and the configured recipient. Offline preview
@@ -52,6 +53,8 @@ always disables checkout. Checkout requires an explicit enabled binding, a
 verified payment mode and a named merchant for live payments. A preview, Site
 credential environment or test tenant name does not prove Adyen is in TEST mode.
 Never claim a return redirect proves payment; never charge a real card as a test.
+Invoice checkout creates real unpaid orders; merchant invoice issuance and EHF
+delivery happen later. Do not submit orders or send invoices just to test the UI.
 Demo donation products are not charitable claims. Demo gift cards create no real
 balance or redemption right unless such a service is deliberately implemented.
 
@@ -65,7 +68,7 @@ balance or redemption right unless such a service is deliberately implemented.
 - [Catalog/images/availability](docs/catalog-and-images.md)
 - [Checkout](docs/checkout.md)
 - [Architecture](docs/architecture.md)
-- [Demo tenant setup](docs/demo-setup.md): catalog, media, credential and payment-mode setup.
+- [Demo tenant setup](docs/demo-setup.md): catalog, credentials and explicit B2B/pickup setup.
 - [Cloudflare deployment](docs/cloudflare-deployment.md)
 - [Client repos and provisioning](docs/repositories.md)
 - [Troubleshooting](docs/troubleshooting.md)
