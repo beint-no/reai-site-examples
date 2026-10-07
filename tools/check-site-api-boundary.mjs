@@ -8,7 +8,7 @@ const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url))
 const sourceRoots = [
   path.join(repositoryRoot, "packages/reai-cloudflare-storefront"),
   path.join(repositoryRoot, "starter/src"),
-  path.join(repositoryRoot, "examples"),
+  path.join(repositoryRoot, "demo/src"),
 ];
 const failures = [];
 

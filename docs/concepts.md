@@ -33,7 +33,7 @@ a generator can read API data at build time, or a Worker can fetch/cache it at
 request time. Each client repository must document its actual data flow, content
 ownership, refresh/deployment process and enabled services.
 
-The examples in this repository demonstrate Site API storefronts. Their explicit
+The single demo in this repository demonstrates a Site API storefront. Its explicit
 local fictional fixtures are for offline exploration, not a live static catalog
 or an upstream error fallback. Customer-specific snapshot previews are separate
 approved artifacts and must document their source, refresh process and limits.
@@ -44,7 +44,7 @@ approved artifacts and must document their source, refresh process and limits.
    data it can deliver, its markets and its accepted domains.
 2. **Website source** lives in a Git repository: layout, CSS, browser behavior,
    authored content and server-side integration.
-3. **Hosting** runs that source. These examples use a Cloudflare Worker and Static
+3. **Hosting** runs that source. The demo uses a Cloudflare Worker and Static
    Assets. ReAI supplies business data and hosted checkout; it does not require
    the storefront layout to live inside the ReAI application.
 

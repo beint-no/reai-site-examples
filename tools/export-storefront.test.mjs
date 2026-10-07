@@ -9,14 +9,15 @@ test('exports a standalone site without a parent dependency or demo catalog', as
   const parent = await mkdtemp(path.join(os.tmpdir(), 'reai-export-'));
   try {
     const destination = path.join(parent, 'client');
-    await exportStorefront('studio-store', destination);
+    await exportStorefront('storefront', destination);
     const worker = await readFile(path.join(destination, 'src/worker.js'), 'utf8');
     assert.match(worker, /\.\.\/packages\/reai-site-client\/client\.mjs/);
     assert.doesNotMatch(worker, /\.\.\/\.\.\/packages/);
     assert.ok((await readdir(path.join(destination, 'packages/reai-site-client'))).includes('client.mjs'));
     await assert.rejects(readdir(path.join(destination, 'examples')));
-    assert.match(await readFile(path.join(destination, 'public/styles.css'), 'utf8'), /Studio: editorial/);
-    await assert.rejects(exportStorefront('everyday-store', destination), { code: 'EEXIST' });
-    assert.match(await readFile(path.join(destination, 'public/styles.css'), 'utf8'), /Studio: editorial/);
+    const styles = await readFile(path.join(destination, 'public/styles.css'), 'utf8');
+    assert.ok(styles.length > 0);
+    await assert.rejects(exportStorefront('storefront', destination), { code: 'EEXIST' });
+    assert.equal(await readFile(path.join(destination, 'public/styles.css'), 'utf8'), styles);
   } finally { await rm(parent, { recursive: true, force: true }); }
 });

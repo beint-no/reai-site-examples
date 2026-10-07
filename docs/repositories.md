@@ -1,6 +1,6 @@
 # Public examples and private client repositories
 
-This is the single public ReAI Sites examples and documentation repository.
+This is the public source for one full ReAI demo store, reusable code and integration documentation.
 Use it for generic design systems, fictional fixtures and reusable integration.
 A real client's source, previews, branding and handoff notes belong in an
 independent **private** repository from the start.
@@ -27,7 +27,7 @@ Cloudflare or ReAI tenant management permissions.
 
 ## Export a design
 
-`npm run export -- <example> /absolute/new/directory` creates standalone source.
+`npm run export -- storefront /absolute/new/directory` creates standalone source.
 It refuses existing destinations, includes the selected theme and required
 Site client, and excludes the local demo harness/catalog. It does not create a
 GitHub repository, grant permissions, create a ReAI Site, deploy or change DNS.
@@ -36,11 +36,11 @@ GitHub repository, grant permissions, create a ReAI Site, deploy or change DNS.
 
 ReAI's existing automatic store creator uses a private GitHub template named
 reai-storefront-starter. That template is an operational copy exported from
-this public repo's everyday-store design, not a second public examples project.
+this public repo's standalone storefront template, not a second public examples project.
 The public repo is the canonical editable starter source.
 
 An operator refreshes the private template using the export tool, regenerates
 its npm lockfile, runs its checks and reviews the resulting change. Existing
 client repos are not overwritten when a template changes. GitHub template
 creation copies a complete repository; do not point the store creator directly
-at this multi-example repo or every client would inherit the entire gallery.
+at this demo repository or every client would inherit the demo store and operator seed tooling.

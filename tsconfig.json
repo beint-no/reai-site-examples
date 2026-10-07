@@ -25,6 +25,7 @@
   "include": [
     "packages/reai-site-client/**/*.mjs",
     "packages/reai-cloudflare-storefront/worker.mjs",
-    "examples/*/worker.js"
+    "templates/*/worker.js",
+    "demo/src/worker.mjs"
   ]
 }

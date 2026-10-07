@@ -1,25 +1,69 @@
-# Public ReAI Sites examples
+# ReAI demo store and Site API guide
 
-This is the canonical public source for generic designs, Site integration and
-documentation. Real customer sites and customer-specific demos belong in
-separate private repos, tracked by the private customer-sites submodule hub.
+One public source repository and one deployed demo Worker. Real client sites live
+in independent private repositories. The operator hub checks this repo out under
+resources/ for convenience; clients have no runtime dependency on either repo.
 
-Never add customer brands, tenant identifiers, handoff notes, customer catalogs
-or credentials here. Use only fictional fixtures and reusable original assets.
-Keep demo data in the explicit local demo harness; the production Worker must
-never fall back to fictional data on errors.
+## What lives here
 
-Upstream calls go through packages/reai-site-client, generated from /openapi/site.
-Management is /api/sites in the separate public API contract. Site credentials
-stay server-side. Preserve bounded same-origin checkout, public IDs and hosted
-checkout; do not invent payment, shipping or merchant policy facts.
+- demo/src/: server-rendered demo storefront, static explanations, public API
+  explorer and bounded same-origin hosted checkout startup.
+- demo/public/: original reusable design, CSS, browser-local cart and illustrations.
+- demo/seed/: fictional product definitions for explicit operator-managed seeding.
+- packages/: generated Site client and reusable advanced Cloudflare integration.
+- starter/ and templates/storefront/: the simple standalone export used to refresh
+  the separate private reai-storefront-starter provisioning repository.
+- docs/: focused API/integration guides. Each directory's AGENTS.md is for humans
+  and agents alike; keep one document per directory instead of parallel READMEs.
 
-Run npm ci and npm run check. Examples build into ignored public directories.
-Use npm run export for standalone private client adaptations; the private
-operational template is refreshed from that exporter. Do not edit it as a
-second design source.
+## Work locally
 
-Keep primary checkouts on main and use dedicated worktrees under ~/.r-worktrees.
-Use PRs and squash merges after the fresh-history bootstrap. CI validates only;
-this public repo must never deploy production or hold production secrets.
-Use semantic HTML, visible focus and modern native browser code.
+Use Node/npm versions in package.json. Work in a dedicated Git worktree under
+~/.r-worktrees, keep the primary checkout on main, and use reviewed squash PRs.
+
+```sh
+npm ci
+npm run demo       # explicit fictional offline preview; checkout disabled
+npm run dev        # real Worker, with ignored .dev.vars / Site credential
+npm run check      # types, security boundaries, tests, docs, bundle and contract
+npm run export -- storefront /absolute/path/to/new-private-repo
+```
+
+The exporter refuses existing destinations and excludes the demo catalog/server.
+Edit generic exported designs here, then refresh and validate the private template.
+Existing client repositories do not change when either source/template changes.
+
+## Data and publishing
+
+Products, prices, translations, images, collections and availability belong in
+ReAI. Deployed code never falls back to fictional fixtures on upstream errors.
+Requests use packages/reai-site-client; keep delivery credentials server-side.
+Never commit tokens, private customer data, or raw tenant/catalog exports.
+
+wrangler.jsonc targets only reai-demo-store. demosite.reai.no is the intended public
+demo hostname. npm run deploy checks and deploys locally; CI validates only.
+Set REAI_SITE_CREDENTIAL as a Worker secret. Checkout defaults off and requires
+both an explicit enabled binding and a verified payment mode. A preview, Site
+credential environment or test tenant name does not prove Adyen is in TEST mode.
+Never claim a return redirect proves payment; never charge a real card as a test.
+Demo donation products are not charitable claims. Demo gift cards create no real
+balance or redemption right unless such a service is deliberately implemented.
+
+## Guides
+
+- [Start and configure the demo](docs/quickstart.md)
+- [Static sites, Site API and data flow](docs/concepts.md)
+- [Management/publication](docs/management.md)
+- [Authentication](docs/authentication.md)
+- [Market and language](docs/markets-and-localization.md)
+- [Catalog/images/availability](docs/catalog-and-images.md)
+- [Checkout](docs/checkout.md)
+- [Architecture](docs/architecture.md)
+- [Demo tenant setup](docs/demo-setup.md): catalog, media, credential and payment-mode setup.
+- [Cloudflare deployment](docs/cloudflare-deployment.md)
+- [Client repos and provisioning](docs/repositories.md)
+- [Troubleshooting](docs/troubleshooting.md)
+
+Canonical contracts: [delivery](https://app.reai.no/openapi/site/ui) and
+[management](https://app.reai.no/openapi/public/ui). Source/original generic assets
+are MIT; see ASSETS.md. Customer assets must never be added to this public repo.
