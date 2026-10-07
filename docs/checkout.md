@@ -47,6 +47,38 @@ live carrier-cost quote. Pickup locations are discovered and validated for the
 selected option. The order preserves accepted delivery snapshots even if future
 shipping configuration changes.
 
+Store pickup is separate from carrier pickup points/lockers. Configure it through
+`POST /api/sites/{siteId}/commerce/markets/{marketId}/shipping-methods/pickup`
+with name and pickupDetails. It is free, preserves merchant collection instructions
+on the order, needs no delivery address and creates no carrier booking. Digital-only
+carts show neither carrier shipping nor store pickup.
+
+## B2B invoice orders and EHF
+
+Enable company checkout per Site with
+`PUT /api/sites/{siteId}/commerce/business-sales` and `{"enabled":true}`.
+Hosted checkout then offers company search and invoice ordering alongside the
+payment flow. Site session creation stays the same: variant IDs, quantities and
+return URL. Do not add company, invoice or bank data to delivery-API responses.
+
+Submitting the invoice option creates a real unpaid order and sends an order
+confirmation; it does not issue an invoice or charge through Adyen. The merchant
+issues the invoice from the order in ReAI. Payment terms and receiving account
+come from invoice configuration. Positive bank-transfer invoices require an
+active account with receiving details before issuance.
+
+ReAI supports Norwegian EHF invoices and credit notes through Peppol. For eligible
+Norwegian companies with a valid organization number, orders normally select EHF.
+On invoice issuance, ReAI attempts EHF when selected and supported; successful
+delivery requires a registered recipient. Configured invoice email is the fallback
+when EHF cannot be delivered. Invoice delivery history and payment state are separate.
+A company lookup, tenant EHF registration or return redirect proves none of them.
+See [DFØ's EHF guide](https://www.anskaffelser.no/kategorispesifik-veiledning/fagsystemer-digitale-anskaffelser/elektronisk-handelsformat-ehf).
+
+Validate setup and checkout choices without submitting real orders or sending
+invoices as a test. The demo's [setup command](demo-setup.md) changes only Site
+checkout/pickup configuration; it never performs those financial actions.
+
 ## Payment prerequisites
 
 A catalog and checkout session can exist before a merchant can accept payment.

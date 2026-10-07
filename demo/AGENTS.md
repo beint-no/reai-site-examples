@@ -26,4 +26,7 @@ before publishing. Root AGENTS.md owns commands and deployment policy.
 The connected demo has manual and automated collections, a fictional compare-at
 price and namespaced market discount codes entered in hosted checkout. Shipping
 and inventory bundles are explained platform capabilities; digital demo goods
-never create shipments. Keep these boundaries explicit.
+never create shipments or show pickup choices. The B2B/EHF guide distinguishes
+real unpaid orders, merchant invoice issuance, delivery and payment. Store pickup
+is explicitly demo-only; never invent a physical collection location. Keep these
+boundaries explicit.

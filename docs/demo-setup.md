@@ -50,6 +50,32 @@ its value is never printed. It includes Site/catalog/availability/checkout scope
 The credential environment is live for the configured active domain; that setting
 is independent of the backend's Adyen TEST/LIVE environment.
 
+## B2B invoice orders and local pickup
+
+Configure these separately from catalog seeding, using an authorized management
+token with Site write access. Preview the plan, then repeat with --apply:
+
+```sh
+node demo/tools/commerce-options.mjs --tenant-id <authorized-demo-tenant-id> --enable-business-sales --demo-pickup
+node demo/tools/commerce-options.mjs --tenant-id <authorized-demo-tenant-id> --enable-business-sales --demo-pickup --apply
+```
+
+The command verifies the named Site/domains and Norwegian default market before
+writing. It enables company checkout for this Site and adds one free, explicitly
+demo-only pickup method; repeat runs do not duplicate it or change carrier methods.
+Conflicting pickup instructions stop before either change. Completed writes persist
+if a later request fails. It never issues invoices, sends EHF or changes payments.
+
+Invoice checkout creates a real unpaid order; the merchant issues its invoice
+later in ReAI. Verify receiving-account details and invoice settings before a
+merchant starts invoicing. EHF uses recipient eligibility/Peppol registration and
+the order's delivery setting; email is the configured fallback. Tenant EHF
+registration alone does not prove outgoing delivery. See the [checkout guide](checkout.md).
+
+Pickup appears only for physical goods. These digital demo products show no
+shipping choices. A real merchant must supply real collection instructions;
+the demo-only method offers no physical fulfillment or collection location.
+
 ## Connect and publish
 
 Configure the dedicated Site domains to match demosite.reai.no and the actual
