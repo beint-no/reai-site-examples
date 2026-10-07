@@ -6,7 +6,8 @@ authorized management token and approved VAT code. It only creates/reuses the
 named demo Site, price list and REAI-DEMO-* products. SKU/publication conflicts
 stop setup; unrelated Sites/products must never be overwritten or deleted.
 
-Original SVG art is rasterized with ImageMagick and uploaded as product media.
+Original SVG art is rasterized with librsvg and uploaded as product media with
+a stable source fingerprint for safe retries.
 ReAI owns runtime products, prices, translations, images and collections. Keep
 private IDs, raster scratch files and the one-time Site token under ignored .local/.
 Never print raw credentials. Repeat runs reuse the demo catalog; credential

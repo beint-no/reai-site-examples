@@ -20,7 +20,7 @@ Review the plan first:
 node demo/tools/setup.mjs --tenant-id <authorized-demo-tenant-id>
 ```
 
-Apply with ImageMagick installed and REAI_DEMO_VAT_CODE set to the accounting
+Apply with librsvg (rsvg-convert) installed and REAI_DEMO_VAT_CODE set to the accounting
 owner's approved code for the test catalog:
 
 ```sh
@@ -31,6 +31,8 @@ If the tenant's online store module is disabled, explicitly enable it in ReAI or
 add --enable-online-store. Setup creates/reuses the named demo Site and NOK price
 list, digital product variants, product images/metadata, English translations,
 publication and three collections. Seed amounts are the displayed gross prices;
+Image uploads use a content fingerprint for idempotent retries and librsvg to
+preserve the original gradients and SVG filters.
 setup derives net price-list entries from the approved VAT code and tenant VAT
 registration, and rejects amounts that cannot round-trip exactly. The browser
 uses delivered prices directly. It does not alter unrelated Sites, existing
