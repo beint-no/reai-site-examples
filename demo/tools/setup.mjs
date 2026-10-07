@@ -1,5 +1,6 @@
 import { readFile, writeFile, mkdir, access } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { netPriceForDisplay } from "./prices.mjs";
@@ -76,9 +77,9 @@ if (args.includes("--write-credential")) {
     if (error.code !== "ENOENT") throw error;
   }
 }
-if (spawnSync("magick", ["-version"], { stdio: "ignore" }).status !== 0)
+if (spawnSync("rsvg-convert", ["--version"], { stdio: "ignore" }).status !== 0)
   throw new Error(
-    "ImageMagick is required to prepare the original demo illustrations.",
+    "librsvg (rsvg-convert) is required to prepare the original demo illustrations.",
   );
 
 async function management(route, method = "GET", body) {
@@ -229,14 +230,10 @@ for (const definition of seed.products) {
   }
   if (!product.images.length) {
     const png = path.join(local, `${definition.art}.png`);
+    const svg = path.join(root, `demo/public/assets/${definition.art}.svg`);
     const converted = spawnSync(
-      "magick",
-      [
-        "-background",
-        "none",
-        path.join(root, `demo/public/assets/${definition.art}.svg`),
-        png,
-      ],
+      "rsvg-convert",
+      ["--width", "640", "--height", "640", "--output", png, svg],
       { stdio: "ignore" },
     );
     if (converted.status !== 0)
@@ -248,7 +245,10 @@ for (const definition of seed.products) {
       `${definition.handle}.png`,
     );
     const image = await management(
-      `/api/products/${product.id}/images`,
+      `/api/products/${product.id}/images?${new URLSearchParams({
+        sourceFingerprint: `reai-demo-${definition.handle}:${createHash("sha256").update(await readFile(svg)).digest("hex")}`,
+        altText: definition.title,
+      })}`,
       "POST",
       form,
     );

@@ -45,6 +45,10 @@ export default {
   /** @param {Request} request @param {DemoEnv} env @param {ExecutionContext} ctx */
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    if (url.protocol === "http:" && url.hostname === "demosite.reai.no") {
+      url.protocol = "https:";
+      return Response.redirect(url.href, 308);
+    }
     let locale =
       url.searchParams.get("lang") === "en"
         ? "en"
