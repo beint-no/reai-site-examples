@@ -240,3 +240,10 @@ document
   });
 save();
 renderCart();
+
+const apiForm=document.querySelector('[data-api-explorer]');
+const requestedProduct=new URL(location.href).searchParams.get('product')||'';
+if(apiForm && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(requestedProduct)) {
+ apiForm.querySelector('[name="endpoint"]').value='product';
+ apiForm.querySelector('[name="resource"]').value=requestedProduct;
+}
