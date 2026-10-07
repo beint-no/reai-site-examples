@@ -1,9 +1,10 @@
 # ReAI Sites: examples and integration guide
 
-Build an independently hosted website with ReAI as its Site identity, published
-catalog, availability and hosted checkout backend. This public repository
-contains generic designs, reusable integration code and a detailed guide.
-Real client sites live in separate private repositories.
+ReAI Sites support independently hosted websites. Some websites serve approved
+static content; others use ReAI's Site API for business data and, when enabled,
+hosted checkout. These examples demonstrate the Site API storefront model.
+This public repository contains generic designs, reusable integration code and
+a detailed guide. Real client sites live in separate private repositories.
 
 ## Try the examples
 
@@ -26,7 +27,7 @@ the [quickstart](docs/quickstart.md).
 
 ## Understand ReAI Sites
 
-1. [Site identities, tenants, commerce and the request flow](docs/concepts.md)
+1. [Static versus Site API websites, Site identities and the request flow](docs/concepts.md)
 2. [Configure Sites, publication, collections and credentials](docs/management.md)
 3. [Market pricing, currency and localization](docs/markets-and-localization.md)
 4. [Delivery credentials and server-side authentication](docs/authentication.md)

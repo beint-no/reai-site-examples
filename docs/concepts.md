@@ -6,6 +6,38 @@ several Sites: separate brands, countries, shops or a non-commerce website.
 A Site does not require commerce. Enabling commerce adds market, publication,
 collection and checkout configuration around that identity.
 
+## Static websites and Site API websites
+
+Repository organization and hosting are separate from the website's data source.
+Both kinds of website can live in independent private repositories and run on
+Cloudflare Workers with Static Assets.
+
+| Website kind | Content/data source | How changes reach visitors |
+| --- | --- | --- |
+| Static website | Approved HTML, copy, images and configuration in its repository | Edit, review, build if needed and deploy the website |
+| Site API website | Repository owns design and editorial copy; ReAI owns the published business data it delivers | Deploy design/copy changes; manage catalog/publication/pricing in ReAI |
+
+A static brochure, restaurant or brand website needs no ReAI delivery credential
+unless it actually calls the Site API. Links to an external ordering service do
+not make it a ReAI storefront. Keep any manually approved menu or price content
+clearly distinguished from live commerce data.
+
+A Site API website reads `/site/v1/**` through its server/Worker using a scoped
+credential. For commerce, ReAI supplies published products, collections, prices,
+images, availability and hosted checkout. Never maintain a second live catalog
+in the website repository. Editorial pages may still be static. Site API usage
+also does not imply that checkout is enabled or the website is approved to launch.
+
+Static-looking HTML or assets do not prove that a site is independent of ReAI:
+a generator can read API data at build time, or a Worker can fetch/cache it at
+request time. Each client repository must document its actual data flow, content
+ownership, refresh/deployment process and enabled services.
+
+The examples in this repository demonstrate Site API storefronts. Their explicit
+local fictional fixtures are for offline exploration, not a live static catalog
+or an upstream error fallback. Customer-specific snapshot previews are separate
+approved artifacts and must document their source, refresh process and limits.
+
 ## Three separate things
 
 1. **ReAI Site configuration** identifies the website and controls which public
