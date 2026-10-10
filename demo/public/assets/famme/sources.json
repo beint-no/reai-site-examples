@@ -1,0 +1,118 @@
+{
+  "owner": "Famme",
+  "permission": "Greg explicitly authorized these Famme images for this public ReAI design test on 2026-10-10. Photographs are not MIT-licensed.",
+  "assets": [
+    {
+      "file": "hero-desktop.avif",
+      "source": "https://famme.no/cdn/shop/files/sweat-sets-desktop.jpg?v=1790864968&width=1920",
+      "width": 1920,
+      "height": 627,
+      "bytes": 82741
+    },
+    {
+      "file": "hero-mobile.avif",
+      "source": "https://famme.no/cdn/shop/files/sweat-sets-mobile-a.jpg?v=1790865275&width=800",
+      "width": 800,
+      "height": 800,
+      "bytes": 40965
+    },
+    {
+      "file": "collection-jeans.avif",
+      "source": "https://famme.no/cdn/shop/collections/jeans-til-dame.jpg?v=1790842362&width=832",
+      "width": 800,
+      "height": 1200,
+      "bytes": 79157
+    },
+    {
+      "file": "collection-softy.avif",
+      "source": "https://famme.no/cdn/shop/collections/softy-2.jpg?v=1789131850&width=832",
+      "width": 800,
+      "height": 1200,
+      "bytes": 32667
+    },
+    {
+      "file": "collection-layers.avif",
+      "source": "https://famme.no/cdn/shop/collections/Legacy-full-zip-lounge-wear-thumb.jpg?v=1791354213&width=832",
+      "width": 800,
+      "height": 955,
+      "bytes": 79348
+    },
+    {
+      "file": "jeans-brown.avif",
+      "source": "https://famme.no/cdn/shop/files/baggy-jeans-dark-brown-2-RE.jpg?v=1791278921&width=832",
+      "width": 800,
+      "height": 1200,
+      "bytes": 20417
+    },
+    {
+      "file": "jeans-detail.avif",
+      "source": "https://famme.no/cdn/shop/files/baggy-jeans-dark-brown-3-RE-a.jpg?v=1791372904&width=832",
+      "width": 800,
+      "height": 1200,
+      "bytes": 18480
+    },
+    {
+      "file": "pants-brown.avif",
+      "source": "https://famme.no/cdn/shop/files/softy-straight-leg-brown-1-Famme-1.jpg?v=1791179945&width=832",
+      "width": 800,
+      "height": 1200,
+      "bytes": 20483
+    },
+    {
+      "file": "pants-black.avif",
+      "source": "https://famme.no/cdn/shop/files/softy-straight-leg-black-7.jpg?v=1791046300&width=832",
+      "width": 800,
+      "height": 1200,
+      "bytes": 21523
+    },
+    {
+      "file": "hoodie-brown.avif",
+      "source": "https://famme.no/cdn/shop/files/essential-oversized-hoodie-brown-8.jpg?v=1787065422&width=832",
+      "width": 800,
+      "height": 1200,
+      "bytes": 29499
+    },
+    {
+      "file": "hoodie-grey.avif",
+      "source": "https://famme.no/cdn/shop/files/essential-oversized-hoodie-light-grey-1.jpg?v=1788763503&width=832",
+      "width": 800,
+      "height": 1200,
+      "bytes": 28159
+    },
+    {
+      "file": "sweatpants-brown.avif",
+      "source": "https://famme.no/cdn/shop/files/straight-leg-sweatpants-brown-2.jpg?v=1787068789&width=832",
+      "width": 800,
+      "height": 1200,
+      "bytes": 18597
+    },
+    {
+      "file": "sweatpants-grey.avif",
+      "source": "https://famme.no/cdn/shop/files/straight-leg-sweatpants-grey-2.jpg?v=1771593473&width=832",
+      "width": 800,
+      "height": 1200,
+      "bytes": 27937
+    },
+    {
+      "file": "halfzip-brown.avif",
+      "source": "https://famme.no/cdn/shop/files/Half-zip-sweater-brown-1.jpg?v=1787068480&width=832",
+      "width": 800,
+      "height": 1200,
+      "bytes": 18158
+    },
+    {
+      "file": "halfzip-khaki.avif",
+      "source": "https://famme.no/cdn/shop/files/half-zip-sweater-khaki-2.jpg?v=1774272876&width=832",
+      "width": 800,
+      "height": 1200,
+      "bytes": 28300
+    },
+    {
+      "file": "editorial.avif",
+      "source": "https://famme.no/cdn/shop/files/Half-zip-sweater-straight-leg-sweat-pants-brown.jpg?v=1787068481&width=1200",
+      "width": 1000,
+      "height": 1500,
+      "bytes": 26303
+    }
+  ]
+}

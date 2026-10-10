@@ -1,0 +1,183 @@
+{
+  "fixture": true,
+  "currency": "NOK",
+  "products": [
+    {
+      "handle": "baggy-jeans",
+      "title": "Baggy Jeans",
+      "price": 1099,
+      "collection": "jeans",
+      "colors": [
+        {
+          "key": "brown",
+          "image": "jeans-brown"
+        }
+      ],
+      "soldOut": {
+        "brown": [
+          "L"
+        ]
+      },
+      "description": {
+        "nb": "Prøv størrelse og to bildevinkler av samme brune jeans. Lager og pris er illustrerende testdata.",
+        "en": "Try sizes and two views of the same brown jeans. Stock and price are illustrative test data."
+      },
+      "gallery": [
+        "jeans-detail"
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "backorder": {},
+      "id": "fashion-baggy-jeans"
+    },
+    {
+      "handle": "softy-straight-leg",
+      "title": "Softy Straight Leg",
+      "price": 899,
+      "collection": "softy",
+      "colors": [
+        {
+          "key": "brown",
+          "image": "pants-brown"
+        },
+        {
+          "key": "black",
+          "image": "pants-black"
+        }
+      ],
+      "soldOut": {
+        "brown": [
+          "L"
+        ],
+        "black": [
+          "XS"
+        ]
+      },
+      "backorder": {
+        "black": [
+          "XL"
+        ]
+      },
+      "description": {
+        "nb": "Fargevalget bytter bilde. Noen størrelser er utsolgt, mens svart XL kan legges i kurven som en simulert restordre.",
+        "en": "Changing color changes the photo. Some sizes are sold out; black XL can be added as a simulated backorder."
+      },
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "id": "fashion-softy-straight-leg"
+    },
+    {
+      "handle": "essential-hoodie",
+      "title": "Essential Hoodie",
+      "price": 899,
+      "collection": "layers",
+      "colors": [
+        {
+          "key": "brown",
+          "image": "hoodie-brown"
+        },
+        {
+          "key": "grey",
+          "image": "hoodie-grey"
+        }
+      ],
+      "soldOut": {
+        "grey": [
+          "M"
+        ]
+      },
+      "description": {
+        "nb": "En romslig produktvisning med fargevalg, størrelse og hurtigkjøp i skuff. Dette er en design-test, ikke klær til salgs.",
+        "en": "A roomy product layout with colors, sizes and quick-add in a drawer. This is a design test, not clothing for sale."
+      },
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "backorder": {},
+      "id": "fashion-essential-hoodie"
+    },
+    {
+      "handle": "half-zip",
+      "title": "Half Zip Sweater",
+      "price": 899,
+      "collection": "layers",
+      "colors": [
+        {
+          "key": "brown",
+          "image": "halfzip-brown"
+        },
+        {
+          "key": "khaki",
+          "image": "halfzip-khaki"
+        }
+      ],
+      "soldOut": {
+        "brown": [
+          "XL"
+        ]
+      },
+      "description": {
+        "nb": "Se hvordan samme produktkort, bildegalleri og kurv fungerer på mobil og desktop. Testdataene er separate fra live-katalogen.",
+        "en": "See the same product card, gallery and cart work on mobile and desktop. Test data is separate from the live catalog."
+      },
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "backorder": {},
+      "id": "fashion-half-zip"
+    },
+    {
+      "handle": "straight-sweatpants",
+      "title": "Straight Sweatpants",
+      "price": 799,
+      "collection": "layers",
+      "colors": [
+        {
+          "key": "brown",
+          "image": "sweatpants-brown"
+        },
+        {
+          "key": "grey",
+          "image": "sweatpants-grey"
+        }
+      ],
+      "soldOut": {
+        "brown": [
+          "S",
+          "XL"
+        ]
+      },
+      "description": {
+        "nb": "En ekstra vare for å teste filtrering, sortering og flere linjer i handlekurven. Ingen betaling eller levering opprettes.",
+        "en": "An extra item for testing filtering, sorting and several cart lines. No payment or delivery is created."
+      },
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "backorder": {},
+      "id": "fashion-straight-sweatpants"
+    }
+  ]
+}

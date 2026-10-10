@@ -1,8 +1,11 @@
 # ReAI sin test-nettbutikk
 
 One Worker at nettbutikk.reai.no; demosite.reai.no redirects here. The front page
-explains platform primitives. Three designs use the same published ReAI catalog:
-Studio (swatches/cart drawer), Atelier (editorial) and Supply (variant availability).
+explains platform primitives. Five designs use the published ReAI catalog: Studio (swatches/cart drawer),
+Atelier (editorial), Supply (variant availability), Essential (three products with
+inline amount choices) and Index (collection browsing). Famme is a separate
+fashion design with licensed photography, collection/product pages, quick-add,
+size/color choices and an isolated fixture cart.
 Use white, ink and teal with open ruled feature rows; Atelier uses a warm serif
 palette and Supply a dark forest palette. Preserve Norwegian/English and mobile access.
 
@@ -11,6 +14,10 @@ shop; showcase.mjs owns the educational front page, design gallery and isolated
 UI scenarios. content/education.mjs covers every delivery operation, checked against
 live OpenAPI. public/assets/demo.js owns the real cart and read-only API explorer;
 showcase.js owns newsletter signup and the separate scenario cart.
+src/design-storefronts.mjs owns standalone design shells. fashion.js uses only
+assets/famme/catalog.json; its non-UUID product choices never enter checkout.
+Famme photo ownership, permission and source URLs are in ASSETS.md and
+assets/famme/sources.json. Do not reuse these images as MIT template assets.
 
 Production catalog data comes only from Site API. Static explanations and explicitly
 labeled /scenarios/ fixtures work without credentials. Fixture carts have separate
