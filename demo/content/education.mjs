@@ -610,7 +610,7 @@ export const lessons = [
     shortTitle: ["Marked", "Markets"],
     icon: "NO / EN",
     tag: ["PRØV SPRÅKKNAPPEN", "TRY THE LANGUAGE BUTTON"],
-    title: ["Markeder styrer valuta. Språk styrer tekst.", "Same store. Right context."],
+    title: ["Markeder styrer valuta. Språk styrer tekst.", "Markets select currency. Languages select text."],
     summary: [
       "Marked velger valuta og prisliste. Språk velger oversettelse. De gjør ulike jobber.",
       "Market selects currency and price list. Locale selects translation. They do different jobs.",
