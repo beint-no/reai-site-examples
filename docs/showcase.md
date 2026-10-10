@@ -12,15 +12,17 @@ forwarding checkout or newsletter writes across origins.
 | /designs/atelier/ | Same live catalog in an editorial design |
 | /designs/supply/ | Same live catalog with per-variant availability |
 | /scenarios/studio/ and /scenarios/supply/ | Isolated physical-product UI fixtures: mixed stock, all available, sold out, backorders and availability changes |
-| /shop/, /products/, /collections/, /cart/ | Live digital demo commerce and bounded hosted-checkout startup |
-| /features/ and /learn/ | Payments, B2B/EHF, shipping/pickup, discounts, catalog, markets, integration and newsletter consent |
+| /shop/, /products/, /collections/, /cart/ | Live catalog, manual ReAI gift cards, development support and hosted checkout |
+| /features/ and /learn/ | Payments, checkout test checklist, B2B/EHF, shipping/pickup, discounts, catalog, markets, integration and newsletter consent |
 | /api/ | All nine delivery reads; checkout and newsletter have their own forms |
 
 Scenario carts use separate storage keys and non-UUID choices. They never call
 checkout or create fulfillment. Live unavailable data produces an error. Design
 photographs are original AI-generated illustrations, not physical inventory.
-Digital demo gift cards have no redemption balance. The live checkout remains with
-Better Integration and explicitly identifies real payments and invoice orders.
+ReAI gift cards are manually redeemed via post@reai.no after verified payment;
+there is no automated balance or code. Donations support Better Integration’s
+ReAI/open-source development. Checkout identifies Better Integration as recipient,
+real payments and unpaid invoice orders.
 
 Newsletter signup forwards only email and explicit consent through newsletter:subscribe.
 No campaign email, discount or customer-existence disclosure is produced. An offline

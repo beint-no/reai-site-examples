@@ -10,7 +10,7 @@ resources/ for convenience; clients have no runtime dependency on either repo.
 - demo/src/: server-rendered demo storefront, static explanations, public API
   explorer and bounded same-origin hosted checkout startup.
 - demo/public/: original reusable design, CSS, browser-local cart and illustrations.
-- demo/seed/: fictional product definitions for explicit operator-managed seeding.
+- demo/seed/: product definitions for explicit operator-managed seeding.
 - packages/: generated Site client and reusable advanced Cloudflare integration.
 - starter/ and templates/storefront/: the simple standalone export used to refresh
   the separate private reai-storefront-starter provisioning repository.
@@ -55,8 +55,13 @@ credential environment or test tenant name does not prove Adyen is in TEST mode.
 Never claim a return redirect proves payment; never charge a real card as a test.
 Invoice checkout creates real unpaid orders; merchant invoice issuance and EHF
 delivery happen later. Do not submit orders or send invoices just to test the UI.
-Demo donation products are not charitable claims. Demo gift cards create no real
-balance or redemption right unless such a service is deliberately implemented.
+Better Integration receives payments as ReAI’s nonprofit development partner.
+Donation to ReAI is voluntary development support, without goods or service credit.
+ReAI gift cards are real, manually fulfilled credit for ReAI: the buyer forwards
+the order confirmation to post@reai.no. There is no automatic balance or code.
+Verify settled payment before redemption, record applied amounts against the
+purchase, and never redeem the same amount twice. Percentage discounts exclude
+gift cards. No tax-deductibility claims are made.
 
 ## Guides
 
