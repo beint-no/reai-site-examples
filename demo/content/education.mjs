@@ -581,6 +581,13 @@ export const lessons = [
         ],
       },
       {
+        title: ["Kassasystem i samme plattform", "Point of sale in the same platform"],
+        text: [
+          "ReAI samler nettbutikk, kassasystem og regnskap. Salg i fysisk butikk håndteres i kassasystemet, med kvitteringer, betalinger og regnskapsoppfølging i ReAI. Du trenger ikke en dyr integrasjon mellom et separat kassasystem og regnskapssystem. Site API-et på dette nettstedet er for nettbutikken; kassasystemet brukes i ReAI.",
+          "ReAI brings together online commerce, point of sale and accounting. In-store sales are handled by the point of sale, with receipts, payments and accounting follow-up in ReAI. You do not need an expensive integration between separate point-of-sale and accounting systems. The Site API on this website serves the storefront; point of sale is used in ReAI.",
+        ],
+      },
+      {
         title: [
           "Hva Site API ikke skal gi nettleseren",
           "What the Site API must not give the browser",
