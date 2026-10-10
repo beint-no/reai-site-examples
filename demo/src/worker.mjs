@@ -143,14 +143,6 @@ export default {
         return finish(html, context);
       }
       if (!env.REAI_SITE_CREDENTIAL) {
-        if (path === "/")
-          return finish(
-            renderHome(
-              { products: [], collections: [], locale, currency: "NOK" },
-              context,
-            ),
-            context,
-          );
         return response(
           path.startsWith("/reai/")
             ? { error: "Site integration not configured" }
@@ -180,7 +172,7 @@ export default {
           return response({ error: "Invalid signup" }, e.status || 400, true);
         }
         if (
-          typeof body.email !== "string" ||
+          typeof body?.email !== "string" ||
           body.email.length > 254 ||
           !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email) ||
           body.consent !== true
@@ -352,7 +344,6 @@ export default {
         return response(await data(result), 200, true);
       }
       const store = await data(client.storefront(delivery));
-      if (path === "/") return finish(renderHome(store, context), context);
       if (
         ["/designs/studio", "/designs/atelier", "/designs/supply"].includes(
           path,

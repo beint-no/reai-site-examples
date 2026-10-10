@@ -308,6 +308,7 @@ test("newsletter rejects missing consent, cross-origin writes and oversized bodi
   await mocked(
     async () => {
       for (const [body, headers, status] of [
+        [null, {}, 400],
         [{ email: "test@example.com", consent: false }, {}, 400],
         [
           { email: "test@example.com", consent: true },
