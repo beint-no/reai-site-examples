@@ -83,7 +83,6 @@ async function renderCart() {
     catalog = await response.json();
     box.replaceChildren();
     let total = 0;
-    let totalKnown = true;
     for (const line of cart) {
       const product = catalog.products.find((p) =>
         p.variants.some((v) => v.id === line.variantId),
@@ -303,6 +302,7 @@ async function refreshDrawer() {
     const catalog = await result.json();
     if (version !== drawerRequest) return;
     let total = 0;
+    let totalKnown = true;
     target.innerHTML = cart
       .map((line) => {
         const product = catalog.products.find((p) =>
