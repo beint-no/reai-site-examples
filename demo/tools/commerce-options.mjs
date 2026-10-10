@@ -7,10 +7,10 @@ export const demoPickup = {
 
 // Preflight both requested changes before writing. Existing carrier methods stay intact.
 export async function configureDemoCommerce(management, options) {
-  const sites = (await management('/api/sites')).filter((site) => site.name === 'ReAI Lekebutikken');
+  const sites = (await management('/api/sites')).filter((site) => site.name === 'ReAI Commerce Showcase');
   if (sites.length !== 1) throw new Error('Expected exactly one dedicated demo Site; run catalog setup first.');
   const site = sites[0];
-  if (site.status !== 'enabled' || site.activeDomain !== 'demosite.reai.no' ||
+  if (site.status !== 'enabled' || site.activeDomain !== 'nettbutikk.reai.no' ||
       site.previewDomain !== 'reai-demo-store.respiro.workers.dev')
     throw new Error('Demo Site status/domains differ; review configuration before applying.');
   const base = `/api/sites/${site.id}/commerce`;
@@ -56,7 +56,7 @@ async function main() {
   if (!args.includes('--apply')) {
     console.log(JSON.stringify({ mode: 'plan', api: api.origin,
       tenantId: args.includes('--tenant-id') ? tenantId : 'required for apply',
-      site: 'ReAI Lekebutikken', market: 'default',
+      site: 'ReAI Commerce Showcase', market: 'default',
       enableBusinessSales: options.business, pickup: options.pickup ? demoPickup : 'unchanged',
       effect: 'Company checkout accepts real unpaid orders. Pickup is demo-only and appears only for physical goods. No invoices, EHF messages or payments are sent.' }, null, 2));
     return;

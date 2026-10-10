@@ -46,7 +46,7 @@ merchant products, payment configuration or hosting. Repeat runs reuse products;
 conflicting SKUs/publications stop. Changes completed before an error persist.
 
 The one-time credential goes to ignored .local/demo-site-token with mode 0600;
-its value is never printed. It includes Site/catalog/availability/checkout scopes.
+its value is never printed. It includes Site/catalog/availability/checkout and newsletter:subscribe scopes.
 The credential environment is live for the configured active domain; that setting
 is independent of the backend's Adyen TEST/LIVE environment.
 
@@ -78,7 +78,7 @@ the demo-only method offers no physical fulfillment or collection location.
 
 ## Connect and publish
 
-Configure the dedicated Site domains to match demosite.reai.no and the actual
+Configure the dedicated Site domains to match nettbutikk.reai.no and the actual
 Worker preview hostname. Install the token without putting it in an argument:
 
 ```sh

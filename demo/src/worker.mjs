@@ -1,10 +1,13 @@
 // @ts-check
-/** @typedef {{ REAI_SITE_CREDENTIAL?: string, REAI_API_BASE_URL?: string, DEMO_MARKET?: string, DEMO_CHECKOUT_ENABLED?: string, DEMO_PAYMENT_MODE?: string, DEMO_MERCHANT_NAME?: string, DEMO_MERCHANT_ORG_NUMBER?: string, ASSETS: Fetcher }} DemoEnv */
+/** @typedef {{ REAI_SITE_CREDENTIAL?: string, REAI_API_BASE_URL?: string, DEMO_MARKET?: string, DEMO_CHECKOUT_ENABLED?: string, DEMO_PAYMENT_MODE?: string, DEMO_MERCHANT_NAME?: string, DEMO_MERCHANT_ORG_NUMBER?: string, DEMO_PREVIEW?: string, ASSETS: Fetcher }} DemoEnv */
 import { ReaiSiteClient } from "../../packages/reai-site-client/client.mjs";
 import {
   HANDLE,
   learningRoutes,
   renderHome,
+  renderDesign,
+  renderDesigns,
+  renderScenario,
   renderShop,
   renderProduct,
   renderCart,
@@ -46,7 +49,18 @@ export default {
   /** @param {Request} request @param {DemoEnv} env @param {ExecutionContext} ctx */
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    if (url.protocol === "http:" && url.hostname === "demosite.reai.no") {
+    if (url.hostname === "demosite.reai.no") {
+      if (!["GET", "HEAD"].includes(request.method))
+        return response(
+          { error: "Use https://nettbutikk.reai.no for new requests" },
+          409,
+          true,
+        );
+      url.protocol = "https:";
+      url.hostname = "nettbutikk.reai.no";
+      return Response.redirect(url.href, 308);
+    }
+    if (url.protocol === "http:" && url.hostname === "nettbutikk.reai.no") {
       url.protocol = "https:";
       return Response.redirect(url.href, 308);
     }
@@ -66,6 +80,7 @@ export default {
         : "disabled";
     let context = {
       locale,
+      preview: env.DEMO_PREVIEW === "true",
       paymentMode,
       configured: !!env.REAI_SITE_CREDENTIAL,
       merchantName: env.DEMO_MERCHANT_NAME?.trim(),
@@ -92,8 +107,20 @@ export default {
     try {
       if (!["GET", "HEAD", "POST"].includes(request.method))
         return response({ error: "Method not allowed" }, 405, true);
-      if (request.method === "POST" && path !== "/reai/checkout/start")
+      if (
+        request.method === "POST" &&
+        !["/reai/checkout/start", "/reai/newsletter"].includes(path)
+      )
         return response({ error: "Not found" }, 404, true);
+      if (request.method !== "POST" && path === "/")
+        return finish(renderHome({}, context), context);
+      if (request.method !== "POST" && path === "/designs")
+        return finish(renderDesigns(context), context);
+      if (
+        request.method !== "POST" &&
+        ["/scenarios/studio", "/scenarios/supply"].includes(path)
+      )
+        return finish(renderScenario(path.split("/")[2], context), context);
       if (
         request.method !== "POST" &&
         [
@@ -138,6 +165,50 @@ export default {
         fetch: (input, init) =>
           fetch(input, { ...init, signal: AbortSignal.timeout(10000) }),
       });
+      if (path === "/reai/newsletter") {
+        if (request.method !== "POST")
+          return response({ error: "Method not allowed" }, 405, true);
+        if (
+          request.headers.get("Origin") !== url.origin ||
+          !request.headers.get("Content-Type")?.startsWith("application/json")
+        )
+          return response({ error: "Same-origin JSON required" }, 403, true);
+        let body;
+        try {
+          body = await readBoundedJson(request, 2048);
+        } catch (e) {
+          return response({ error: "Invalid signup" }, e.status || 400, true);
+        }
+        if (
+          typeof body.email !== "string" ||
+          body.email.length > 254 ||
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email) ||
+          body.consent !== true
+        )
+          return response(
+            { error: "Valid email and explicit consent required" },
+            400,
+            true,
+          );
+        if (body.website) return response({ accepted: true }, 200, true);
+        if (env.DEMO_PREVIEW === "true")
+          return response(
+            { error: "Signup is unavailable in offline preview" },
+            503,
+            true,
+          );
+        const result = await client.subscribeNewsletter({
+          email: body.email.trim(),
+          consent: true,
+        });
+        if (!result.response.ok)
+          return response(
+            { error: "Signup is temporarily unavailable" },
+            result.response.status === 400 ? 400 : 503,
+            true,
+          );
+        return response({ accepted: true }, 200, true);
+      }
       const site = await data(client.site());
       const selected =
         site.markets?.find((m) => m.handle === env.DEMO_MARKET) ||
@@ -282,6 +353,20 @@ export default {
       }
       const store = await data(client.storefront(delivery));
       if (path === "/") return finish(renderHome(store, context), context);
+      if (
+        ["/designs/studio", "/designs/atelier", "/designs/supply"].includes(
+          path,
+        )
+      ) {
+        const ids = store.products.flatMap((p) => p.variants.map((v) => v.id));
+        const availability = ids.length
+          ? await data(client.availabilities(ids.slice(0, 100), delivery))
+          : { variants: [] };
+        return finish(
+          renderDesign(path.split("/")[2], store, availability, context),
+          context,
+        );
+      }
       if (path === "/shop") return finish(renderShop(store, context), context);
       if (path.startsWith("/collections/")) {
         const handle = path.slice(13);
@@ -344,3 +429,27 @@ export default {
     }
   },
 };
+
+async function readBoundedJson(request, limit) {
+  const reader = request.body?.getReader();
+  if (!reader) throw Object.assign(new Error("Empty body"), { status: 400 });
+  const chunks = [];
+  let length = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    length += value.byteLength;
+    if (length > limit) {
+      await reader.cancel();
+      throw Object.assign(new Error("Body too large"), { status: 413 });
+    }
+    chunks.push(value);
+  }
+  const bytes = new Uint8Array(length);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return JSON.parse(new TextDecoder().decode(bytes));
+}

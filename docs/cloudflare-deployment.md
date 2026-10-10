@@ -1,7 +1,7 @@
 # Publish the demo on Cloudflare
 
 The repository has one deploy target: reai-demo-store in root wrangler.jsonc.
-The custom domain is demosite.reai.no. Cloudflare Workers host this site
+The custom domain is nettbutikk.reai.no. Cloudflare Workers host this site
 independently from the AX42 application server; do not point this hostname at AX42.
 
 Use the intended Cloudflare account and scoped environment credentials. Configure

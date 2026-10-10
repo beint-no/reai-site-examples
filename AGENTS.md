@@ -41,11 +41,11 @@ ReAI. Deployed code never falls back to fictional fixtures on upstream errors.
 Requests use packages/reai-site-client; keep delivery credentials server-side.
 Never commit tokens, private customer data, or raw tenant/catalog exports.
 
-wrangler.jsonc targets only reai-demo-store at https://demosite.reai.no.
+wrangler.jsonc targets only reai-demo-store at https://nettbutikk.reai.no.
 npm run deploy checks and deploys locally; CI validates only.
 Set REAI_SITE_CREDENTIAL as a Worker secret. The published field guide at /features/
 explains payments, B2B/EHF, shipping/pickup, discounts, catalog, markets and
-integration; /api/ exercises all nine delivery reads.
+integration; /api/ exercises all nine delivery reads, checkout and newsletter signup.
 Shipping and inventory bundles are documented capabilities, not fulfillment
 promises for this digital catalog. The published demo uses Adyen LIVE
 and clearly labels real payments and the configured recipient. Offline preview

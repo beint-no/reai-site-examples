@@ -21,6 +21,7 @@ function save() {
   try {
     localStorage.setItem(key, JSON.stringify(cart));
   } catch {}
+  document.dispatchEvent(new CustomEvent("reai:cart-change"));
   document
     .querySelectorAll("[data-cart-count]")
     .forEach(
@@ -57,8 +58,10 @@ document.querySelectorAll("[data-add-to-cart]").forEach((form) =>
     else if (cart.length < 30) cart.push({ variantId: id, quantity });
     save();
     form.querySelector("[data-add-message]").textContent = nb
-      ? "Lagt i handlekurven. Litt mer magi!"
-      : "Added to cart. A little more magic!";
+      ? "Lagt i handlekurven."
+      : "Added to cart.";
+    liveDrawer?.showModal();
+    refreshDrawer();
   }),
 );
 document.querySelector("[data-search]")?.addEventListener("input", (e) => {
@@ -243,12 +246,12 @@ document
 save();
 renderCart();
 
-const apiForm = document.querySelector('[data-api-explorer]');
+const apiForm = document.querySelector("[data-api-explorer]");
 if (apiForm) {
   const params = new URL(location.href).searchParams;
-  const product = params.get('product');
-  const endpoint = product ? 'product' : params.get('endpoint');
-  const resource = product || params.get('resource') || '';
+  const product = params.get("product");
+  const endpoint = product ? "product" : params.get("endpoint");
+  const resource = product || params.get("resource") || "";
   const select = apiForm.querySelector('[name="endpoint"]');
   if (Array.from(select.options).some((option) => option.value === endpoint)) {
     select.value = endpoint;
@@ -260,15 +263,102 @@ async function populateApiSample(form) {
   const endpoint = form.querySelector('[name="endpoint"]').value;
   const resource = form.querySelector('[name="resource"]');
   if (resource.value.trim()) return;
-  if (endpoint === 'product') resource.value = 'heia-reai';
-  if (endpoint === 'collection') resource.value = 'alle-demo-objekter';
-  if (['availability', 'availabilities'].includes(endpoint)) {
+  if (endpoint === "product") resource.value = "heia-reai";
+  if (endpoint === "collection") resource.value = "alle-demo-objekter";
+  if (["availability", "availabilities"].includes(endpoint)) {
     try {
-      const response = await fetch('/reai/products');
+      const response = await fetch("/reai/products");
       if (!response.ok) return;
       const data = await response.json();
-      const variants = data.products.flatMap((p) => p.variants.map((v) => v.id));
-      resource.value = endpoint === 'availability' ? variants[0] || '' : variants.slice(0, 2).join(',');
-    } catch { /* The explorer displays the resulting HTTP error if sample lookup fails. */ }
+      const variants = data.products.flatMap((p) =>
+        p.variants.map((v) => v.id),
+      );
+      resource.value =
+        endpoint === "availability"
+          ? variants[0] || ""
+          : variants.slice(0, 2).join(",");
+    } catch {
+      /* The explorer displays the resulting HTTP error if sample lookup fails. */
+    }
   }
 }
+
+const liveDrawer = document.querySelector("[data-cart-drawer]");
+let drawerRequest = 0;
+async function refreshDrawer() {
+  if (!liveDrawer?.open) return;
+  const version = ++drawerRequest;
+  const target = document.querySelector("[data-drawer-lines]");
+  target.textContent = nb ? "Henter katalogen…" : "Loading catalog…";
+  if (!cart.length) {
+    target.textContent = nb ? "Handlekurven er tom." : "Your cart is empty.";
+    return;
+  }
+  try {
+    const result = await fetch("/reai/catalog");
+    if (!result.ok) throw new Error();
+    const catalog = await result.json();
+    if (version !== drawerRequest) return;
+    target.innerHTML = cart
+      .map((line) => {
+        const product = catalog.products.find((p) =>
+          p.variants.some((v) => v.id === line.variantId),
+        );
+        const variant = product?.variants.find((v) => v.id === line.variantId);
+        return `<article class="drawer-line"><div><b>${esc(product?.title || (nb ? "Utilgjengelig produkt" : "Unavailable product"))}</b><small>${esc(variant?.options.map((o) => o.value).join(" / ") || "")} · ${line.quantity} ${nb ? "stk." : "items"}</small><button data-drawer-remove="${esc(line.variantId)}">${nb ? "Fjern" : "Remove"}</button></div><span>${variant ? esc(format(Number(variant.price) * line.quantity, catalog.currency)) : ""}</span></article>`;
+      })
+      .join("");
+    target.querySelectorAll("[data-drawer-remove]").forEach((button) =>
+      button.addEventListener("click", () => {
+        cart = cart.filter(
+          (line) => line.variantId !== button.dataset.drawerRemove,
+        );
+        save();
+        refreshDrawer();
+        renderCart();
+      }),
+    );
+  } catch {
+    target.textContent = nb
+      ? "Katalogen er midlertidig utilgjengelig. Prøv igjen."
+      : "The catalog is temporarily unavailable. Try again.";
+  }
+}
+document.querySelector("[data-cart-open]")?.addEventListener("click", () => {
+  liveDrawer.showModal();
+  refreshDrawer();
+});
+document
+  .querySelector("[data-cart-close]")
+  ?.addEventListener("click", () => liveDrawer.close());
+document.addEventListener("reai:cart-change", refreshDrawer);
+liveDrawer?.addEventListener("click", (e) => {
+  if (
+    e.target === liveDrawer &&
+    e.clientX < liveDrawer.getBoundingClientRect().left
+  )
+    liveDrawer.close();
+});
+
+function esc(value) {
+  return String(value).replace(
+    /[&<>"\']/g,
+    (c) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "\'": "&#39;",
+      })[c],
+  );
+}
+
+document.querySelector(".header nav")?.addEventListener("click", (event) => {
+  if (event.target.closest("a")) {
+    document.querySelector(".header").classList.remove("menu-open");
+    document
+      .querySelector(".menu-toggle")
+      .setAttribute("aria-expanded", "false");
+  }
+});

@@ -158,10 +158,12 @@ const types = {
   ".css": "text/css",
   ".js": "text/javascript",
   ".svg": "image/svg+xml",
+          ".jpg": "image/jpeg",
 };
 const env = {
   REAI_API_BASE_URL: "http://demo-api.invalid",
   REAI_SITE_CREDENTIAL: "offline-fixture-only",
+  DEMO_PREVIEW: "true",
   DEMO_CHECKOUT_ENABLED: "false",
   ASSETS: {
     async fetch(request) {

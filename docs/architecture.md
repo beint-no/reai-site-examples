@@ -15,11 +15,16 @@ ReAI owns published business data and checkout state.
 | packages/reai-cloudflare-storefront/ | Reusable advanced integration for other private client implementations |
 | starter/ and templates/storefront/ | Simple standalone operational template export |
 
-The demo uses one coherent storefront snapshot for home and shop, direct product
+The live shop and all three designs use one coherent storefront snapshot, direct product
 and collection detail reads, and uncached batch availability on product pages.
 The API playground exercises Site, storefront, catalog, collections, product and
 collection detail, single and batch availability. Checkout is demonstrated through
-the cart, never as an unsafe arbitrary request in the explorer.
+the cart, never as an unsafe arbitrary request in the explorer. Newsletter signup
+uses explicit consent and the typed client; the receipt never reveals existing customers.
+
+The educational home, design gallery and /scenarios/ lab are static. Scenario data
+is intentionally simulated, kept in a separate cart and incapable of creating checkout
+or shipments. It never replaces failed live reads. See [showcase coverage](showcase.md).
 
 Static feature/about/privacy pages work without ReAI. Missing configuration and
 upstream errors stay explicit; the deployed Worker never imports seed fixtures.
