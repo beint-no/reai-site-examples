@@ -20,7 +20,7 @@ const value = (flag) => {
 };
 const tenantId = value("--tenant-id");
 const api = new URL(process.env.REAI_API_BASE_URL || "https://app.reai.no");
-const siteName = "ReAI Lekebutikken";
+const siteName = "ReAI Commerce Showcase";
 const priceName = "ReAI demo NOK";
 const skus = (p) => p.variants.map((_, i) => `REAI-DEMO-${p.handle}-${i + 1}`);
 
@@ -133,11 +133,11 @@ if (!site)
   site = await management("/api/sites", "POST", {
     name: siteName,
     locale: "nb-NO",
-    activeDomain: "demosite.reai.no",
+    activeDomain: "nettbutikk.reai.no",
     previewDomain: "reai-demo-store.respiro.workers.dev",
   });
 if (
-  site.activeDomain !== "demosite.reai.no" ||
+  site.activeDomain !== "nettbutikk.reai.no" ||
   site.previewDomain !== "reai-demo-store.respiro.workers.dev"
 )
   throw new Error(
@@ -339,6 +339,7 @@ if (args.includes("--write-credential")) {
       "commerce:catalog:read",
       "commerce:availability:read",
       "commerce:checkout:create",
+      "newsletter:subscribe",
     ],
   });
   if (!credential.token)

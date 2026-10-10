@@ -5,7 +5,7 @@
   "compatibility_date":"2026-10-07",
   "workers_dev":true,
   "dev":{"host":"127.0.0.1"},
-  "routes":[{"pattern":"demosite.reai.no","custom_domain":true}],
+  "routes":[{"pattern":"nettbutikk.reai.no","custom_domain":true},{"pattern":"demosite.reai.no","custom_domain":true}],
   "assets":{"directory":"demo/public","binding":"ASSETS","run_worker_first":true},
   "vars":{"REAI_API_BASE_URL":"https://app.reai.no","DEMO_MARKET":"default","DEMO_CHECKOUT_ENABLED":"true","DEMO_PAYMENT_MODE":"live","DEMO_MERCHANT_NAME":"Better Integration","DEMO_MERCHANT_ORG_NUMBER":"935733944"},
   "observability":{"enabled":true}

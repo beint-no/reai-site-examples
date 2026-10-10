@@ -1,32 +1,34 @@
-# ReAI Lekebutikken
+# ReAI commerce showcase
 
-One deliberately playful demonstration of a full ReAI Site integration, in
-Norwegian and English. Preserve the warm paper background, cobalt/lime palette,
-original illustrated objects, clear demo labels and accessible mobile layouts.
-Do not add unrelated example Workers or copy real client brands/data here.
+One Worker at nettbutikk.reai.no; demosite.reai.no redirects here. The front page
+explains platform primitives. Three designs use the same published ReAI catalog:
+Studio (swatches/cart drawer), Atelier (editorial) and Supply (variant availability).
+Use white, ink and teal with open ruled feature rows; Atelier uses a warm serif
+palette and Supply a dark forest palette. Preserve Norwegian/English and mobile access.
 
-src/worker.mjs owns upstream integration and trusted checkout startup;
-src/storefront.mjs owns HTML; content/education.mjs owns the bilingual field guide
-and complete delivery-operation coverage (verified against live OpenAPI). public/assets/demo.js owns the local
-cart, filters and read-only API explorer; demo.css owns presentation. seed/catalog.json
-contains fictional product definitions, not a runtime/live catalog.
+src/worker.mjs owns trusted integration; storefront.mjs owns the document and live
+shop; showcase.mjs owns the educational front page, design gallery and isolated
+UI scenarios. content/education.mjs covers every delivery operation, checked against
+live OpenAPI. public/assets/demo.js owns the real cart and read-only API explorer;
+showcase.js owns newsletter signup and the separate scenario cart.
 
-Static explanations render without a credential. Commerce fails explicitly when
-unconfigured/unavailable. Production product data comes only from the selected
-ReAI Site. The offline preview intercepts a synthetic origin only and has no payment.
+Production catalog data comes only from Site API. Static explanations and explicitly
+labeled /scenarios/ fixtures work without credentials. Fixture carts have separate
+storage keys, non-UUID identifiers and no checkout or fulfillment endpoint; they
+never substitute for unavailable live data. Product photographs on design pages
+illustrate layouts, not physical goods for sale. seed/catalog.json is operator input.
 
-Keep donation levels and Motivation to Greg lighthearted and clearly demonstrative.
-The gift card is a test product, never an unimplemented redemption promise.
-Checkout requires explicit verified payment configuration; the return page does
-not clear the cart or claim payment was completed from a URL parameter alone.
+Newsletter signup requires an unchecked consent box and newsletter:subscribe;
+show the Site owner and link privacy. Never claim it sends a welcome email or coupon.
+The offline preview records no consent and accepts no payments.
 
-Run npm run check and inspect desktop/mobile, navigation, variants, cart and errors
-before publishing. Root AGENTS.md owns commands and deployment policy.
+Live digital demo checkout names Better Integration and discloses real payments and
+invoice orders before starting. Demo gift cards have no redemption balance, and
+contributions are not charitable donations. Return URLs do not prove payment or
+clear the cart. Shipping/pickup/EHF remain accurately documented configured flows;
+digital products create no physical shipments. Scenario stock/backorders are UI tests.
 
-The connected demo has manual and automated collections, a fictional compare-at
-price and namespaced market discount codes entered in hosted checkout. Shipping
-and inventory bundles are explained platform capabilities; digital demo goods
-never create shipments or show pickup choices. The B2B/EHF guide distinguishes
-real unpaid orders, merchant invoice issuance, delivery and payment. Store pickup
-is explicitly demo-only; never invent a physical collection location. Keep these
-boundaries explicit.
+Run npm run check; verify desktop/mobile, all designs, swatches, both cart drawers,
+stock scenarios, real API reads, newsletter errors and canonical redirects before deploy.
+Root AGENTS.md owns release policy. Keep operational docs concise and avoid duplicating
+field-guide content in Markdown.
