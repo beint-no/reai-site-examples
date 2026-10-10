@@ -1,4 +1,4 @@
-# Connect the single demo store
+# Connect ReAI sin test-nettbutikk
 
 Use a dedicated demo Site in an authorized test tenant. Other Sites in the same tenant
 must stay separate. A tenant named test is not necessarily an Adyen test environment:

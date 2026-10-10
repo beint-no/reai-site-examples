@@ -63,7 +63,7 @@ globalThis.fetch = async (input, init) => {
   if (url.pathname.endsWith("/site"))
     return Response.json({
       id: uuid(9001),
-      name: "ReAI Lekebutikken",
+      name: blueprint.name,
       sourceLocale: "nb-NO",
       status: "enabled",
       markets: [

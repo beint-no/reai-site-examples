@@ -20,7 +20,7 @@ const value = (flag) => {
 };
 const tenantId = value("--tenant-id");
 const api = new URL(process.env.REAI_API_BASE_URL || "https://app.reai.no");
-const siteName = "ReAI Commerce Showcase";
+const siteName = seed.name;
 const priceName = "ReAI demo NOK";
 const skus = (p) => p.variants.map((_, i) => `REAI-DEMO-${p.handle}-${i + 1}`);
 

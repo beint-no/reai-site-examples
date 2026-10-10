@@ -21,7 +21,7 @@ export const copy = {
   nb: {
     shop: "Live-butikk",
     features: "Lær ReAI",
-    about: "Om demoen",
+    about: "Om test-nettbutikken",
     cart: "Handlekurv",
     add: "Legg i kurven",
     choose: "Velg variant",
@@ -32,7 +32,7 @@ export const copy = {
       "En ekte ReAI-integrasjon, med litt mindre alvor. Utforsk produkter, prøv varianter og se hvordan nettbutikk og regnskap henger sammen.",
     browse: "Finn litt kontormagi",
     learn: "Se hva som skjer bak kulissene",
-    demo: "DEMO — fiktive produkter. Se betalingsmodus før checkout.",
+    demo: "ReAI sin test-nettbutikk · Se betalingsmodus før checkout.",
     empty: "Her blir det snart kontormagi. Katalogen kobles til ReAI.",
     back: "Tilbake til butikken",
     quantity: "Antall",
@@ -43,7 +43,7 @@ export const copy = {
     remove: "Fjern",
     live: "Data fra ReAI",
     noToken:
-      "Demoen er ikke koblet til ReAI ennå. Statisk innhold virker; katalog og checkout åpnes når oppsettet er klart.",
+      "Test-nettbutikken er ikke koblet til ReAI ennå. Statisk innhold virker; katalog og checkout åpnes når oppsettet er klart.",
     wait: "Henter katalogen…",
     pay: "Betalingsmodus",
     disabled: "Checkout er ikke aktivert",
@@ -58,14 +58,14 @@ export const copy = {
     api: "Utforsk API-et",
     basket: "Handlekurven din",
     saved: "Lagt i handlekurven",
-    related: "Flere demoprodukter",
+    related: "Flere testprodukter",
     stock: "Tilgjengelighet sjekkes i ReAI",
     status: "API-status",
   },
   en: {
     shop: "Shop",
     features: "Learn ReAI",
-    about: "About the demo",
+    about: "About the test store",
     cart: "Cart",
     add: "Add to cart",
     choose: "Choose an option",
@@ -76,7 +76,7 @@ export const copy = {
       "A real ReAI integration with a little less seriousness. Explore products, try variants and see how commerce and accounting fit together.",
     browse: "Find some office magic",
     learn: "See what happens behind the scenes",
-    demo: "DEMO — fictional products. Check payment mode before checkout.",
+    demo: "ReAI test store · Check payment mode before checkout.",
     empty:
       "Office magic is on its way. The catalog is being connected to ReAI.",
     back: "Back to the shop",
@@ -88,7 +88,7 @@ export const copy = {
     remove: "Remove",
     live: "Data from ReAI",
     noToken:
-      "The demo is not connected to ReAI yet. Editorial pages work; catalog and checkout open when setup is ready.",
+      "The test store is not connected to ReAI yet. Editorial pages work; catalog and checkout open when setup is ready.",
     wait: "Loading the catalog…",
     pay: "Payment mode",
     disabled: "Checkout is not enabled",
@@ -103,7 +103,7 @@ export const copy = {
     api: "Explore the API",
     basket: "Your cart",
     saved: "Added to cart",
-    related: "More demo products",
+    related: "More test products",
     stock: "Availability is checked in ReAI",
     status: "API status",
   },
@@ -151,6 +151,13 @@ export function picture(product, eager = false) {
     } loading="${eager ? "eager" : "lazy"}">`;
   return `<img src="/assets/${art(product)}.svg" alt="${h(product.title)}" width="640" height="640" loading="${eager ? "eager" : "lazy"}">`;
 }
+function variantLabel(variant, store) {
+  const price = money(variant.price, store),
+    option = variant.options?.map((o) => o.value).join(" / ") || variant.sku || "Standard";
+  return option.replace(/\s/g, "") === price.replace(/\s/g, "")
+    ? price
+    : `${option} — ${price}`;
+}
 function card(product, store) {
   const t = copy[language(store.locale)],
     v = product.variants || [],
@@ -160,7 +167,7 @@ function card(product, store) {
       (x) =>
         Number(x.price) === min && Number(x.compareAtPrice) > Number(x.price),
     )?.compareAtPrice;
-  return `<article class="product-card"><a class="product-art art-${art(product)}" href="/products/${h(product.handle)}/">${picture(product)}<span class="art-tag">DEMO OBJECT</span><span class="round-arrow" aria-hidden="true">↗</span></a><div class="product-meta"><h3><a href="/products/${h(product.handle)}/">${h(product.title)}</a></h3><span>${min === null ? "" : `${new Set(prices).size > 1 ? t.from + " " : ""}${h(money(min, store))}`}${reference ? ` <s class="reference-price">${h(money(reference, store))}</s>` : ""}</span></div><p class="product-caption">${h(
+  return `<article class="product-card"><a class="product-art art-${art(product)}" href="/products/${h(product.handle)}/">${picture(product)}<span class="art-tag">TEST PRODUCT</span><span class="round-arrow" aria-hidden="true">↗</span></a><div class="product-meta"><h3><a href="/products/${h(product.handle)}/">${h(product.title)}</a></h3><span>${min === null ? "" : `${new Set(prices).size > 1 ? t.from + " " : ""}${h(money(min, store))}`}${reference ? ` <s class="reference-price">${h(money(reference, store))}</s>` : ""}</span></div><p class="product-caption">${h(
     String(product.description || "")
       .replace(/<[^>]*>/g, "")
       .split(". ")[0],
@@ -170,12 +177,13 @@ export function documentHtml(title, body, context = {}) {
   const lang = language(context.locale),
     t = copy[lang],
     mode = context.paymentMode || "disabled",
-    nb = lang === "nb";
-  return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="ReAI commerce showcase: storefront designs, Site API, checkout, payments, shipping and accounting."><meta name="theme-color" content="#ffffff"><meta name="robots" content="noindex, nofollow"><title>${h(title)} · ReAI commerce</title><link rel="icon" href="/assets/mark.svg"><link rel="stylesheet" href="/assets/demo.css"></head><body data-locale="${lang}" data-design="${h(context.design || "")}" data-payment-mode="${h(mode)}" data-checkout-origin="${h(context.checkoutOrigin || "https://app.reai.no")}"><a class="skip" href="#main">${nb ? "Hopp til innhold" : "Skip to content"}</a><div class="notice">${context.preview ? (nb ? "Lokal forhåndsvisning · fiktiv katalog · ingen betaling" : "Local preview · fictional catalog · no payments") : mode === "live" ? (nb ? "Demobutikk · fiktive produkter · ekte betalinger er tydelig merket" : "Demo store · fictional products · real payments are clearly marked") : t.demo}</div><header class="header shell"><a class="brand" href="/"><strong>ReAI</strong><span>/ commerce</span></a><nav aria-label="${nb ? "Hovedmeny" : "Main navigation"}"><a href="/#primitives">${nb ? "Plattform" : "Platform"}</a><a href="/designs/">${nb ? "Butikkdesign" : "Storefront designs"}</a><a href="/features/">${t.features}</a><a href="/api/">API</a></nav><div class="header-actions"><a class="language" href="?lang=${nb ? "en" : "nb"}">${nb ? "EN" : "NO"}</a><button class="cart-pill" ${context.scenario ? "data-scenario-header-open" : "data-cart-open"} type="button" aria-label="${context.scenario ? (nb ? "Testkurv" : "Scenario cart") : t.cart}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l3 12h11l3-9H6M9 20h.01M18 20h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><b ${context.scenario ? "data-scenario-count" : "data-cart-count"}>0</b></button><button class="menu-toggle" aria-label="${nb ? "Åpne meny" : "Open navigation"}" aria-expanded="false" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.6"/></svg></button></div></header><main id="main">${body}</main><footer class="footer shell"><div class="footer-top"><a class="brand" href="/"><strong>ReAI</strong><span>/ commerce</span></a><p>${nb ? "En plattform. Din opplevelse." : "One platform. Your experience."}</p><a href="https://reai.no">${nb ? "Om ReAI" : "About ReAI"} ${arrow}</a></div><div class="footer-bottom"><span>© ${new Date().getUTCFullYear()} ReAI</span><div><a href="/shop/">${nb ? "Live-demobutikk" : "Live demo shop"}</a><a href="/about/">${t.about}</a><a href="/privacy/">${nb ? "Personvern" : "Privacy"}</a><a href="https://github.com/beint-no/reai-site-examples">${nb ? "Kildekode" : "Source"}</a></div></div></footer><dialog class="cart-drawer" data-cart-drawer aria-label="${t.cart}"><div class="drawer-header"><h2>${t.cart}</h2><button data-cart-close aria-label="${nb ? "Lukk" : "Close"}">×</button></div><div data-drawer-lines></div><div class="drawer-bottom"><p>${nb ? "Live-katalog fra ReAI. Betalingsmodus og mottaker vises før checkout." : "Live catalog from ReAI. Payment mode and recipient are shown before checkout."}</p><a class="button" href="/cart/">${nb ? "Se handlekurven" : "View cart"} ${arrow}</a></div></dialog><script src="/assets/demo.js" defer></script><script src="/assets/showcase.js" defer></script></body></html>`;
+    nb = lang === "nb",
+    storeName = nb ? "ReAI sin test-nettbutikk" : "ReAI test store";
+  return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="ReAI commerce showcase: storefront designs, Site API, checkout, payments, shipping and accounting."><meta name="theme-color" content="#ffffff"><meta name="robots" content="noindex, nofollow"><title>${h(title === storeName ? storeName : `${title} · ${storeName}`)}</title><link rel="icon" href="/assets/mark.svg"><link rel="stylesheet" href="/assets/demo.css"></head><body data-locale="${lang}" data-design="${h(context.design || "")}" data-payment-mode="${h(mode)}" data-checkout-origin="${h(context.checkoutOrigin || "https://app.reai.no")}"><a class="skip" href="#main">${nb ? "Hopp til innhold" : "Skip to content"}</a><div class="notice">${context.preview ? (nb ? "Lokal forhåndsvisning · fiktiv katalog · ingen betaling" : "Local preview · fictional catalog · no payments") : mode === "live" ? (nb ? "ReAI sin test-nettbutikk · Betaling i kassen fungerer, hele flyten kan testes" : "ReAI test store · Checkout payments work; test the full flow") : t.demo}</div><header class="header shell"><a class="brand" href="/"><strong>ReAI</strong><span>/ commerce</span></a><nav aria-label="${nb ? "Hovedmeny" : "Main navigation"}"><a href="/#primitives">${nb ? "Plattform" : "Platform"}</a><a href="/designs/">${nb ? "Butikkdesign" : "Storefront designs"}</a><a href="/features/">${t.features}</a><a href="/api/">API</a></nav><div class="header-actions"><a class="language" href="?lang=${nb ? "en" : "nb"}">${nb ? "EN" : "NO"}</a><button class="cart-pill" ${context.scenario ? "data-scenario-header-open" : "data-cart-open"} type="button" aria-label="${context.scenario ? (nb ? "Testkurv" : "Scenario cart") : t.cart}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l3 12h11l3-9H6M9 20h.01M18 20h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><b ${context.scenario ? "data-scenario-count" : "data-cart-count"}>0</b></button><button class="menu-toggle" aria-label="${nb ? "Åpne meny" : "Open navigation"}" aria-expanded="false" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.6"/></svg></button></div></header><main id="main">${body}</main><footer class="footer shell"><div class="footer-top"><a class="brand" href="/"><strong>ReAI</strong><span>/ commerce</span></a><p>${nb ? "En plattform. Din opplevelse." : "One platform. Your experience."}</p><a href="https://reai.no">${nb ? "Om ReAI" : "About ReAI"} ${arrow}</a></div><div class="footer-bottom"><span>© ${new Date().getUTCFullYear()} ReAI</span><div><a href="/shop/">${nb ? "Test-nettbutikken" : "Test store"}</a><a href="/about/">${t.about}</a><a href="/privacy/">${nb ? "Personvern" : "Privacy"}</a><a href="https://github.com/beint-no/reai-site-examples">${nb ? "Kildekode" : "Source"}</a></div></div></footer><dialog class="cart-drawer" data-cart-drawer aria-label="${t.cart}"><div class="drawer-header"><h2>${t.cart}</h2><button data-cart-close aria-label="${nb ? "Lukk" : "Close"}">×</button></div><div data-drawer-lines></div><div class="drawer-bottom"><p>${nb ? "Live-katalog fra ReAI. Betalingsmodus og mottaker vises før checkout." : "Live catalog from ReAI. Payment mode and recipient are shown before checkout."}</p><a class="button" href="/cart/">${nb ? "Se handlekurven" : "View cart"} ${arrow}</a></div></dialog><script src="/assets/demo.js" defer></script><script src="/assets/showcase.js" defer></script></body></html>`;
 }
 export function renderHome(store, context) {
   return documentHtml(
-    language(context.locale) === "nb" ? "ReAI nettbutikk" : "ReAI commerce",
+    language(context.locale) === "nb" ? "ReAI sin test-nettbutikk" : "ReAI test store",
     homeContent(context),
     context,
   );
@@ -219,7 +227,7 @@ export function renderShop(store, context, collection = null) {
     products = collection ? collection.products || [] : store.products || [];
   return documentHtml(
     collection?.title || t.shop,
-    `<section class="shell inner"><span class="eyebrow">LIVE / REAI SITE API</span><h1>${h(collection?.title || t.all)}</h1><p class="lead">${h(collection?.description || (lang === "nb" ? "Publisert katalog fra ReAI. Fiktive, digitale demoprodukter." : "A published ReAI catalog. Fictional digital demo products."))}</p><div class="shop-learning"><p>${lang === "nb" ? "Følg dataene: samlingene og prisene under leveres fra ReAI." : "Follow the data: these collections and prices are delivered by ReAI."}</p><a href="/learn/catalog/">${lang === "nb" ? "Hvordan virker samlinger?" : "How do collections work?"} ↗</a><a href="/learn/discounts/">${lang === "nb" ? "Prøv en rabattkode" : "Try a discount code"} ↗</a></div><div class="shop-toolbar"><div class="collection-filters"><a class="filter ${collection ? "" : "active"}" href="/shop/">${t.all}</a>${(store.collections || []).map((c) => `<a class="filter ${collection?.handle === c.handle ? "active" : ""}" href="/collections/${h(c.handle)}/">${h(c.title)}</a>`).join("")}</div><label class="search"><span class="sr-only">${t.search}</span><input data-search type="search" placeholder="${t.search}"><span aria-hidden="true">⌕</span></label></div>${renderGrid(products, store)}<p data-search-empty hidden>${lang === "nb" ? "Ingen treff. Prøv litt annen magi." : "No matches. Try another kind of magic."}</p></section>`,
+    `<section class="shell inner"><span class="eyebrow">LIVE / REAI SITE API</span><h1>${h(collection?.title || t.all)}</h1><p class="lead">${h(collection?.description || (lang === "nb" ? "Publisert katalog fra ReAI. Fiktive, digitale testprodukter." : "A published ReAI catalog. Fictional digital test products."))}</p><div class="shop-learning"><p>${lang === "nb" ? "Følg dataene: samlingene og prisene under leveres fra ReAI." : "Follow the data: these collections and prices are delivered by ReAI."}</p><a href="/learn/catalog/">${lang === "nb" ? "Hvordan virker samlinger?" : "How do collections work?"} ↗</a><a href="/learn/discounts/">${lang === "nb" ? "Prøv en rabattkode" : "Try a discount code"} ↗</a></div><div class="shop-toolbar"><div class="collection-filters"><a class="filter ${collection ? "" : "active"}" href="/shop/">${t.all}</a>${(store.collections || []).map((c) => `<a class="filter ${collection?.handle === c.handle ? "active" : ""}" href="/collections/${h(c.handle)}/">${h(c.title)}</a>`).join("")}</div><label class="search"><span class="sr-only">${t.search}</span><input data-search type="search" placeholder="${t.search}"><span aria-hidden="true">⌕</span></label></div>${renderGrid(products, store)}<p data-search-empty hidden>${lang === "nb" ? "Ingen treff. Prøv litt annen magi." : "No matches. Try another kind of magic."}</p></section>`,
     context,
   );
 }
@@ -228,14 +236,14 @@ export function renderProduct(store, product, availability, context) {
     t = copy[lang];
   return documentHtml(
     product.title,
-    `<section class="shell inner"><a class="breadcrumb" href="/shop/">← ${t.back}</a><div class="product-detail"><div class="detail-art art-${art(product)}">${picture(product, true)}<span class="art-tag">REAI DEMO OBJECT</span></div><div class="detail-copy"><span class="eyebrow">${t.live.toUpperCase()}</span><h1>${h(product.title)}</h1>${richDescription(product)}${productCommerceNotes(product, store, context)}<form data-add-to-cart><label for="variant">${t.variants}</label><select id="variant" name="variantId">${(product.variants || []).map((v) => `<option value="${h(v.id)}" ${availability?.variants?.find((a) => a.variantId === v.id)?.status === "OUT_OF_STOCK" ? "disabled" : ""}>${h(v.options?.map((o) => o.value).join(" / ") || v.sku || "Standard")} — ${h(money(v.price, store))}</option>`).join("")}</select><label for="quantity">${t.quantity}</label><input id="quantity" name="quantity" type="number" value="1" min="1" max="20"><button class="button" type="submit" ${(product.variants || []).some((v) => availability?.variants?.find((a) => a.variantId === v.id)?.status === "AVAILABLE") ? "" : "disabled"}>${t.add} <span>+</span></button><p data-add-message role="status"></p></form><div class="product-notes"><p><span class="dot"></span>${t.stock}</p><p>✳ ${lang === "nb" ? "Digitalt demo-produkt. Ingen fysisk levering." : "Digital demo product. No physical delivery."}</p>${product.handle?.includes("gavekort") ? `<p>↗ ${t.gift}</p>` : ""}</div><details class="api-note"><summary>${lang === "nb" ? "Hva viser dette produktet?" : "What does this demonstrate?"}</summary><p>${lang === "nb" ? "Produktdetaljer, bilder og beløpsvarianter kommer fra Site API. Tilgjengelighet hentes separat, og checkout validerer pris og lager på nytt." : "Product detail, images and price variants come from Site API. Availability is fetched separately; checkout revalidates prices and stock."}</p><a href="/api/?product=${h(product.handle)}">${t.api} ↗</a></details></div></div><div class="section-heading"><h2>${t.related}</h2></div>${renderGrid((store.products || []).filter((p) => p.id !== product.id).slice(0, 3), store)}</section>`,
+    `<section class="shell inner"><a class="breadcrumb" href="/shop/">← ${t.back}</a><div class="product-detail"><div class="detail-art art-${art(product)}">${picture(product, true)}<span class="art-tag">REAI TEST PRODUCT</span></div><div class="detail-copy"><span class="eyebrow">${t.live.toUpperCase()}</span><h1>${h(product.title)}</h1>${richDescription(product)}${productCommerceNotes(product, store, context)}<form data-add-to-cart><label for="variant">${t.variants}</label><select id="variant" name="variantId">${(product.variants || []).map((v) => `<option value="${h(v.id)}" ${availability?.variants?.find((a) => a.variantId === v.id)?.status === "OUT_OF_STOCK" ? "disabled" : ""}>${h(variantLabel(v, store))}</option>`).join("")}</select><label for="quantity">${t.quantity}</label><input id="quantity" name="quantity" type="number" value="1" min="1" max="20"><button class="button" type="submit" ${(product.variants || []).some((v) => availability?.variants?.find((a) => a.variantId === v.id)?.status === "AVAILABLE") ? "" : "disabled"}>${t.add} <span>+</span></button><p data-add-message role="status"></p></form><div class="product-notes"><p><span class="dot"></span>${t.stock}</p><p>✳ ${lang === "nb" ? "Digitalt testprodukt. Ingen fysisk levering." : "Digital test product. No physical delivery."}</p>${product.handle?.includes("gavekort") ? `<p>↗ ${t.gift}</p>` : ""}</div><details class="api-note"><summary>${lang === "nb" ? "Hva viser dette produktet?" : "What does this demonstrate?"}</summary><p>${lang === "nb" ? "Produktdetaljer, bilder og beløpsvarianter kommer fra Site API. Tilgjengelighet hentes separat, og checkout validerer pris og lager på nytt." : "Product detail, images and price variants come from Site API. Availability is fetched separately; checkout revalidates prices and stock."}</p><a href="/api/?product=${h(product.handle)}">${t.api} ↗</a></details></div></div><div class="section-heading"><h2>${t.related}</h2></div>${renderGrid((store.products || []).filter((p) => p.id !== product.id).slice(0, 3), store)}</section>`,
     context,
   );
 }
 function paymentDisclosure(context) {
   if (context.paymentMode !== "live") return "";
   const nb = language(context.locale) === "nb";
-  return `<div class="payment-disclosure"><p><b>${nb ? "Ekte betalinger og fakturaordrer." : "Real payments and invoice orders."}</b></p><p>${nb ? "Betalingen går til" : "Payment goes to"} ${h(context.merchantName)}${context.merchantOrgNumber ? ` (${nb ? "org.nr." : "org. no."} ${h(context.merchantOrgNumber)})` : ""}.</p><p>${nb ? "Du kjøper et digitalt demo-produkt. Ingen varer sendes, og demo-gavekort kan ikke innløses." : "You are buying a digital demo product. Nothing is shipped and demo gift cards cannot be redeemed."}</p><p>${nb ? "Bedrift kan velge faktura i checkout. Sluttknappen oppretter da en ekte, ubetalt ordre; selger utsteder faktura senere." : "Businesses can choose Invoice in checkout. The final button then creates a real, unpaid order; the merchant issues its invoice later."} <a href="/learn/business/">${nb ? "Slik virker B2B og EHF" : "How B2B and EHF work"} ↗</a></p></div>`;
+  return `<div class="payment-disclosure"><p><b>${nb ? "Ekte betalinger og fakturaordrer." : "Real payments and invoice orders."}</b></p><p>${nb ? "Betalingen går til" : "Payment goes to"} ${h(context.merchantName)}${context.merchantOrgNumber ? ` (${nb ? "org.nr." : "org. no."} ${h(context.merchantOrgNumber)})` : ""}.</p><p>${nb ? "Du kjøper et digitalt testprodukt. Ingen varer sendes, og demo-gavekort kan ikke innløses." : "You are buying a digital test product. Nothing is shipped and demo gift cards cannot be redeemed."}</p><p>${nb ? "Bedrift kan velge faktura i checkout. Sluttknappen oppretter da en ekte, ubetalt ordre; selger utsteder faktura senere." : "Businesses can choose Invoice in checkout. The final button then creates a real, unpaid order; the merchant issues its invoice later."} <a href="/learn/business/">${nb ? "Slik virker B2B og EHF" : "How B2B and EHF work"} ↗</a></p></div>`;
 }
 export function renderCart(context) {
   const t = copy[language(context.locale)],
@@ -257,7 +265,7 @@ export function renderEditorial(route, context) {
     );
   } else if (route === "about") {
     title = t.about;
-    body = `<span class="eyebrow">THIS IS A PLAYGROUND</span><h1>${lang === "nb" ? "En butikk med glimt i API-et." : "A shop with a twinkle in its API."}</h1><p class="lead">${lang === "nb" ? "ReAI commerce showcase er en demonstrasjon, med fiktive produkter og én ReAI Site. Formålet er å vise hele handelsflyten — ikke å selge kaffe, motivasjon eller innløselige gavekort." : "ReAI commerce showcase is a demonstration with fictional products and one ReAI Site. It demonstrates the commerce flow, not sales of coffee, motivation or redeemable gift cards."}</p><div class="prose"><h2>${t.pay}</h2><p>${context.paymentMode === "test" ? t.test : context.paymentMode === "live" ? t.livePay : t.disabled}.</p><p>${lang === "nb" ? "«Heia, ReAI!» er et testprodukt og ikke en veldedig innsamling. «ReAI gavekort» oppretter ikke et ekte gavekort eller et innløsningsløfte." : "“Go, ReAI!” is a test product, not a charitable fundraiser. “ReAI gift card” creates no real gift card or redemption promise."}</p>${paymentDisclosure(context)}<h2>${lang === "nb" ? "Ekte dataflyt, tydelige grenser" : "Real data flow, clear boundaries"}</h2><p>${lang === "nb" ? "Utseende og forklaringer styres i Git. Publisert katalog, priser og aktiv checkout styres i ReAI. Ingen produktpriser er hardkodet i frontend." : "Design and explanations are maintained in Git. Published catalog, prices and active checkout are managed in ReAI. Frontend product prices are not hardcoded."}</p><a href="https://github.com/beint-no/reai-site-examples">${lang === "nb" ? "Se koden og dokumentasjonen" : "Read the source and documentation"} ↗</a></div>`;
+    body = `<span class="eyebrow">THIS IS A PLAYGROUND</span><h1>${lang === "nb" ? "En butikk med glimt i API-et." : "A shop with a twinkle in its API."}</h1><p class="lead">${lang === "nb" ? "ReAI sin test-nettbutikk viser hele handelsflyten med fiktive produkter og én ReAI Site. Prøv handlekurv, betaling, ordre og kvittering fra 1 kr. Ingen kaffe, motivasjon eller innløselige gavekort leveres." : "The ReAI test store demonstrates the full commerce flow with fictional products and one ReAI Site. Try cart, payment, order and receipt from 1 kr. No coffee, motivation or redeemable gift cards are delivered."}</p><div class="prose"><h2>${t.pay}</h2><p>${context.paymentMode === "test" ? t.test : context.paymentMode === "live" ? t.livePay : t.disabled}.</p><p>${lang === "nb" ? "«Heia, ReAI!» er et testprodukt og ikke en veldedig innsamling. «ReAI gavekort» oppretter ikke et ekte gavekort eller et innløsningsløfte." : "“Go, ReAI!” is a test product, not a charitable fundraiser. “ReAI gift card” creates no real gift card or redemption promise."}</p>${paymentDisclosure(context)}<h2>${lang === "nb" ? "Ekte dataflyt, tydelige grenser" : "Real data flow, clear boundaries"}</h2><p>${lang === "nb" ? "Utseende og forklaringer styres i Git. Publisert katalog, priser og aktiv checkout styres i ReAI. Ingen produktpriser er hardkodet i frontend." : "Design and explanations are maintained in Git. Published catalog, prices and active checkout are managed in ReAI. Frontend product prices are not hardcoded."}</p><a href="https://github.com/beint-no/reai-site-examples">${lang === "nb" ? "Se koden og dokumentasjonen" : "Read the source and documentation"} ↗</a></div>`;
   } else if (route === "return") {
     title = t.returned;
     body = `<div class="return-mark">✳</div><h1>${t.returned}</h1><p class="lead">${t.returnText}</p><a class="button" href="/shop/">${t.back} ↗</a>`;
