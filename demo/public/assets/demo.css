@@ -2191,3 +2191,10 @@ body[data-design="supply"] .cart-pill b {
   background: #8eb8a3;
   color: #182d26;
 }
+body {
+  color: var(--ink);
+}
+.drawer-header button,
+.menu-toggle {
+  background: transparent;
+}
