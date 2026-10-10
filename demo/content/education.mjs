@@ -65,8 +65,8 @@ export const lessons = [
     icon: "↗",
     tag: ["EKTE CHECKOUT", "REAL CHECKOUT"],
     title: [
-      "Én checkout. Mange måter å betale.",
-      "One checkout. Many ways to pay.",
+      "Checkout med Adyen og flere betalingsmåter.",
+      "Checkout with Adyen and multiple payment methods.",
     ],
     summary: [
       "ReAI tar kurven videre til Adyen, med betalingsmåter som passer kunden og butikken.",
@@ -137,14 +137,149 @@ export const lessons = [
       "Worker → ReAI request. The Site credential is sent only from the server.",
     ],
   },
+{
+  "slug": "checkout-test",
+  "shortTitle": [
+    "Testkjøp",
+    "Test purchase"
+  ],
+  "icon": "01",
+  "tag": [
+    "HELE KJØPSFLYTEN",
+    "THE COMPLETE PURCHASE FLOW"
+  ],
+  "title": [
+    "Test fra handlekurv til ordre og kvittering.",
+    "Test from cart to order and receipt."
+  ],
+  "summary": [
+    "Testbeløp på 1, 10 og 100 kr. En sjekkliste for kundeopplevelsen og oppfølgingen i ReAI.",
+    "Test amounts of 1, 10 and 100 kr. A checklist for the customer experience and follow-up in ReAI."
+  ],
+  "intro": [
+    "Denne nettbutikken bruker ekte checkout. Start med 1 kr for å prøve en liten betaling, eller utforsk frem til betaling uten å fullføre kjøpet. En fullført betaling trekker beløpet og mottas av Better Integration.",
+    "This store uses real checkout. Start with 1 kr to try a small payment, or explore up to payment without completing the purchase. Completing payment charges the amount and pays Better Integration."
+  ],
+  "steps": [
+    [
+      "Åpne Test betaling. Velg 1, 10 eller 100 kr, legg én variant i kurven og kontroller antall og totalsum.",
+      "Open Test a payment. Choose 1, 10 or 100 kr, add one variant to your cart and check quantity and total."
+    ],
+    [
+      "Åpne ReAI checkout. Kontroller at produkt, variant og beløp følger med. Oppgi en e-postadresse du kan motta ordrebekreftelsen på.",
+      "Open ReAI checkout. Check that product, variant and amount carry through. Enter an email address where you can receive the order confirmation."
+    ],
+    [
+      "Hvis du vil teste rabatt, bruk REAI-DEMO10 og kontroller den nye totalsummen. Fjern koden for å teste hele beløpet.",
+      "To test discounts, use REAI-DEMO10 and check the new total. Remove the code to test the full amount."
+    ],
+    [
+      "Velg en tilgjengelig betalingsmåte. Ikke bruk testkort i LIVE-checkout. Sluttknappen fullfører et ekte kjøp.",
+      "Choose an available payment method. Do not use test cards in LIVE checkout. The final button completes a real purchase."
+    ],
+    [
+      "Etter betaling: kontroller resultatet i ReAI checkout. Retur til nettsiden er ikke i seg selv bevis på betalt ordre.",
+      "After payment, check the result in ReAI checkout. Returning to the website alone is not proof of a paid order."
+    ],
+    [
+      "Kontroller ordrebekreftelsen på e-post: produkt, beløp, eventuell rabatt og kontaktinformasjon. Ordrebekreftelse er ikke det samme som betalingsstatus.",
+      "Check the email order confirmation: product, amount, any discount and contact information. An order confirmation is not the same as payment status."
+    ],
+    [
+      "Selger kontrollerer samme ordre i ReAI: riktig kunde, ordrelinjer, totalsum, betalingsstatus og eventuell faktura. Test betaling skal ikke gi en fysisk sending.",
+      "The merchant checks the same order in ReAI: correct customer, lines, total, payment status and any invoice. Test a payment must not create a physical shipment."
+    ],
+    [
+      "Ved en avtalt refusjon kontrollerer selger også refusjonsstatus og regnskapsoppfølging. En retur til butikken eller en klikket refusjonsknapp er ikke bevis på fullført refusjon.",
+      "For an agreed refund, the merchant also checks refund status and accounting follow-up. Returning to the store or clicking Refund is not proof of a completed refund."
+    ]
+  ],
+  "sections": [
+    {
+      "title": [
+        "Hva skjer hvis du avbryter?",
+        "What happens if you cancel?"
+      ],
+      "text": [
+        "Du kan forlate checkout før betalingen. En handlekurv eller opprettet checkout er ikke en betalt ordre. Prøv også å gå tilbake, endre antall og åpne checkout på nytt. Butikken skal vise ReAIs gjeldende resultat, ikke late som kjøpet lyktes.",
+        "You can leave checkout before paying. A cart or created checkout is not a paid order. Also try going back, changing quantity and reopening checkout. The store must show ReAI’s actual outcome rather than pretend the purchase succeeded."
+      ]
+    },
+    {
+      "title": [
+        "Gavekort med manuell innløsning",
+        "Gift cards with manual redemption"
+      ],
+      "text": [
+        "ReAI gavekort kan brukes til å betale for ReAI. Send ordrebekreftelsen til post@reai.no og oppgi kunden eller fakturaen det gjelder. Vi bekrefter betaling før beløpet brukes, og håndterer innløsningen manuelt. Det finnes ingen automatisk saldo eller gavekortkode. Gavekort inngår ikke i testbutikkens prosentrabatter.",
+        "ReAI gift cards can pay for ReAI. Email your order confirmation to post@reai.no and identify the customer or invoice. We verify payment before applying the amount and handle redemption manually. There is no automatic balance or gift-card code. Gift cards are excluded from this store’s percentage discounts."
+      ]
+    },
+    {
+      "title": [
+        "Donasjon til utvikling og åpen kildekode",
+        "Donate to development and open source"
+      ],
+      "text": [
+        "Donasjon til ReAI er et frivillig bidrag til Better Integration, ReAIs ideelle utviklingspartner. Partneren utvikler også åpen kildekode, blant annet Thim. Donasjonen gir ingen varer, ReAI-abonnement eller gavekortsaldo. Betalingsmottakeren vises i handlekurven.",
+        "Donation to ReAI is a voluntary contribution to Better Integration, ReAI’s nonprofit development partner. The partner also develops open-source software, including Thim. A donation includes no goods, ReAI subscription or gift-card balance. The cart identifies the payment recipient."
+      ]
+    },
+    {
+      "title": [
+        "B2B og fysisk levering testes separat",
+        "Test B2B and physical delivery separately"
+      ],
+      "text": [
+        "Faktura i B2B-checkout oppretter en ubetalt ordre, ikke en kortbetaling. Selger utsteder faktura og følger eventuell EHF-levering og innbetaling videre i ReAI. Produktene her er ikke fysiske; bruk en publisert, fysisk vare når du tester transportør, hentested, lokal henting og fraktetikett.",
+        "Invoice in B2B checkout creates an unpaid order, not a card payment. The merchant issues the invoice and follows EHF delivery and payment in ReAI. Products here are not physical; use a published physical item to test carriers, pickup points, store pickup and shipping labels."
+      ]
+    }
+  ],
+  "links": [
+    [
+      "/products/test-betaling/",
+      [
+        "Velg 1, 10 eller 100 kr",
+        "Choose 1, 10 or 100 kr"
+      ]
+    ],
+    [
+      "/products/reai-gavekort/",
+      [
+        "ReAI gavekort",
+        "ReAI gift card"
+      ]
+    ],
+    [
+      "/products/heia-reai/",
+      [
+        "Donasjon til ReAI",
+        "Donation to ReAI"
+      ]
+    ],
+    [
+      "/learn/payments/",
+      [
+        "Slik fungerer betaling",
+        "How payment works"
+      ]
+    ]
+  ],
+  "code": "Variant ID + quantity → ReAI checkout\nReAI → price / discount validation → Adyen\nConfirmed outcome → order → email confirmation\nMerchant → payment / invoice / refund follow-up",
+  "codeLabel": [
+    "Sjekk hvert steg; en checkout-URL alene bekrefter ingen betaling.",
+    "Check every step; a checkout URL alone confirms no payment."
+  ]
+},
   {
     slug: "business",
     shortTitle: ["B2B / EHF", "B2B / EHF"],
     icon: "B2B",
     tag: ["BEDRIFT + FAKTURA", "BUSINESS + INVOICING"],
     title: [
-      "Bedrift i kurven. EHF i regnskapet.",
-      "Business in the cart. EHF in the books.",
+      "B2B-ordre, faktura og EHF.",
+      "B2B orders, invoicing and EHF.",
     ],
     summary: [
       "Firmasøk, fakturaordre og EHF via Peppol. En ordre, en sendt faktura og en betaling er tre ulike steg.",
@@ -315,8 +450,8 @@ export const lessons = [
     icon: "%",
     tag: ["PRØV I CHECKOUT", "TRY IN CHECKOUT"],
     title: [
-      "Rabatter med litt mer hjerne.",
-      "Discounts with a little more brain.",
+      "Rabattkoder med prosent, vilkår og samlinger.",
+      "Discount codes with rates, conditions and collections.",
     ],
     summary: [
       "Prosent, samlingsregler, minstebeløp og fraktfrihet. ReAI regner — nettleseren gjetter ikke.",
@@ -332,8 +467,8 @@ export const lessons = [
         "Add a demo product to your cart and open ReAI checkout.",
       ],
       [
-        "Skriv REAI-DEMO10 i rabattfeltet: 10 % på alle produktlinjer.",
-        "Enter REAI-DEMO10 in the discount field: 10% off all product lines.",
+        "Skriv REAI-DEMO10 i rabattfeltet: 10 % på «Testkjøp og støtte». Gavekort er ikke omfattet.",
+        "Enter REAI-DEMO10: 10% off “Test payments & support”. Gift cards are excluded.",
       ],
       [
         "Eller prøv REAI-MAGI20 på Kontormagi: 20 % når kvalifiserende produktlinjer er minst 100 kr før rabatt.",
@@ -348,8 +483,8 @@ export const lessons = [
       {
         title: ["Tre regler å prøve", "Three rules to try"],
         text: [
-          "REAI-DEMO10 gjelder hele demo-katalogen. REAI-MAGI20 gjelder bare Kontormagi med minst 100 kr i kvalifiserende produkter. REAI-FRAKT demonstrerer en fraktfri kode uten prosentrabatt; den sparer ingen frakt på disse digitale produktene. Kodene gjelder kun denne demoens marked.",
-          "REAI-DEMO10 applies to the whole demo catalog. REAI-MAGI20 applies only to Office magic with at least 100 kr in eligible products. REAI-FRAKT demonstrates a free-shipping code without a percentage discount; it saves no shipping on these digital products. Codes apply only to this demo market.",
+          "REAI-DEMO10 gjelder samlingen «Testkjøp og støtte». Gavekort får ingen prosentrabatt. REAI-MAGI20 gjelder bare Kontormagi med minst 100 kr i kvalifiserende produkter. REAI-FRAKT demonstrerer en fraktfri kode uten prosentrabatt; den sparer ingen frakt på disse digitale produktene. Kodene gjelder kun denne demoens marked.",
+          "REAI-DEMO10 applies to “Test payments & support”. Gift cards receive no percentage discount. REAI-MAGI20 applies only to Office magic with at least 100 kr in eligible products. REAI-FRAKT demonstrates a free-shipping code without a percentage discount; it saves no shipping on these digital products. Codes apply only to this demo market.",
         ],
       },
       {
@@ -399,8 +534,8 @@ export const lessons = [
     icon: "✳",
     tag: ["LIVE PRODUKTDATA", "LIVE PRODUCT DATA"],
     title: [
-      "En katalog. Mange små superkrefter.",
-      "One catalog. Many little superpowers.",
+      "Produkter, varianter og samlinger fra API-et.",
+      "Products, variants and collections from the API.",
     ],
     summary: [
       "Varianter, bilder, manuelle og automatiske samlinger, pris og lager — med én datakilde.",
@@ -475,7 +610,7 @@ export const lessons = [
     shortTitle: ["Marked", "Markets"],
     icon: "NO / EN",
     tag: ["PRØV SPRÅKKNAPPEN", "TRY THE LANGUAGE BUTTON"],
-    title: ["Samme butikk. Riktig kontekst.", "Same store. Right context."],
+    title: ["Markeder styrer valuta. Språk styrer tekst.", "Markets select currency. Languages select text."],
     summary: [
       "Marked velger valuta og prisliste. Språk velger oversettelse. De gjør ulike jobber.",
       "Market selects currency and price list. Locale selects translation. They do different jobs.",
@@ -540,8 +675,8 @@ export const lessons = [
     icon: "{ }",
     tag: ["FRA NETTSIDE TIL PLATTFORM", "FROM WEBSITE TO PLATFORM"],
     title: [
-      "Design fritt. Hold dataene samlet.",
-      "Design freely. Keep data together.",
+      "Slik kobles butikkdesignet til ReAI.",
+      "How a storefront design connects to ReAI.",
     ],
     summary: [
       "Statisk nettsted, Site API, management-API og ordre/regnskap. Hvem gjør hva?",
@@ -587,6 +722,34 @@ export const lessons = [
           "ReAI brings together online commerce, point of sale and accounting. In-store sales are handled by the point of sale, with receipts, payments and accounting follow-up in ReAI. You do not need an expensive integration between separate point-of-sale and accounting systems. The Site API on this website serves the storefront; point of sale is used in ReAI.",
         ],
       },
+{
+      "title": [
+            "HTML først, JavaScript for interaksjon",
+            "HTML first, JavaScript for interaction"
+      ],
+      "text": [
+            "Denne butikken sender ferdig HTML fra en Cloudflare Worker. Det trengs ikke en stor JavaScript-app for å vise produkter. Bilder lastes i passende størrelser, og bilder lenger ned på siden lastes ved behov. Kurv, fargevalg og påmelding bruker små skript. Du kan også bruke et annet rammeverk; Site API-et binder deg ikke til dette designet.",
+            "This store sends HTML from a Cloudflare Worker. It needs no large JavaScript application to display products. Images use suitable sizes, and images lower on the page load on demand. Small scripts handle the cart, swatches and signup. You can choose another framework; the Site API does not tie you to this design."
+      ]
+},{
+      "title": [
+            "Mellomlagre katalog, hent lagerstatus fersk",
+            "Cache catalogs, fetch availability fresh"
+      ],
+      "text": [
+            "storefront gir én sammenhengende katalog med produkter og samlinger, slik at du slipper ett kall per samling. Leverings-API-et støtter ETag for katalogdata. Tilgjengelighet hentes separat og uten mellomlagring, gjerne i ett batch-kall for variantene på siden. Checkout validerer pris og lager på nytt. Denne testbutikkens HTML og JSON-svar mellomlagres ikke.",
+            "storefront gives one coherent catalog with products and collections, avoiding a request for each collection. The delivery API supports ETags for catalog data. Availability is fetched separately without caching, ideally in one batch for the page’s variants. Checkout revalidates prices and stock. This test store does not cache its HTML or JSON responses."
+      ]
+},{
+      "title": [
+            "Hent dataene designet trenger",
+            "Fetch the data your design needs"
+      ],
+      "text": [
+            "Bruk produktdetaljer til produktsiden, samlinger til navigasjonen og tilgjengelighet til variantvalg. Beskrivelser leveres både som tekst og som renset HTML. Site API gir nettstedets publiserte data. Andre backend-funksjoner hører til management-API-et og krever autorisert serverkode; en offentlig nettside skal ikke få tilgang til privat regnskap.",
+            "Use product details for product pages, collections for navigation and availability for variant selection. Descriptions are delivered as text and sanitized HTML. The Site API exposes the website’s published data. Other backend functions belong to the management API and require authorized server code; a public website must not gain access to private accounting."
+      ]
+},
       {
         title: [
           "Hva Site API ikke skal gi nettleseren",
@@ -610,8 +773,8 @@ export const lessons = [
           "One private repository per client",
         ],
         text: [
-          "Hver kundes nettsted har egne rettigheter, instruksjoner og deploy. Det interne customer-sites-repoet organiserer dem som submoduler og lagrer bare valgte commit-referanser. Å pushe i et barnerepo deployer ikke naboens nettsted eller endrer automatisk forelderens pin.",
-          "Each client website has its own permissions, instructions and deployment. The internal customer-sites repository organizes them as submodules and stores selected commit references. Pushing a child repository neither deploys a neighbor’s site nor automatically changes the parent’s pin.",
+          "Hver kundes nettsted har egne rettigheter, instruksjoner og deploy. Du kan dele repo-tilgang med kunden og deploye designendringer uten å deploye andre kunders nettsteder.",
+          "Each client website has its own permissions, instructions and deployment. You can share repository access with the client and deploy design changes without deploying other clients’ websites.",
         ],
       },
     ],

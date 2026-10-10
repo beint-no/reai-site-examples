@@ -11,8 +11,9 @@ the separate Site token, not this management token.
 
 ## Prepare and apply
 
-The public seed describes fictional products: contribution variants 100/500/1,000
-kr, Motivation for Greg, a non-redeemable demo gift card and other digital items.
+The public seed includes test purchases from 1 kr, voluntary development support
+at 100/500/1,000 kr, manually redeemable ReAI gift cards and illustrative digital
+products. Review the named recipient and fulfillment policy before enabling LIVE.
 It is setup input and an explicit offline preview fixture, never production fallback.
 Review the plan first:
 
@@ -32,7 +33,7 @@ add --enable-online-store. Setup creates/reuses the named demo Site and NOK pric
 list, digital product variants, product images/metadata, English translations,
 publication, three manual collections and one brand-based automated collection.
 It also seeds an illustrative compare-at price and three market-scoped demo codes:
-REAI-DEMO10 (10% catalog-wide), REAI-MAGI20 (20% on Kontormagi with 100 NOK
+REAI-DEMO10 (10% on Test payments & support; gift cards excluded), REAI-MAGI20 (20% on Kontormagi with 100 NOK
 eligible undiscounted gross minimum), and REAI-FRAKT (free shipping only).
 Customers enter codes in hosted checkout; session creation does not accept a code.
 Free shipping has no effect on this digital catalog. Existing conflicting rules
@@ -101,3 +102,21 @@ release. Verify a hosted session from the registered hostname. Returning to the
 store never proves payment success; the store retains its cart and directs the
 shopper to checkout's authoritative status/receipt. No real payment is required
 for code validation.
+
+## Gift cards and development support
+
+Better Integration receives payments as ReAI’s nonprofit development partner.
+Donation to ReAI provides no goods or ReAI credit. ReAI gift cards pay for ReAI
+through manual fulfillment: the buyer forwards their order confirmation to
+post@reai.no with the intended customer/invoice. Site support/reply-to use that
+address. No balance, redemption code or automatic subscription credit is created.
+
+Before applying gift credit, verify the gift-card line and settled payment in ReAI.
+An invoice order or confirmation email alone is not proof of payment. Record the
+amount applied, target invoice/customer and any remainder against the purchase;
+check previous redemptions and refunds before applying more. Reconcile the receipt
+with the ReAI invoice through the normal accounting process, rather than treating
+it as a promotional discount. Percentage demo codes exclude gift cards.
+
+The setup command creates/reuses seed products; it does not rewrite descriptions
+or options on existing products. Review existing catalog changes explicitly.

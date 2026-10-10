@@ -1092,6 +1092,7 @@ legend {
   gap: 65px;
 }
 .lesson-nav {
+  min-width: 0;
   align-self: start;
   position: sticky;
   top: 25px;
@@ -2210,4 +2211,35 @@ body {
 .drawer-header button,
 .menu-toggle {
   background: transparent;
+}
+
+.architecture-section { padding: 80px 0; }
+.architecture-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 36px; }
+.architecture-grid article { border-top: 1px solid var(--line); padding-top: 24px; }
+.architecture-grid h3 { font-size: 25px; margin: 20px 0 14px; letter-spacing: -.7px; }
+.architecture-grid p { color: var(--muted); line-height: 1.7; min-height: 108px; }
+.architecture-grid code { display: block; font-size: 11px; padding: 16px 0; overflow-wrap: anywhere; color: var(--teal); }
+.architecture-grid .under-link { font-size: 13px; }
+.architecture-note { display: grid; grid-template-columns: 1fr 2fr; column-gap: 36px; margin-top: 40px; padding-top: 28px; border-top: 1px solid var(--line); }
+.architecture-note b { font-size: 18px; }
+.architecture-note p { color: var(--muted); line-height: 1.7; margin-top: 0; }
+.architecture-note a { grid-column: 2; font-size: 13px; color: var(--teal); }
+.architecture-note svg { width: 16px; height: 16px; vertical-align: middle; }
+.checkout-test-band { background: #eff6f3; border-block: 1px solid #dbe7e0; }
+.checkout-test { display: grid; grid-template-columns: 1.1fr 1fr; gap: 80px; padding-block: 72px; }
+.checkout-test h2 { font-size: clamp(34px, 4vw, 54px); font-weight: 500; line-height: 1.12; letter-spacing: -2px; margin: 24px 0; }
+.checkout-test p { max-width: 490px; line-height: 1.7; color: var(--muted); }
+.checkout-test .fineprint { font-size: 12px; }
+.checkout-test-steps { list-style: none; margin: 0; padding: 0; }
+.checkout-test-steps li { display: flex; gap: 22px; padding: 20px 0; border-bottom: 1px solid #dbe7e0; }
+.checkout-test-steps li > span { font: 12px ui-monospace, monospace; color: var(--teal); padding-top: 5px; }
+.checkout-test-steps h3 { font-size: 19px; font-weight: 500; margin: 0 0 6px; }
+.checkout-test-steps p { margin: 0; font-size: 14px; }
+@media (max-width: 700px) {
+  .architecture-section { padding: 48px 0; }
+  .architecture-grid, .architecture-note, .checkout-test { grid-template-columns: 1fr; gap: 28px; }
+  .architecture-grid p { min-height: 0; }
+  .architecture-note a { grid-column: 1; }
+  .checkout-test { padding-block: 48px; }
+  .checkout-test h2 { letter-spacing: -1.2px; }
 }

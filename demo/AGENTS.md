@@ -23,11 +23,15 @@ show the Site owner and link privacy. Never claim it sends a welcome email or co
 The offline preview records no consent and accepts no payments.
 
 Live digital test checkout names Better Integration and discloses real payments and
-invoice orders before starting. Demo gift cards have no redemption balance, and
-contributions are not charitable donations. Return URLs do not prove payment or
+invoice orders before starting. Gift cards are redeemed manually via post@reai.no
+after verified payment;
+there is no automated balance/code. Donations support Better Integration’s
+ReAI/open-source development and grant no goods, services or gift-card credit.
+Return URLs do not prove payment or
 clear the cart. Shipping/pickup/EHF remain accurately documented configured flows;
 digital products create no physical shipments. Test betaling has 1/10/100 kr variants
-for small live purchases. Scenario stock/backorders are UI tests.
+for small live purchases; /learn/checkout-test/ provides the full checklist.
+Scenario stock/backorders are UI tests.
 
 Run npm run check; verify desktop/mobile, all designs, swatches, both cart drawers,
 stock scenarios, real API reads, newsletter errors and canonical redirects before deploy.
