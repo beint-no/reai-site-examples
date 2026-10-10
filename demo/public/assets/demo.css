@@ -1092,6 +1092,7 @@ legend {
   gap: 65px;
 }
 .lesson-nav {
+  min-width: 0;
   align-self: start;
   position: sticky;
   top: 25px;
