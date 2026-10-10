@@ -1,5 +1,5 @@
 {
-  "name": "ReAI Commerce Showcase",
+  "name": "ReAI sin test-nettbutikk",
   "products": [
     {
       "handle": "heia-reai",
@@ -126,6 +126,31 @@
       "en": {
         "title": "Monday courage",
         "description": "A small dose of Monday optimism. Demonstrates collections and publication. A digital demo product with no physical delivery."
+      }
+    },
+    {
+      "handle": "test-betaling",
+      "title": "Test betaling",
+      "description": "Prøv hele kjøpsflyten for 1, 10 eller 100 kr: handlekurv, betaling, ordre og kvittering. Velg beløpet du vil teste med. Fullført betaling trekker det valgte beløpet. Ingen varer eller tjenester leveres.",
+      "variants": [
+        {
+          "title": "1 kr",
+          "price": 1
+        },
+        {
+          "title": "10 kr",
+          "price": 10
+        },
+        {
+          "title": "100 kr",
+          "price": 100
+        }
+      ],
+      "collection": "god-karma",
+      "art": "heart",
+      "en": {
+        "title": "Test a payment",
+        "description": "Try the full purchase flow for 1, 10 or 100 kr: cart, payment, order and receipt. Choose the amount you want to test. Completing payment charges the selected amount. No goods or services are delivered."
       }
     }
   ],

@@ -12,7 +12,7 @@ function fixture(methods = [{ id: 'carrier', name: 'Bring', amount: 69, carrier:
       else commerce.markets[0].shippingMethods.push({ id: 'pickup', ...body, amount: 0, carrier: null, deliveryMethod: null, freeFromAmount: null });
       return structuredClone(commerce);
     }
-    if (route === '/api/sites') return [{ id: 'site', name: 'ReAI Commerce Showcase', status: 'enabled', activeDomain: 'nettbutikk.reai.no', previewDomain: 'reai-demo-store.respiro.workers.dev' }];
+    if (route === '/api/sites') return [{ id: 'site', name: 'ReAI sin test-nettbutikk', status: 'enabled', activeDomain: 'nettbutikk.reai.no', previewDomain: 'reai-demo-store.respiro.workers.dev' }];
     if (route.endsWith('/markets')) return [{ id: 'market', handle: 'default', enabled: true, isDefault: true, countries: ['NO'] }];
     return structuredClone(commerce);
   };

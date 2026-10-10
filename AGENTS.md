@@ -1,4 +1,4 @@
-# ReAI demo store and Site API guide
+# ReAI test store and Site API guide
 
 One public source repository and one deployed demo Worker. Real client sites live
 in independent private repositories. The operator hub checks this repo out under
