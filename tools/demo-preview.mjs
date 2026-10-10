@@ -36,8 +36,9 @@ const collections = blueprint.collections.map((c, i) => ({
   id: uuid(50 + i),
   products: products.filter(
     (p) =>
-      c.type === "automated" || blueprint.products.find((x) => x.handle === p.handle).collection ===
-      c.handle,
+      c.type === "automated" ||
+      blueprint.products.find((x) => x.handle === p.handle).collection ===
+        c.handle,
   ),
 }));
 const store = {
@@ -106,7 +107,11 @@ globalThis.fetch = async (input, init) => {
       collections: collectionDetails,
     });
   if (url.pathname.endsWith("/products"))
-    return Response.json({ ...context, catalogVersion: 1, products: translatedProducts });
+    return Response.json({
+      ...context,
+      catalogVersion: 1,
+      products: translatedProducts,
+    });
   if (url.pathname.endsWith("/catalog"))
     return Response.json({
       ...store,
@@ -158,7 +163,9 @@ const types = {
   ".css": "text/css",
   ".js": "text/javascript",
   ".svg": "image/svg+xml",
-          ".jpg": "image/jpeg",
+  ".jpg": "image/jpeg",
+  ".avif": "image/avif",
+  ".json": "application/json",
 };
 const env = {
   REAI_API_BASE_URL: "http://demo-api.invalid",

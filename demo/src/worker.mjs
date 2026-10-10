@@ -14,6 +14,11 @@ import {
   renderEditorial,
   renderError,
 } from "./storefront.mjs";
+import {
+  renderFashion,
+  renderEssential,
+  renderCollections,
+} from "./design-storefronts.mjs";
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const headers = {
@@ -141,6 +146,18 @@ export default {
                 context,
               );
         return finish(html, context);
+      }
+      if (
+        request.method !== "POST" &&
+        (path === "/designs/famme" || path.startsWith("/designs/famme/"))
+      ) {
+        const html = renderFashion(
+          path === "/designs/famme" ? "" : path.slice(15),
+          context,
+        );
+        return html
+          ? finish(html, context)
+          : response(renderError(404, context), 404);
       }
       if (!env.REAI_SITE_CREDENTIAL) {
         return response(
@@ -355,6 +372,38 @@ export default {
           : { variants: [] };
         return finish(
           renderDesign(path.split("/")[2], store, availability, context),
+          context,
+        );
+      }
+      if (path === "/designs/essential") {
+        const ids = store.products
+          .filter((p) =>
+            ["test-betaling", "reai-gavekort", "heia-reai"].includes(p.handle),
+          )
+          .flatMap((p) => p.variants.map((v) => v.id));
+        const availability = ids.length
+          ? await data(client.availabilities(ids, delivery))
+          : { variants: [] };
+        return finish(renderEssential(store, availability, context), context);
+      }
+      if (
+        path === "/designs/collections" ||
+        path.startsWith("/designs/collections/")
+      ) {
+        if (path === "/designs/collections")
+          return finish(renderCollections(store, context), context);
+        const handle = path.slice(21);
+        if (!HANDLE.test(handle))
+          return response(renderError(404, context), 404);
+        const collection = await data(client.collection(handle, delivery));
+        const byId = new Map(store.products.map((p) => [p.id, p]));
+        return finish(
+          renderCollections(store, context, {
+            ...collection,
+            products: collection.products.flatMap((p) =>
+              byId.has(p.id) ? [byId.get(p.id)] : [],
+            ),
+          }),
           context,
         );
       }

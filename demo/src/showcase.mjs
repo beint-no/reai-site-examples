@@ -13,6 +13,37 @@ export const arrow =
   '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>';
 export const designs = [
   {
+    slug: "famme",
+    name: "Famme",
+    image: "famme/hero-mobile.avif",
+    fixture: true,
+    title: ["Bannere & mote", "Banners & fashion"],
+    text: [
+      "Famme-bilder i AVIF, mobilbanner, kolleksjoner, hurtigkjøp og separat testkurv. Illustrerende produktdata.",
+      "Famme AVIF photography, mobile banners, collections, quick-add and a separate test cart. Illustrative product data.",
+    ],
+  },
+  {
+    slug: "essential",
+    name: "Essential",
+    image: "gift.svg",
+    title: ["Tre produkter", "Three products"],
+    text: [
+      "En liten butikk med beløpsvalg direkte på forsiden, live ReAI-data og kurv i skuff.",
+      "A small store with inline amount selection, live ReAI data and a cart drawer.",
+    ],
+  },
+  {
+    slug: "collections",
+    name: "Index",
+    image: "confetti.svg",
+    title: ["Kolleksjoner først", "Collections first"],
+    text: [
+      "Bla og søk i publiserte ReAI-samlinger. Designet følger med fra katalog til kolleksjon.",
+      "Browse and search published ReAI collections. The design carries through from catalog to collection.",
+    ],
+  },
+  {
     slug: "studio",
     name: "Studio",
     title: ["Skuffer & fargevalg", "Drawers & swatches"],
@@ -126,29 +157,84 @@ export function featureMatrix(c) {
   return `<section class="shell primitive-section" id="primitives"><div class="section-heading"><h2>${pick(c, "Dette håndterer ReAI.", "What ReAI handles.")}</h2><p>${pick(c, "Åpne en funksjon for å se dataene, oppsettet og hvordan du kan prøve den.", "Open a feature to see its data, configuration and how to try it.")}</p></div><div class="primitive-rows">${primitives.map(([slug, a, b, x, y, scope], i) => `<a class="primitive-row" href="/learn/${slug}/"><span class="row-number">${String(i + 1).padStart(2, "0")}</span><h3>${pick(c, a, b)}</h3><p>${pick(c, x, y)}</p><span class="scope">${scope}</span><span class="row-arrow">${arrow}</span></a>`).join("")}</div></section>`;
 }
 export function designGallery(c) {
-  return `<section class="shell designs-section" id="designs"><div class="section-heading"><div><h2>${pick(c, "Tre design med samme katalog.", "Three designs using the same catalog.")}</h2><p>${pick(c, "Sammenlign fargevalg, handlekurv og produktvisning. Produkter og priser hentes fra ReAI i alle tre designene.", "Compare swatches, carts and product layouts. All three designs fetch products and prices from ReAI.")}</p></div></div><div class="design-grid">${designs.map((d) => `<a class="design-card" href="/designs/${d.slug}/"><div class="design-preview preview-${d.slug}"><div class="preview-header"><b>${d.name.toUpperCase()}</b><span>${pick(c, "Kolleksjon", "Collection")} ${arrow}</span></div><img src="/assets/${d.slug}.jpg" width="840" height="1050" loading="lazy" alt="${h(d.name)} ${pick(c, "designillustrasjon", "design illustration")}"><div class="preview-overlay"><span>${d.title[nb(c) ? 0 : 1]}</span>${d.slug === "studio" ? '<div class="swatch-preview"><i></i><i></i><i></i></div>' : ""}</div></div><div class="design-card-caption"><h3>${d.name} <span>— ${d.title[nb(c) ? 0 : 1]}</span></h3>${arrow}</div><p>${d.text[nb(c) ? 0 : 1]}</p></a>`).join("")}</div><p class="fineprint">${pick(c, "Fotografiene illustrerer designene. Produktene under hentes fra den publiserte ReAI-katalogen, med testkjøp, gavekort og støtte til utvikling.", "Photography illustrates the designs. Products come from the published ReAI catalog: test purchases, gift cards and development support.")}</p></section>`;
+  return `<section class="shell designs-section" id="designs"><div class="section-heading"><div><h2>${pick(c, "Seks butikkdesign du kan prøve.", "Six storefront designs to try.")}</h2><p>${pick(c, "Prøv bannere, kolleksjoner, fargevalg, hurtigkjøp og handlekurver. Fem design bruker live ReAI-data; Famme er en separat design-test.", "Try banners, collections, swatches, quick-add and carts. Five designs use live ReAI data; Famme is a separate design test.")}</p></div></div><div class="design-grid">${designs.map((d) => `<a class="design-card" href="/designs/${d.slug}/"><div class="design-preview preview-${d.slug}"><div class="preview-header"><b>${d.name.toUpperCase()}</b><span>${pick(c, "Kolleksjon", "Collection")} ${arrow}</span></div><img src="/assets/${d.image || d.slug + ".jpg"}" width="840" height="1050" loading="lazy" alt="${h(d.name)} ${pick(c, "designillustrasjon", "design illustration")}"><div class="preview-overlay"><span>${d.title[nb(c) ? 0 : 1]}</span>${d.slug === "studio" ? '<div class="swatch-preview"><i></i><i></i><i></i></div>' : ""}</div></div><span class="design-data-label">${d.fixture ? pick(c, "Illustrerende testdata", "Illustrative test data") : "Live ReAI Site API"}</span><div class="design-card-caption"><h3>${d.name} <span>— ${d.title[nb(c) ? 0 : 1]}</span></h3>${arrow}</div><p>${d.text[nb(c) ? 0 : 1]}</p></a>`).join("")}</div><p class="fineprint">${pick(c, "Famme-fotografier brukes med tillatelse. Den illustrerende motekatalogen er isolert fra live-butikken med testkjøp, gavekort og utviklingsstøtte.", "Famme photography is used with permission. Its illustrative fashion catalog is isolated from the live store’s test purchases, gift cards and development support.")}</p></section>`;
 }
 export function newsletter(c) {
   return `<section class="shell" id="newsletter"><div class="newsletter-band"><div><h2>${pick(c, "Prøv også e-postpåmelding.", "Try email signup, too.")}</h2><p>${pick(c, "Et ekte Site API-kall med eksplisitt samtykke. Ingen e-post sendes automatisk.", "A real Site API request with explicit consent. No email is sent automatically.")}</p><a href="/learn/newsletter/">${pick(c, "Slik virker samtykke", "How consent works")} ${arrow}</a></div><form data-newsletter><label class="sr-only" for="signup-email">${pick(c, "E-postadresse", "Email address")}</label><div class="newsletter-input"><input id="signup-email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="${pick(c, "din@epost.no", "you@example.com")}"><button class="button" type="submit">${pick(c, "Meld meg på", "Subscribe")}</button></div><label class="consent"><input type="checkbox" name="consent" required> <span>${pick(c, "Jeg vil motta nyheter fra", "I want to receive news from")} ${h(c.merchantName || "Better Integration")}. <a href="/privacy/">${pick(c, "Personvern", "Privacy")}</a></span></label><input class="honeypot" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true"><p data-newsletter-message role="status"></p></form></div></section>`;
 }
 export function platformExplanation(c) {
   const layers = [
-    ["01", "Butikkdesignet", "Storefront design", "HTML · CSS · JavaScript", "Velg typografi, bilder, fargevalg og handlekurv. Studio, Atelier og Supply viser tre løsninger med den samme katalogen.", "Choose typography, photography, swatches and a cart. Studio, Atelier and Supply show three approaches using the same catalog.", "/#designs", "Se designene", "Compare the designs"],
-    ["02", "Produkter fra Site API", "Products from Site API", "Katalog → varianter → tilgjengelighet", "Publiser produkter, priser, samlinger og oversettelser i ReAI. Nettsiden henter dataene og presenterer dem i sitt eget design.", "Publish products, prices, collections and translations in ReAI. The website fetches those records and presents them in its own design.", "/api/", "Se dataene butikken bruker", "Inspect the store’s data"],
-    ["03", "Checkout og regnskap", "Checkout and accounting", "Handlekurv → betaling → ordre", "Send variant-ID og antall til checkout. ReAI beregner pris og rabatt, tar imot betalingen og følger ordren videre i plattformen.", "Send variant IDs and quantities to checkout. ReAI calculates prices and discounts, takes payment and tracks the order in the platform.", "/learn/checkout-test/", "Følg hele kjøpsflyten", "Follow the purchase flow"],
+    [
+      "01",
+      "Butikkdesignet",
+      "Storefront design",
+      "HTML · CSS · JavaScript",
+      "Velg typografi, bilder, fargevalg og handlekurv. Fem design viser ulike løsninger med den samme publiserte katalogen. Famme viser i tillegg et isolert motedesign.",
+      "Choose typography, photography, swatches and a cart. Five designs show different approaches using the same published catalog. Famme adds an isolated fashion design.",
+      "/#designs",
+      "Se designene",
+      "Compare the designs",
+    ],
+    [
+      "02",
+      "Produkter fra Site API",
+      "Products from Site API",
+      "Katalog → varianter → tilgjengelighet",
+      "Publiser produkter, priser, samlinger og oversettelser i ReAI. Nettsiden henter dataene og presenterer dem i sitt eget design.",
+      "Publish products, prices, collections and translations in ReAI. The website fetches those records and presents them in its own design.",
+      "/api/",
+      "Se dataene butikken bruker",
+      "Inspect the store’s data",
+    ],
+    [
+      "03",
+      "Checkout og regnskap",
+      "Checkout and accounting",
+      "Handlekurv → betaling → ordre",
+      "Send variant-ID og antall til checkout. ReAI beregner pris og rabatt, tar imot betalingen og følger ordren videre i plattformen.",
+      "Send variant IDs and quantities to checkout. ReAI calculates prices and discounts, takes payment and tracks the order in the platform.",
+      "/learn/checkout-test/",
+      "Følg hele kjøpsflyten",
+      "Follow the purchase flow",
+    ],
   ];
   return `<section class="shell architecture-section" id="how-it-works"><div class="section-heading"><div><span class="eyebrow">${pick(c, "SLIK ER DENNE BUTIKKEN BYGGET", "HOW THIS STORE IS BUILT")}</span><h2>${pick(c, "Design på nettsiden.<br>Handelsdata i ReAI.", "Design on the website.<br>Commerce data in ReAI.")}</h2></div><p>${pick(c, "Du trenger ikke et bestemt tema eller rammeverk. API-et leverer publiserte data; nettsiden bestemmer hvordan de vises.", "No particular theme or framework is required. The API supplies published data; the website decides how to display it.")}</p></div><div class="architecture-grid">${layers.map(([n, a, b, detail, x, y, url, linkNb, linkEn]) => `<article><span class="row-number">${n}</span><h3>${pick(c, a, b)}</h3><p>${pick(c, x, y)}</p><code>${n === "02" ? pick(c, detail, "Catalog → variants → availability") : n === "03" ? pick(c, detail, "Cart → payment → order") : detail}</code><a class="under-link" href="${url}">${pick(c, linkNb, linkEn)} ${arrow}</a></article>`).join("")}</div><div class="architecture-note"><b>${pick(c, "Raskt uten en tung frontend", "Fast without a heavy frontend")}</b><p>${pick(c, "Disse sidene kommer som ferdig HTML fra en Cloudflare Worker. CSS og bilder bygger designet; JavaScript brukes til kurv, fargevalg og skjemaer. Katalogen kan mellomlagres med ETag, mens lagerstatus må hentes fersk og valideres igjen i checkout.", "These pages arrive as HTML from a Cloudflare Worker. CSS and images build the design; JavaScript handles the cart, swatches and forms. Catalogs support ETag caching, while availability needs fresh reads and validation again at checkout.")}</p><a href="/learn/integration/">${pick(c, "Lær om rendering, ytelse og API-tilgang", "Learn about rendering, performance and API access")} ${arrow}</a></div></section>`;
 }
 export function checkoutTest(c) {
   return `<section class="checkout-test-band"><div class="shell checkout-test"><div><span class="eyebrow">${pick(c, "PRØV DEN FAKTISKE KJØPSFLYTEN", "TRY THE ACTUAL PURCHASE FLOW")}</span><h2>${pick(c, "Fra 1 kr til<br>betaling og ordre.", "From 1 kr to<br>payment and order.")}</h2><p>${pick(c, "Velg 1, 10 eller 100 kr. Legg produktet i kurven, åpne ReAI checkout og følg hva som skjer med betaling, ordre og kvittering.", "Choose 1, 10 or 100 kr. Add the product to your cart, open ReAI checkout and follow payment, order and receipt.")}</p><div class="hero-actions"><a class="button" href="/products/test-betaling/">${pick(c, "Velg testbeløp", "Choose a test amount")} ${arrow}</a><a class="under-link" href="/learn/checkout-test/">${pick(c, "Se hele sjekklisten", "See the complete checklist")} ${arrow}</a></div><p class="fineprint">${c.preview || c.paymentMode !== "live" ? pick(c, "Se betalingsmodus i handlekurven. Lokal forhåndsvisning tar ikke betaling.", "Check the payment mode in the cart. Local preview takes no payments.") : pick(c, "Fullført betaling trekker beløpet og går til", "Completing payment charges the amount and pays")} ${!c.preview && c.paymentMode === "live" ? `${h(c.merchantName)}. ${pick(c, "Ingen varer eller tjenester leveres for testproduktet.", "No goods or services are delivered for the test product.")}` : ""}</p></div><ol class="checkout-test-steps">${[
-    ["Handlekurv", "Cart", "Velg variant og antall. Prisen kommer fra ReAI.", "Choose a variant and quantity. Prices come from ReAI."],
-    ["Checkout", "Checkout", "Prøv rabattkode og en tilgjengelig betalingsmåte.", "Try a discount code and an available payment method."],
-    ["Betalingsresultat", "Payment result", "Bekreftet betaling er fasiten, ikke retur til nettsiden.", "Confirmed payment is authoritative, not a return to the website."],
-    ["Ordre i ReAI", "Order in ReAI", "Selger ser ordre, betaling og videre oppfølging.", "The merchant sees the order, payment and subsequent operations."],
-  ].map(([a, b, x, y], i) => `<li><span>${String(i + 1).padStart(2, "0")}</span><div><h3>${pick(c, a, b)}</h3><p>${pick(c, x, y)}</p></div></li>`).join("")}</ol></div></section>`;
+    [
+      "Handlekurv",
+      "Cart",
+      "Velg variant og antall. Prisen kommer fra ReAI.",
+      "Choose a variant and quantity. Prices come from ReAI.",
+    ],
+    [
+      "Checkout",
+      "Checkout",
+      "Prøv rabattkode og en tilgjengelig betalingsmåte.",
+      "Try a discount code and an available payment method.",
+    ],
+    [
+      "Betalingsresultat",
+      "Payment result",
+      "Bekreftet betaling er fasiten, ikke retur til nettsiden.",
+      "Confirmed payment is authoritative, not a return to the website.",
+    ],
+    [
+      "Ordre i ReAI",
+      "Order in ReAI",
+      "Selger ser ordre, betaling og videre oppfølging.",
+      "The merchant sees the order, payment and subsequent operations.",
+    ],
+  ]
+    .map(
+      ([a, b, x, y], i) =>
+        `<li><span>${String(i + 1).padStart(2, "0")}</span><div><h3>${pick(c, a, b)}</h3><p>${pick(c, x, y)}</p></div></li>`,
+    )
+    .join("")}</ol></div></section>`;
 }
 export function homeContent(c) {
-  return `<section class="hero shell"><div class="hero-copy"><h1>${pick(c, "<span class=\"platform-products\">Nettbutikk + Kassasystem + Regnskap</span><span class=\"platform-promise\">Alt i en plattform</span>", "<span class=\"platform-products\">Online store + Point of sale + Accounting</span><span class=\"platform-promise\">All in one platform</span>")}</h1><p>${pick(c, "Publiser produkter i ReAI. Hent dem til et butikkdesign du styrer selv. Bruk samme plattform til checkout, kassasystem, ordre og regnskap, uten dyre integrasjoner mellom disse systemene.", "Publish products in ReAI. Fetch them into a storefront design you control. Use the same platform for checkout, point of sale, orders and accounting, without expensive integrations between those systems.")}</p><div class="hero-actions"><a class="button" href="#primitives">${pick(c, "Utforsk funksjonene", "Explore the features")} ${arrow}</a><a class="under-link" href="#designs">${pick(c, "Prøv butikkdesign", "Try storefront designs")} ${arrow}</a></div><a class="under-link" href="/products/test-betaling/">${pick(c, "Test hele kjøpsflyten fra 1 kr", "Test the full purchase flow from 1 kr")} ${arrow}</a></div><div class="platform-preview"><a class="mini-store" href="/scenarios/studio/"><div class="window-chrome"><i></i><i></i><i></i><span>STUDIO / UI scenario</span></div><div class="mini-product"><img src="/assets/studio.jpg" width="840" height="1050" alt="${pick(c, "Illustrasjon av et butikkdesign med en marineblå genser", "Illustrative storefront design with a navy sweatshirt")}" fetchpriority="high"><div><b>Studio / Essential</b><strong>349 kr</strong><small>${pick(c, "Simulert produkt & lager", "Simulated product & stock")}</small><p>${pick(c, "Farge", "Color")}</p><div class="swatch-preview"><i></i><i></i><i></i></div><p>${pick(c, "Størrelse", "Size")}</p><div class="size-preview"><span>S</span><span class="selected">M</span><s>L</s><span>XL</span></div><span class="mini-button">${pick(c, "Prøv variantvalg", "Try variant selection")}</span></div></div></a><div class="platform-nodes">${[
+  return `<section class="hero shell"><div class="hero-copy"><h1>${pick(c, '<span class="platform-products">Nettbutikk + Kassasystem + Regnskap</span><span class="platform-promise">Alt i en plattform</span>', '<span class="platform-products">Online store + Point of sale + Accounting</span><span class="platform-promise">All in one platform</span>')}</h1><p>${pick(c, "Publiser produkter i ReAI. Hent dem til et butikkdesign du styrer selv. Bruk samme plattform til checkout, kassasystem, ordre og regnskap, uten dyre integrasjoner mellom disse systemene.", "Publish products in ReAI. Fetch them into a storefront design you control. Use the same platform for checkout, point of sale, orders and accounting, without expensive integrations between those systems.")}</p><div class="hero-actions"><a class="button" href="#primitives">${pick(c, "Utforsk funksjonene", "Explore the features")} ${arrow}</a><a class="under-link" href="#designs">${pick(c, "Prøv butikkdesign", "Try storefront designs")} ${arrow}</a></div><a class="under-link" href="/products/test-betaling/">${pick(c, "Test hele kjøpsflyten fra 1 kr", "Test the full purchase flow from 1 kr")} ${arrow}</a></div><div class="platform-preview"><a class="mini-store" href="/scenarios/studio/"><div class="window-chrome"><i></i><i></i><i></i><span>STUDIO / UI scenario</span></div><div class="mini-product"><img src="/assets/studio.jpg" width="840" height="1050" alt="${pick(c, "Illustrasjon av et butikkdesign med en marineblå genser", "Illustrative storefront design with a navy sweatshirt")}" fetchpriority="high"><div><b>Studio / Essential</b><strong>349 kr</strong><small>${pick(c, "Simulert produkt & lager", "Simulated product & stock")}</small><p>${pick(c, "Farge", "Color")}</p><div class="swatch-preview"><i></i><i></i><i></i></div><p>${pick(c, "Størrelse", "Size")}</p><div class="size-preview"><span>S</span><span class="selected">M</span><s>L</s><span>XL</span></div><span class="mini-button">${pick(c, "Prøv variantvalg", "Try variant selection")}</span></div></div></a><div class="platform-nodes">${[
     ["Katalog", "Catalog", "Produkter · varianter"],
     ["Checkout", "Checkout", "Betaling · faktura"],
     ["Regnskap", "Accounting", "Ordre · oppfølging"],

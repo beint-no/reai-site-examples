@@ -9,7 +9,8 @@ resources/ for convenience; clients have no runtime dependency on either repo.
 - demo/content/: bilingual educational lessons and delivery-operation coverage.
 - demo/src/: server-rendered demo storefront, static explanations, public API
   explorer and bounded same-origin hosted checkout startup.
-- demo/public/: original reusable design, CSS, browser-local cart and illustrations.
+- demo/public/: reusable design, CSS, browser-local carts and illustrations;
+  explicitly licensed Famme test photography is documented in ASSETS.md.
 - demo/seed/: product definitions for explicit operator-managed seeding.
 - packages/: generated Site client and reusable advanced Cloudflare integration.
 - starter/ and templates/storefront/: the simple standalone export used to refresh
@@ -80,4 +81,6 @@ gift cards. No tax-deductibility claims are made.
 
 Canonical contracts: [delivery](https://app.reai.no/openapi/site/ui) and
 [management](https://app.reai.no/openapi/public/ui). Source/original generic assets
-are MIT; see ASSETS.md. Customer assets must never be added to this public repo.
+are MIT; see ASSETS.md. Famme photographs are a specifically authorized design-test
+exception, owned by Famme and not MIT. Other customer assets must never be added
+to this public repo without explicit permission.

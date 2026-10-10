@@ -83,6 +83,7 @@ async function renderCart() {
     catalog = await response.json();
     box.replaceChildren();
     let total = 0;
+    let totalKnown = true;
     for (const line of cart) {
       const product = catalog.products.find((p) =>
         p.variants.some((v) => v.id === line.variantId),
@@ -206,9 +207,9 @@ document
               ? "En variant er ikke tilgjengelig. Endre kurven og prøv igjen."
               : "An item is unavailable. Update your cart and try again."
             : data.error ||
-              (nb
-                ? "Checkout kunne ikke åpnes."
-                : "Checkout could not be opened."),
+                (nb
+                  ? "Checkout kunne ikke åpnes."
+                  : "Checkout could not be opened."),
         );
       const destination = new URL(data.checkoutUrl);
       if (
@@ -290,6 +291,8 @@ async function refreshDrawer() {
   const version = ++drawerRequest;
   const target = document.querySelector("[data-drawer-lines]");
   target.textContent = nb ? "Henter katalogen…" : "Loading catalog…";
+  const totalBox = document.querySelector("[data-drawer-total]");
+  if (totalBox) totalBox.textContent = cart.length ? "—" : format(0);
   if (!cart.length) {
     target.textContent = nb ? "Handlekurven er tom." : "Your cart is empty.";
     return;
@@ -299,22 +302,40 @@ async function refreshDrawer() {
     if (!result.ok) throw new Error();
     const catalog = await result.json();
     if (version !== drawerRequest) return;
+    let total = 0;
     target.innerHTML = cart
       .map((line) => {
         const product = catalog.products.find((p) =>
           p.variants.some((v) => v.id === line.variantId),
         );
         const variant = product?.variants.find((v) => v.id === line.variantId);
-        return `<article class="drawer-line"><div><b>${esc(product?.title || (nb ? "Utilgjengelig produkt" : "Unavailable product"))}</b><small>${esc(variant?.options.map((o) => o.value).join(" / ") || "")} · ${line.quantity} ${nb ? "stk." : "items"}</small><button data-drawer-remove="${esc(line.variantId)}">${nb ? "Fjern" : "Remove"}</button></div><span>${variant ? esc(format(Number(variant.price) * line.quantity, catalog.currency)) : ""}</span></article>`;
+        if (variant) total += Number(variant.price) * line.quantity;
+        else totalKnown = false;
+        return `<article class="drawer-line"><div><b>${esc(product?.title || (nb ? "Utilgjengelig produkt" : "Unavailable product"))}</b><small>${esc(variant?.options?.map((o) => o.value).join(" / ") || "")}</small><div class="cart-quantity"><button data-drawer-quantity="${esc(line.variantId)}" data-delta="-1" aria-label="${nb ? "Reduser" : "Decrease"} ${esc(product?.title || "")}" ${line.quantity <= 1 ? "disabled" : ""}>−</button><span>${line.quantity}</span><button data-drawer-quantity="${esc(line.variantId)}" data-delta="1" aria-label="${nb ? "Øk" : "Increase"} ${esc(product?.title || "")}" ${line.quantity >= 20 ? "disabled" : ""}>+</button></div><button data-drawer-remove="${esc(line.variantId)}">${nb ? "Fjern" : "Remove"}</button></div><span>${variant ? esc(format(Number(variant.price) * line.quantity, catalog.currency)) : ""}</span></article>`;
       })
       .join("");
+    if (totalBox)
+      totalBox.textContent = totalKnown ? format(total, catalog.currency) : "—";
+    target.querySelectorAll("[data-drawer-quantity]").forEach((button) =>
+      button.addEventListener("click", () => {
+        const line = cart.find(
+          (line) => line.variantId === button.dataset.drawerQuantity,
+        );
+        if (!line) return;
+        line.quantity = Math.max(
+          1,
+          Math.min(20, line.quantity + Number(button.dataset.delta)),
+        );
+        save();
+        renderCart();
+      }),
+    );
     target.querySelectorAll("[data-drawer-remove]").forEach((button) =>
       button.addEventListener("click", () => {
         cart = cart.filter(
           (line) => line.variantId !== button.dataset.drawerRemove,
         );
         save();
-        refreshDrawer();
         renderCart();
       }),
     );
