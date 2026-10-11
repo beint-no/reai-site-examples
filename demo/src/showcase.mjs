@@ -70,8 +70,8 @@ export const designs = [
     image: "confetti.svg",
     title: ["Kolleksjoner først", "Collections first"],
     text: [
-      "Bla og søk i publiserte ReAI-samlinger. Designet følger med fra katalog til kolleksjon.",
-      "Browse and search published ReAI collections. The design carries through from catalog to collection.",
+      "Filtrer publiserte samlinger etter produkttype, kategori, egenskaper og varianter. Søk, sorter og bytt mellom liste og rutenett.",
+      "Filter published collections by product type, category, attributes and variants. Search, sort and switch between list and grid.",
     ],
   },
   {

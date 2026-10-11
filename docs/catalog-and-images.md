@@ -34,6 +34,27 @@ runtime dependency.
 Delivery prices already include VAT. Management product price lists store net
 amounts; never add VAT again to delivered prices in the storefront.
 
+## Collection filtering
+
+The delivered product has category, merchant productType and structured attributes.
+Variants carry option-linked attributes. Index and the main catalog derive facet
+choices from the current collection, using entry UUIDs for attribute identity,
+category IDs for taxonomy, merchant labels for display and provided colors for swatches.
+They do not infer attributes from titles or images. Taxonomy names and aliases can
+support search while retaining the original entry identity.
+
+Choices within a facet are OR; facets combine with AND. Option, attribute, price
+and availability constraints must match one variant. Product-wide attributes apply
+to every variant. Counts represent matching products; prices and product links use
+matching variants. Missing metadata creates no invented choice. Selected filters,
+sort and layout are shareable URL parameters. Featured restores delivery order.
+
+Available-only filtering separately requests uncached variant status in batches
+of up to 100. Failure reports an error and removes that constraint. Checkout still
+revalidates stock. The browser filters the complete delivered collection; if delivery
+later becomes paginated, facets/counts will need a complete server-side projection.
+See the published [filtering lesson](https://nettbutikk.reai.no/learn/collections/#filtering).
+
 ## Images
 
 Public product images include `url`, `alt`, `width`, `height` and width-specific

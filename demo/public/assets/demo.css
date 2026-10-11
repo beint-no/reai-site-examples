@@ -831,16 +831,12 @@ legend {
   display: none;
 }
 .shop-learning {
-  padding: 20px;
-  background: var(--pale);
-  margin: 30px 0;
-  font-size: 14px;
+  margin: 20px 0 0;
+  font-size: 13px;
   display: flex;
-  gap: 24px;
+  gap: 16px;
   align-items: center;
-}
-.shop-learning p {
-  flex: 1;
+  flex-wrap: wrap;
 }
 .shop-learning a {
   color: var(--teal);

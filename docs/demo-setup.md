@@ -15,6 +15,19 @@ The public seed includes test purchases from 1 kr, voluntary development support
 at 100/500/1,000 kr, manually redeemable ReAI gift cards and illustrative digital
 products. Review the named recipient and fulfillment policy before enabling LIVE.
 It is setup input and an explicit offline preview fixture, never production fallback.
+Filter metadata is separately seeded after the catalog exists:
+
+```sh
+node demo/tools/catalog-metadata.mjs
+node demo/tools/catalog-metadata.mjs --apply --tenant-id <demo-tenant-id> --site-id <demo-site-uuid>
+```
+
+This guarded operator command uses SSH ax42 and host PostgreSQL; these metadata
+fields currently have no public management write API. It adds product types,
+the real gift-card category and illustration colors, preserves commerce amounts
+and stock, and saves the prior metadata under ignored .local/. The same seed is
+used by the explicit offline preview. Ordinary storefront rendering reads ReAI.
+
 Review the plan first:
 
 ```sh

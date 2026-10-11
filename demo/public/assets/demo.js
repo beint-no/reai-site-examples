@@ -45,6 +45,16 @@ document.querySelector(".menu-toggle")?.addEventListener("click", (e) => {
   const open = document.querySelector(".header").classList.toggle("menu-open");
   e.currentTarget.setAttribute("aria-expanded", String(open));
 });
+const preferredVariant = new URL(location.href).searchParams.get("variant");
+const variantSelect = document.querySelector("select[name=variantId]");
+if (
+  preferredVariant &&
+  variantSelect &&
+  [...variantSelect.options].some(
+    (option) => option.value === preferredVariant && !option.disabled,
+  )
+)
+  variantSelect.value = preferredVariant;
 document.querySelectorAll("[data-add-to-cart]").forEach((form) =>
   form.addEventListener("submit", (e) => {
     e.preventDefault();

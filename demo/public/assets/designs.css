@@ -413,6 +413,217 @@ body[data-store-theme="essential"] .button {
 .index-layout aside .under-link {
   font-size: 12px;
 }
+.catalog-collection-menu {
+  margin-top: 12px;
+}
+.catalog-collection-menu > summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  font-size: 13px;
+  cursor: pointer;
+  list-style: none;
+}
+.catalog-collection-menu > summary::-webkit-details-marker {
+  display: none;
+}
+.index-layout .catalog-collection-menu nav {
+  margin: 6px 0 0;
+}
+.catalog-filters {
+  margin-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.catalog-filters > summary,
+.catalog-facet > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 0;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 650;
+  list-style: none;
+}
+.catalog-filters summary::-webkit-details-marker {
+  display: none;
+}
+.catalog-filters summary > span:last-child {
+  margin-left: auto;
+}
+.catalog-filters details[open] > summary > span:last-child,
+.catalog-filters[open] > summary > span:last-child {
+  transform: rotate(45deg);
+}
+[data-filter-count]:not(:empty) {
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: #17231e;
+  color: white;
+}
+.catalog-price {
+  border: 0;
+  padding: 8px 0 14px;
+  min-width: 0;
+}
+.catalog-price legend {
+  font-size: 12px;
+  font-weight: 650;
+}
+.catalog-price > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.catalog-price label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 11px;
+}
+.catalog-price input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 9px;
+  font:
+    13px Arial,
+    sans-serif;
+  background: white;
+}
+.catalog-price input[aria-invalid="true"] {
+  border-color: #aa331e;
+}
+.catalog-filters .catalog-price p {
+  margin-top: 8px;
+  color: #aa331e;
+}
+.catalog-stock {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 12px;
+  padding: 10px 0 18px;
+}
+.catalog-filters input[type="checkbox"] {
+  accent-color: #17231e;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin: 0;
+}
+.catalog-facet {
+  border-top: 1px solid var(--line);
+}
+.catalog-facet summary > span {
+  margin-left: auto;
+}
+.catalog-facet fieldset {
+  border: 0;
+  padding: 0 0 15px;
+  margin: 0;
+  min-width: 0;
+  max-height: 280px;
+  overflow: auto;
+}
+.catalog-facet label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.catalog-facet label:has(input:disabled) {
+  color: #818885;
+  cursor: default;
+}
+.catalog-facet label > span {
+  overflow-wrap: anywhere;
+}
+.catalog-facet small {
+  margin-left: auto;
+  color: #64716b;
+  font-variant-numeric: tabular-nums;
+}
+.catalog-swatch {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  border: 1px solid #d2d8d5;
+  border-radius: 50%;
+}
+.catalog-filters .catalog-filter-note {
+  font-size: 11px;
+  line-height: 1.5;
+  border-top: 1px solid var(--line);
+  padding-top: 15px;
+}
+.catalog-stock-note:empty {
+  display: none;
+}
+.catalog-active {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: -4px 0 24px;
+}
+.catalog-active button {
+  border: 1px solid #d4dfda;
+  background: #f2f6f4;
+  color: #17231e;
+  border-radius: 3px;
+  padding: 8px 10px;
+  font-size: 12px;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.catalog-active .catalog-clear {
+  border-color: transparent;
+  background: transparent;
+  text-decoration: underline;
+}
+.catalog-empty {
+  padding: 36px 20px;
+  background: #f2f6f4;
+  border: 1px solid var(--line);
+  font-size: 15px;
+}
+.catalog-active[hidden],
+.catalog-empty[hidden],
+[data-price-error][hidden],
+.product-card[hidden] {
+  display: none !important;
+}
+@media (max-width: 700px) {
+  .catalog-filters {
+    margin-top: 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .catalog-filter-body {
+    padding: 0 12px 12px;
+  }
+  .catalog-filters .catalog-filter-note,
+  .catalog-filters .catalog-price p,
+  .catalog-filters .catalog-stock-note {
+    display: block;
+  }
+  .catalog-filters [data-price-error][hidden] {
+    display: none;
+  }
+  .catalog-facet label {
+    min-height: 44px;
+  }
+  .catalog-price input {
+    font-size: 16px;
+  }
+  .catalog-active {
+    margin: 0 0 20px;
+  }
+}
 .index-toolbar {
   display: flex;
   justify-content: space-between;
