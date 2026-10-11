@@ -24,6 +24,9 @@ import {
   renderLookbook,
   renderTrade,
 } from "./design-storefronts.mjs";
+import { uxRoutes } from "../content/ux.mjs";
+import { renderUxBody, designLearning, uxTitle } from "./ux.mjs";
+import { documentHtml } from "./storefront.mjs";
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const headers = {
@@ -130,7 +133,13 @@ export default {
           /(<body[^>]*>)/,
           `$1<div class="demo-notice"><a href="/designs/">← Alle butikkdesign / All designs</a> · ${context.preview ? "Simulerte data. Checkout og påmelding er deaktivert." : "ReAI sin test-nettbutikk · Betaling i kassen fungerer · Mottaker: Better Integration"}</div>`,
         );
-        return new Response(request.method === "HEAD" ? null : markup, {
+        const annotated = markup
+          .replace("</main>", designLearning("starter", context) + "</main>")
+          .replace(
+            "</head>",
+            `<link rel="stylesheet" href="/assets/ux-notes.css"></head>`,
+          );
+        return new Response(request.method === "HEAD" ? null : annotated, {
           status: result.status,
           headers: { ...headers, ...Object.fromEntries(result.headers) },
         });
@@ -162,6 +171,15 @@ export default {
         return response({ error: "Not found" }, 404, true);
       if (request.method !== "POST" && path === "/")
         return finish(renderHome({}, context), context);
+      if (request.method !== "POST" && uxRoutes.includes(path))
+        return finish(
+          documentHtml(
+            uxTitle(path, context),
+            renderUxBody(path, context),
+            context,
+          ),
+          context,
+        );
       if (request.method !== "POST" && path === "/designs")
         return finish(renderDesigns(context), context);
       if (

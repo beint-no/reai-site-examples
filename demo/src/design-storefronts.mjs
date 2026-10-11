@@ -1,3 +1,4 @@
+import { designLearning } from "./ux.mjs";
 import {
   escapeHtml as h,
   language,
@@ -5,7 +6,10 @@ import {
   picture,
   renderGrid,
 } from "./storefront.mjs";
-import { renderCatalogFilters, renderCatalogTools } from "./catalog-filters.mjs";
+import {
+  renderCatalogFilters,
+  renderCatalogTools,
+} from "./catalog-filters.mjs";
 import fashion from "../public/assets/famme/catalog.json" with { type: "json" };
 const pick = (c, a, b) => (language(c.locale) === "nb" ? a : b);
 const arrow =
@@ -81,7 +85,7 @@ function frame(title, body, c, theme, fixture = false) {
                     pick(c, "Slik virker det", "How it works"),
                   ],
                 ];
-  return `<!doctype html><html lang="${language(c.locale)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="description" content="${h(pick(c, "ReAI butikkdesign med samlinger, variantvalg og handlekurv i skuff.", "ReAI storefront designs with collections, variants and a cart drawer."))}"><title>${h(title)} · ReAI ${pick(c, "butikkdesign", "storefront design")}</title><link rel="icon" href="/assets/mark.svg"><link rel="stylesheet" href="/assets/demo.css"><link rel="stylesheet" href="/assets/designs.css"></head><body data-locale="${language(c.locale)}" data-store-theme="${theme}" data-checkout-origin="${h(c.checkoutOrigin || "https://app.reai.no")}" data-payment-mode="${fixture ? "disabled" : h(c.paymentMode || "disabled")}" ${fixture ? "data-fashion-store" : "data-live-store"}><a class="skip" href="#main">${pick(c, "Hopp til innhold", "Skip to content")}</a><div class="design-notice"><a href="/designs/">← ${pick(c, "Alle butikkdesign", "All storefront designs")}</a><span>${fixture ? pick(c, "Design-test · Famme-bilder · ingen salg av klær", "Design test · Famme photography · no clothing for sale") : c.preview ? pick(c, "Lokal forhåndsvisning · ingen betaling", "Local preview · no payments") : pick(c, "ReAI sin test-nettbutikk · Mottaker: ", "ReAI test store · Recipient: ") + h(c.merchantName || "Better Integration")}</span><a href="?lang=${language(c.locale) === "nb" ? "en" : "nb"}">${pick(c, "EN", "NO")}</a></div><header class="design-header"><a class="design-brand" href="${root}">${name}<small>/ REAI ${fixture ? "DESIGN TEST" : "SITE API"}</small></a><nav aria-label="${pick(c, "Butikkmeny", "Store navigation")}">${nav.map(([url, label]) => `<a href="${url}">${label}</a>`).join("")}</nav><div class="design-header-actions">${fixture ? `<a href="${base}/collections/all/#filter" aria-label="${pick(c, "Søk produkter", "Search products")}">${search}</a>` : ""}<button type="button" ${fixture ? "data-fashion-cart-open" : "data-cart-open"} aria-label="${pick(c, fixture ? "Testkurv" : "Handlekurv", fixture ? "Test cart" : "Cart")}">${bag}<span ${fixture ? "data-fashion-count" : "data-cart-count"}>0</span></button><button class="design-menu" aria-label="${pick(c, "Åpne meny", "Open navigation")}" aria-expanded="false">☰</button></div></header><main id="main">${body}</main><footer class="design-footer"><a class="design-brand" href="/designs/">${name}<small>/ REAI</small></a><p>${fixture ? pick(c, "Famme-fotografier brukt med tillatelse. Fiktiv katalog og separat testkurv.", "Famme photography used with permission. Fictional catalog and separate test cart.") : pick(c, "Design i Git. Produkter, priser og ordre i ReAI.", "Design in Git. Products, prices and orders in ReAI.")}</p><a href="/learn/catalog/">${pick(c, "Lær om Site API", "Learn about the Site API")} ${arrow}</a></footer>${fixture ? fashionDialogs(c) : liveDrawer(c)}<script type="module" src="/assets/catalog-filters.js"></script><script src="/assets/${fixture ? "fashion" : "demo"}.js" defer></script><script src="/assets/designs.js" defer></script></body></html>`;
+  return `<!doctype html><html lang="${language(c.locale)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="description" content="${h(pick(c, "ReAI butikkdesign med samlinger, variantvalg og handlekurv i skuff.", "ReAI storefront designs with collections, variants and a cart drawer."))}"><title>${h(title)} · ReAI ${pick(c, "butikkdesign", "storefront design")}</title><link rel="icon" href="/assets/mark.svg"><link rel="stylesheet" href="/assets/demo.css"><link rel="stylesheet" href="/assets/designs.css"><link rel="stylesheet" href="/assets/ux-notes.css"></head><body data-locale="${language(c.locale)}" data-store-theme="${theme}" data-checkout-origin="${h(c.checkoutOrigin || "https://app.reai.no")}" data-payment-mode="${fixture ? "disabled" : h(c.paymentMode || "disabled")}" ${fixture ? "data-fashion-store" : "data-live-store"}><a class="skip" href="#main">${pick(c, "Hopp til innhold", "Skip to content")}</a><div class="design-notice"><a href="/designs/">← ${pick(c, "Alle butikkdesign", "All storefront designs")}</a><span>${fixture ? pick(c, "Design-test · Famme-bilder · ingen salg av klær", "Design test · Famme photography · no clothing for sale") : c.preview ? pick(c, "Lokal forhåndsvisning · ingen betaling", "Local preview · no payments") : pick(c, "ReAI sin test-nettbutikk · Mottaker: ", "ReAI test store · Recipient: ") + h(c.merchantName || "Better Integration")}</span><a href="?lang=${language(c.locale) === "nb" ? "en" : "nb"}">${pick(c, "EN", "NO")}</a></div><header class="design-header"><a class="design-brand" href="${root}">${name}<small>/ REAI ${fixture ? "DESIGN TEST" : "SITE API"}</small></a><nav aria-label="${pick(c, "Butikkmeny", "Store navigation")}">${nav.map(([url, label]) => `<a href="${url}">${label}</a>`).join("")}</nav><div class="design-header-actions">${fixture ? `<a href="${base}/collections/all/#filter" aria-label="${pick(c, "Søk produkter", "Search products")}">${search}</a>` : ""}<button type="button" ${fixture ? "data-fashion-cart-open" : "data-cart-open"} aria-label="${pick(c, fixture ? "Testkurv" : "Handlekurv", fixture ? "Test cart" : "Cart")}">${bag}<span ${fixture ? "data-fashion-count" : "data-cart-count"}>0</span></button><button class="design-menu" aria-label="${pick(c, "Åpne meny", "Open navigation")}" aria-expanded="false">☰</button></div></header><main id="main">${body}${designLearning(theme === "index" ? "collections" : theme, c)}</main><footer class="design-footer"><a class="design-brand" href="/designs/">${name}<small>/ REAI</small></a><p>${fixture ? pick(c, "Famme-fotografier brukt med tillatelse. Fiktiv katalog og separat testkurv.", "Famme photography used with permission. Fictional catalog and separate test cart.") : pick(c, "Design i Git. Produkter, priser og ordre i ReAI.", "Design in Git. Products, prices and orders in ReAI.")}</p><a href="/learn/catalog/">${pick(c, "Lær om Site API", "Learn about the Site API")} ${arrow}</a></footer>${fixture ? fashionDialogs(c) : liveDrawer(c)}<script type="module" src="/assets/catalog-filters.js"></script><script src="/assets/${fixture ? "fashion" : "demo"}.js" type="module"></script><script src="/assets/designs.js" defer></script></body></html>`;
 }
 const productCopy = {
   "test-betaling": [
@@ -149,7 +153,7 @@ export function renderCollections(store, c, selected = null) {
   const products = selected ? selected.products : store.products;
   return frame(
     "Index",
-    `<section class="design-shell index-intro"><div><h1>${h(selected?.title || pick(c, "Finn din samling.", "Find your collection."))}</h1><p>${h(selected?.description || pick(c, "Bla etter formål. Samlingene, produktene og prisene hentes fra ReAI.", "Browse by purpose. Collections, products and prices come from ReAI."))}</p></div><a href="/learn/collections/#filtering">${pick(c, "Fra produktdata til filtre", "From product data to filters")} ${arrow}</a></section><div class="design-shell index-layout" data-catalog><aside><h2>${pick(c, "Kolleksjoner", "Collections")}</h2><details class="catalog-collection-menu"><summary>${h(selected?.title || pick(c, "Alle produkter", "All products"))} <span aria-hidden="true">⌄</span></summary><nav aria-label="${pick(c, "Velg samling", "Select a collection")}"><a href="/designs/collections/" ${selected ? "" : 'aria-current="page"'}>${pick(c, "Alle produkter", "All products")} <span>${store.products.length}</span></a>${(store.collections || []).map((col) => `<a href="/designs/collections/${h(col.handle)}/" ${selected?.handle === col.handle ? 'aria-current="page"' : ""}>${h(col.title)} ${arrow}</a>`).join("")}</nav></details>${renderCatalogFilters(products, store, language(c.locale))}</aside><section>${renderCatalogTools(products, language(c.locale))}${renderGrid(products, store)}<p class="catalog-empty" data-catalog-empty hidden>${pick(c, "Ingen produkter passer valgene. Fjern et filter eller juster prisen.", "No products match. Remove a filter or adjust the price.")}</p></section></div>`,
+    `<section class="design-shell index-intro"><div><h1>${h(selected?.title || pick(c, "Finn din samling.", "Find your collection."))}</h1><p>${h(selected?.description || pick(c, "Bla etter formål. Samlingene, produktene og prisene hentes fra ReAI.", "Browse by purpose. Collections, products and prices come from ReAI."))}</p></div><a href="/learn/collections/#filtering">${pick(c, "Fra produktdata til filtre", "From product data to filters")} ${arrow}</a></section><div class="design-shell index-layout" data-catalog><aside><h2>${pick(c, "Kolleksjoner", "Collections")}</h2><details class="catalog-collection-menu"><summary>${h(selected?.title || pick(c, "Alle produkter", "All products"))} <span aria-hidden="true">⌄</span></summary><nav aria-label="${pick(c, "Velg samling", "Select a collection")}"><a href="/designs/collections/" ${selected ? "" : 'aria-current="page"'}>${pick(c, "Alle produkter", "All products")} <span>${store.products.length}</span></a>${(store.collections || []).map((col) => `<a href="/designs/collections/${h(col.handle)}/" ${selected?.handle === col.handle ? 'aria-current="page"' : ""}>${h(col.title)} ${arrow}</a>`).join("")}</nav></details>${renderCatalogFilters(products, store, language(c.locale))}</aside><section>${renderCatalogTools(products, language(c.locale))}${renderGrid(products, store)}<p data-catalog-empty hidden></p></section></div>`,
     c,
     "index",
   );
@@ -158,7 +162,7 @@ function image(name, alt = "", eager = false) {
   return `<img src="/assets/famme/${name}.avif" width="800" height="1200" alt="${h(alt)}" loading="${eager ? "eager" : "lazy"}">`;
 }
 function fashionCard(p, c) {
-  return `<article class="fashion-card" data-fashion-card data-title="${h(p.title)}" data-price="${p.price}" data-collection="${p.collection}"><a class="fashion-card-image" href="${base}/products/${p.handle}/">${image(p.colors[0].image, p.title)}</a><div class="fashion-card-heading"><h3><a href="${base}/products/${p.handle}/">${h(p.title)}</a></h3><span>${p.price.toLocaleString(language(c.locale))} kr</span></div><div class="fashion-card-swatches">${p.colors.map((color, i) => `<button type="button" class="fashion-swatch swatch-${color.key}" data-card-color="${color.image}" data-color-name="${color.key}" aria-label="${h(p.title)} ${colorName(color.key, c)}" aria-pressed="${i === 0}"></button>`).join("")}</div><button class="fashion-quick-add" data-fashion-quick="${p.handle}" type="button">${pick(c, "Velg størrelse", "Choose size")} <span>+</span></button></article>`;
+  return `<article class="fashion-card product-card" data-product-id="${h(p.handle)}" data-fashion-card data-title="${h(p.title)}" data-price="${p.price}" data-collection="${p.collection}"><a class="fashion-card-image" href="${base}/products/${p.handle}/">${image(p.colors[0].image, p.title)}</a><div class="fashion-card-heading"><h3><a href="${base}/products/${p.handle}/">${h(p.title)}</a></h3><span data-product-price>${p.price.toLocaleString(language(c.locale))} kr</span></div><div class="fashion-card-swatches">${p.colors.map((color, i) => `<button type="button" class="fashion-swatch swatch-${color.key}" data-card-color="${color.image}" data-color-name="${color.key}" aria-label="${h(p.title)} ${colorName(color.key, c)}" aria-pressed="${i === 0}"></button>`).join("")}</div><button class="fashion-quick-add" data-fashion-quick="${p.handle}" type="button">${pick(c, "Velg størrelse", "Choose size")} <span>+</span></button></article>`;
 }
 export function colorName(key, c) {
   return pick(
@@ -166,6 +170,51 @@ export function colorName(key, c) {
     { brown: "Brun", black: "Svart", grey: "Grå", khaki: "Khaki" }[key] || key,
     { brown: "Brown", black: "Black", grey: "Grey", khaki: "Khaki" }[key] ||
       key,
+  );
+}
+export function fashionFilterProducts(products, c) {
+  return products.map((p) => ({
+    id: p.handle,
+    title: p.title,
+    description: p.description[language(c.locale)],
+    productType: p.collection,
+    attributes: [],
+    variants: p.colors.flatMap((color) =>
+      p.sizes.map((size) => ({
+        id: `fashion-${p.handle}-${color.key}-${size}`,
+        price: p.price,
+        options: [{ name: "Size", value: size }],
+        attributes: [
+          {
+            key: "color",
+            name: pick(c, "Farge", "Color"),
+            values: [
+              {
+                id: color.key,
+                label: colorName(color.key, c),
+                aliases: [color.key],
+                taxonomyValues: [],
+                colors: [],
+              },
+            ],
+          },
+        ],
+      })),
+    ),
+  }));
+}
+export function fashionAvailability(products) {
+  return products.flatMap((p) =>
+    p.colors.flatMap((color) =>
+      p.sizes.map((size) => [
+        `fashion-${p.handle}-${color.key}-${size}`,
+        p.soldOut[color.key]?.includes(size)
+          ? "OUT_OF_STOCK"
+          : p.backorder[color.key]?.includes(size)
+            ? "BACKORDER"
+            : "AVAILABLE",
+      ]),
+    ),
   );
 }
 function collections(c) {
@@ -197,12 +246,12 @@ export function renderFashion(route, c) {
       )
       .join(
         "",
-      )}</nav><form class="fashion-filters" id="filter"><label>${pick(c, "Søk produkter", "Search products")}<input type="search" data-fashion-search placeholder="${pick(c, "Navn på produkt", "Product name")}"></label><label>${pick(c, "Tilgjengelighet", "Availability")}<select data-fashion-stock><option value="all">${pick(c, "Alle størrelser", "All sizes")}</option>${["XS", "S", "M", "L", "XL"].map((s) => `<option>${s}</option>`).join("")}</select></label><label>${pick(c, "Sorter", "Sort")}<select data-fashion-sort><option value="featured">${pick(c, "Utvalgt", "Featured")}</option><option value="asc">${pick(c, "Pris: lav til høy", "Price: low to high")}</option><option value="desc">${pick(c, "Pris: høy til lav", "Price: high to low")}</option></select></label></form><div class="fashion-products-grid" data-fashion-grid>${products.map((p) => fashionCard(p, c)).join("")}</div><p data-fashion-empty hidden>${pick(c, "Ingen produkter passer valgene.", "No products match your selection.")}</p><p class="fashion-result-count" data-fashion-results role="status"></p></section>`;
+      )}</nav><div class="index-layout" data-catalog id="filter"><aside>${renderCatalogFilters(fashionFilterProducts(products, c), { currency: "NOK" }, language(c.locale), { explain: false, availability: fashionAvailability(products) })}</aside><div>${renderCatalogTools(products, language(c.locale))}<div class="fashion-products-grid product-grid" data-fashion-grid>${products.map((p) => fashionCard(p, c)).join("")}</div><p data-catalog-empty hidden></p></div></div></section>`;
   } else if (route.startsWith("products/")) {
     const p = fashion.products.find((p) => p.handle === route.slice(9));
     if (!p) return null;
     title = p.title;
-    body = `<section class="design-shell fashion-product-page"><a class="under-link" href="${base}/collections/${p.collection}/">← ${pick(c, ...collectionLabels[p.collection])}</a><div class="fashion-product-layout"><div class="fashion-product-gallery"><div data-fashion-main-image>${image(p.colors[0].image, p.title, true)}</div>${(p.gallery || []).map((name) => image(name, p.title)).join("")}</div><div class="fashion-product-copy"><h1>${h(p.title)}</h1><strong class="fashion-detail-price">${p.price.toLocaleString(language(c.locale))} kr</strong><p>${h(p.description[language(c.locale)])}</p>${fashionForm(p, c)}<details><summary>${pick(c, "Hvordan dette kobles til ReAI", "How this connects to ReAI")}</summary><p>${pick(c, "I en ekte butikk brukes publiserte variant-ID-er og priser fra Site API. Tilgjengelighet leses separat, og checkout validerer lager og pris på nytt. Her er pris, lager og produkt-ID-er lokale testdata.", "A real store uses published variant IDs and prices from the Site API. Availability is read separately; checkout revalidates stock and prices. Here prices, stock and IDs are local test data.")}</p><a href="/api/?endpoint=availabilities">${pick(c, "Prøv tilgjengelighets-API-et", "Try the availability API")} ${arrow}</a></details></div></div></section>`;
+    body = `<section class="design-shell fashion-product-page"><a class="under-link" href="${base}/collections/${p.collection}/">← ${pick(c, ...collectionLabels[p.collection])}</a><div class="fashion-product-layout"><div class="fashion-product-gallery"><div data-fashion-main-image>${image(p.colors[0].image, p.title, true)}</div><div class="fashion-thumbnails" aria-label="${pick(c, "Produktbilder", "Product images")}">${[...new Set([...p.colors.map((x) => x.image), ...(p.gallery || [])])].map((name, i) => `<button type="button" data-fashion-image="${h(name)}" aria-label="${pick(c, "Se bilde", "View image")} ${i + 1}" aria-pressed="${i === 0}">${image(name, p.title)}</button>`).join("")}</div></div><div class="fashion-product-copy"><h1>${h(p.title)}</h1><strong class="fashion-detail-price">${p.price.toLocaleString(language(c.locale))} kr</strong><p>${h(p.description[language(c.locale)])}</p>${fashionForm(p, c)}<details><summary>${pick(c, "Hvordan dette kobles til ReAI", "How this connects to ReAI")}</summary><p>${pick(c, "I en ekte butikk brukes publiserte variant-ID-er og priser fra Site API. Tilgjengelighet leses separat, og checkout validerer lager og pris på nytt. Her er pris, lager og produkt-ID-er lokale testdata.", "A real store uses published variant IDs and prices from the Site API. Availability is read separately; checkout revalidates stock and prices. Here prices, stock and IDs are local test data.")}</p><a href="/api/?endpoint=availabilities">${pick(c, "Prøv tilgjengelighets-API-et", "Try the availability API")} ${arrow}</a></details></div></div></section>`;
   } else return null;
   return frame(
     title,
@@ -214,7 +263,7 @@ export function renderFashion(route, c) {
   );
 }
 function fashionForm(p, c) {
-  return `<form data-fashion-add="${p.handle}"><fieldset><legend>${pick(c, "Farge", "Color")}</legend><div class="fashion-color-options">${p.colors.map((x, i) => `<label><input type="radio" name="color" value="${x.key}" ${i === 0 ? "checked" : ""}><span class="fashion-swatch swatch-${x.key}"></span><span>${colorName(x.key, c)}</span></label>`).join("")}</div></fieldset><fieldset><legend>${pick(c, "Størrelse", "Size")}</legend><div class="fashion-size-options">${p.sizes.map((s) => `<label><input type="radio" name="size" value="${s}" required ${p.soldOut[p.colors[0].key]?.includes(s) ? "disabled" : ""}><span>${s}</span></label>`).join("")}</div></fieldset><p data-fashion-stock-message role="status">${pick(c, "Velg størrelse. Utsolgte varianter er deaktivert.", "Choose a size. Sold-out variants are disabled.")}</p><button class="fashion-button" type="submit" disabled>${pick(c, "Legg i testkurven", "Add to test cart")} +</button></form>`;
+  return `<form data-fashion-add="${p.handle}"><fieldset><legend>${pick(c, "Farge", "Color")}</legend><div class="fashion-color-options">${p.colors.map((x, i) => `<label><input type="radio" name="color" value="${x.key}" ${i === 0 ? "checked" : ""}><span class="fashion-swatch swatch-${x.key}"></span><span>${colorName(x.key, c)}</span></label>`).join("")}</div></fieldset><fieldset><legend>${pick(c, "Størrelse", "Size")}</legend><div class="fashion-size-options">${p.sizes.map((s) => `<label><input type="radio" name="size" value="${s}" required ${p.soldOut[p.colors[0].key]?.includes(s) ? "disabled" : ""}><span>${s}<small data-size-status>${p.soldOut[p.colors[0].key]?.includes(s) ? pick(c, "Utsolgt", "Sold out") : ""}</small></span></label>`).join("")}</div></fieldset><p data-fashion-stock-message role="status">${pick(c, "Velg størrelse. Utsolgte varianter er deaktivert.", "Choose a size. Sold-out variants are disabled.")}</p><button class="fashion-button" type="submit" disabled>${pick(c, "Legg i testkurven", "Add to test cart")} +</button></form>`;
 }
 function fashionDialogs(c) {
   return `<dialog class="cart-drawer fashion-quick-dialog" data-fashion-quick-dialog aria-label="${pick(c, "Velg variant", "Choose variant")}"><div class="drawer-header"><h2>${pick(c, "Velg variant", "Choose variant")}</h2><button data-fashion-quick-close aria-label="${pick(c, "Lukk variantvalg", "Close variant selection")}">×</button></div><div data-fashion-quick-content></div></dialog><dialog class="cart-drawer fashion-cart" data-fashion-cart aria-label="${pick(c, "Testkurv", "Test cart")}"><div class="drawer-header"><h2>${pick(c, "Testkurven din", "Your test cart")}</h2><button data-fashion-cart-close aria-label="${pick(c, "Lukk testkurv", "Close test cart")}">×</button></div><p class="fashion-cart-disclosure">${pick(c, "Simulert kurv. Ingen betaling, ordre eller levering.", "Simulated cart. No payment, order or delivery.")}</p><div data-fashion-lines></div><div class="drawer-bottom"><div class="drawer-subtotal"><b>${pick(c, "Delsum", "Subtotal")}</b><strong data-fashion-total>0 kr</strong></div><a class="fashion-button" href="/products/test-betaling/">${pick(c, "Prøv ekte checkout fra 1 kr", "Try real checkout from 1 kr")} ${arrow}</a><p>${pick(c, "Dette åpner et separat digitalt testprodukt. Klærne følger ikke med til checkout.", "This opens a separate digital test product. Clothing is not carried into checkout.")}</p></div></dialog>`;

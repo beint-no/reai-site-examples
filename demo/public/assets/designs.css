@@ -1509,15 +1509,8 @@ body[data-store-theme="famme"] .design-header {
     margin-top: 24px;
   }
   .fashion-product-gallery {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-  }
-  .fashion-product-gallery > div,
-  .fashion-product-gallery > img {
-    width: 100%;
-    flex: 0 0 100%;
-    scroll-snap-align: start;
+    display: grid;
+    min-width: 0;
   }
   .fashion-product-gallery img {
     max-height: 540px;
@@ -1772,7 +1765,7 @@ body[data-store-theme="lookbook"] .design-brand {
 }
 .lookbook-copy p {
   font:
-    clamp(18px, 2vw, 26px)/1.45 Georgia,
+    clamp(18px, 2vw, 26px) / 1.45 Georgia,
     serif;
   margin: 30px 0;
   max-width: 400px;
@@ -2339,5 +2332,590 @@ body[data-store-theme="lookbook"] .fashion-button {
 @media (max-width: 700px) {
   .lookbook-image img {
     height: 460px;
+  }
+}
+
+/* Research-informed controls shared with the standalone export. */
+.catalog-search-form {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  min-width: 0;
+}
+.catalog-search-form .search {
+  min-width: 0;
+}
+.catalog-search-form button,
+.catalog-recovery button {
+  padding: 10px 14px;
+  min-height: 44px;
+  border: 1px solid #a4b2ab;
+  background: #fff;
+  color: #171b19;
+  cursor: pointer;
+}
+.catalog-recovery {
+  padding: 20px;
+  border: 1px solid #cad1cb;
+  margin-bottom: 20px;
+}
+.catalog-recovery[hidden],
+[data-catalog-empty][hidden] {
+  display: none;
+}
+.catalog-mobile-heading,
+.catalog-filter-actions {
+  display: none;
+}
+.catalog-mobile-dialog {
+  width: min(100%, 480px);
+  max-height: 100dvh;
+  height: 100dvh;
+  max-width: 100%;
+  margin: 0 0 0 auto;
+  padding: 0;
+  border: 0;
+  color: #171b19;
+  background: #fff;
+}
+.catalog-mobile-dialog::backdrop {
+  background: #0006;
+}
+.catalog-mobile-dialog .catalog-filter-body {
+  padding: 0 20px;
+}
+.catalog-mobile-dialog .catalog-mobile-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  padding: 18px 0;
+  z-index: 2;
+  border-bottom: 1px solid #cad1cb;
+}
+.catalog-mobile-dialog fieldset {
+  border: 0;
+  padding: 12px 0;
+  margin: 0;
+}
+.catalog-mobile-dialog .catalog-price > div {
+  display: flex;
+  gap: 12px;
+}
+.catalog-mobile-dialog label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+}
+.catalog-mobile-dialog .catalog-price label {
+  flex: 1;
+  min-width: 0;
+  display: block;
+}
+.catalog-mobile-dialog input[type="number"] {
+  width: 100%;
+  min-height: 44px;
+  font-size: 16px;
+  border: 1px solid #a4b2ab;
+  padding: 10px;
+}
+.catalog-mobile-dialog summary {
+  padding: 16px 0;
+  cursor: pointer;
+}
+.catalog-mobile-dialog summary span:last-child {
+  float: right;
+}
+.catalog-mobile-dialog small {
+  margin-left: auto;
+}
+.catalog-mobile-dialog .catalog-filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  padding: 16px 0;
+  border-top: 1px solid #cad1cb;
+}
+.catalog-mobile-dialog button {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid #a4b2ab;
+  background: white;
+  color: #171b19;
+  cursor: pointer;
+}
+.catalog-mobile-dialog [data-filter-apply] {
+  flex: 1;
+  background: #173f34;
+  color: #fff;
+}
+.catalog-mobile-dialog .catalog-swatch {
+  width: 20px;
+  height: 20px;
+}
+.catalog-mobile-dialog .catalog-stock-note {
+  display: block;
+}
+.catalog-mobile-dialog [hidden] {
+  display: none;
+}
+@media (max-width: 700px) {
+  .catalog-search-form {
+    width: 100%;
+  }
+  .catalog-search-form .search {
+    flex: 1;
+  }
+  .catalog-search-form input {
+    width: 100%;
+  }
+  .index-toolbar {
+    flex-wrap: wrap;
+  }
+}
+
+.fashion-thumbnails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.fashion-thumbnails button {
+  padding: 0;
+  width: 72px;
+  border: 2px solid transparent;
+  background: none;
+  cursor: pointer;
+  align-self: start;
+}
+.fashion-thumbnails button[aria-pressed="true"] {
+  border-color: #171717;
+}
+.fashion-thumbnails img {
+  width: 100%;
+  height: 96px;
+  object-fit: cover;
+}
+.fashion-size-options small {
+  display: block;
+  font-size: 9px;
+}
+.fashion-size-options label {
+  min-width: 56px;
+}
+.fashion-catalog .index-layout .product-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.fashion-card [data-product-price] {
+  white-space: nowrap;
+}
+@media (max-width: 700px) {
+  .fashion-catalog .index-layout {
+    display: block;
+  }
+}
+/* The learning guide follows the existing ruled, editorial ReAI design. */
+.ux-hub h1 {
+  max-width: 1100px;
+}
+.ux-source {
+  color: #59615e;
+  font-size: 13px;
+  max-width: 850px;
+  line-height: 1.7;
+}
+.ux-source a {
+  color: inherit;
+  text-decoration: underline;
+}
+.ux-hub-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  align-items: center;
+  margin-block: 30px;
+}
+.ux-stage-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 20px 0;
+  border-block: 1px solid var(--line);
+  margin-top: 50px;
+}
+.ux-stage-nav a {
+  padding: 12px 20px;
+  background: #edf2ee;
+}
+.ux-stage {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 60px;
+  padding: 55px 0;
+  border-bottom: 1px solid var(--line);
+  scroll-margin-top: 30px;
+}
+.ux-stage header > span {
+  color: var(--teal);
+  font-size: 14px;
+}
+.ux-stage h2 {
+  font-size: 44px;
+  margin: 12px 0;
+}
+.ux-stage header p {
+  font-size: 15px;
+  max-width: 220px;
+  color: var(--muted);
+}
+.ux-stage article {
+  display: flex;
+  justify-content: space-between;
+  gap: 25px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--line);
+}
+.ux-stage article:last-child {
+  border: 0;
+}
+.ux-stage article h3 {
+  font-size: 21px;
+  margin: 0 0 12px;
+}
+.ux-stage article p {
+  font-size: 15px;
+  line-height: 1.7;
+  max-width: 550px;
+}
+.ux-stage article > span {
+  font-size: 11px;
+  width: 120px;
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.ux-coverage,
+.ux-boundaries {
+  padding-top: 70px;
+}
+.ux-coverage h2,
+.ux-boundaries h2 {
+  font-size: clamp(30px, 4vw, 54px);
+}
+.ux-coverage-rows article {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 35px;
+  padding: 25px 0;
+  border-bottom: 1px solid var(--line);
+}
+.ux-coverage-rows small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 10px;
+}
+.ux-coverage-rows article div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.ux-coverage-rows article div a {
+  font-size: 12px;
+  text-decoration: underline;
+  padding: 6px 0;
+}
+.ux-boundaries dl {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 22px;
+}
+.ux-boundaries dd {
+  margin: 0;
+  line-height: 1.7;
+}
+.ux-lesson h1 {
+  max-width: 1000px;
+}
+.ux-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 13px;
+  margin-bottom: 40px;
+}
+.ux-lesson-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 70px;
+  padding: 45px 0;
+}
+.ux-lesson-grid h2 {
+  font-size: 30px;
+}
+.ux-lesson-grid aside {
+  padding: 30px;
+  background: #edf2ee;
+  align-self: start;
+}
+.ux-lesson-grid aside p {
+  font-size: 15px;
+  line-height: 1.8;
+}
+.ux-lesson-grid aside h3 {
+  margin-top: 35px;
+}
+.ux-example-links {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin: 25px 0;
+}
+.ux-tasks {
+  list-style: none;
+  padding: 0;
+}
+.ux-tasks li {
+  display: flex;
+  gap: 25px;
+  padding: 25px 0;
+  border-top: 1px solid var(--line);
+}
+.ux-tasks span {
+  color: var(--teal);
+}
+.ux-tasks p {
+  margin: 0;
+  line-height: 1.8;
+}
+.ux-next {
+  border-top: 1px solid var(--line);
+  padding-top: 25px;
+  display: flex;
+  gap: 40px;
+  justify-content: space-between;
+}
+.ux-next p {
+  font-size: 12px;
+  max-width: 650px;
+}
+.ux-next a {
+  white-space: nowrap;
+}
+.ux-gallery-callout {
+  border-top: 1px solid var(--line);
+  padding-block: 50px;
+}
+.ux-lab-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 60px;
+  margin-top: 50px;
+}
+.ux-checkout label {
+  display: block;
+  margin: 15px 0;
+  font-size: 14px;
+}
+.ux-checkout input:not([type="checkbox"]):not([type="radio"]) {
+  display: block;
+  width: 100%;
+  border: 1px solid #9aa7a0;
+  padding: 13px;
+  margin-top: 8px;
+  min-height: 48px;
+  font: inherit;
+  font-size: 16px;
+}
+.ux-checkout input[aria-invalid="true"] {
+  border: 2px solid #b33026;
+}
+.ux-checkout [data-field-error] {
+  color: #b33026;
+}
+.ux-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 20px;
+}
+.ux-checkout .ux-check {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 44px;
+}
+.ux-delivery {
+  border: 0;
+  padding: 12px 0;
+  margin: 20px 0;
+}
+.ux-delivery label {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid #b6c4bc;
+  padding: 16px;
+  min-height: 54px;
+}
+.ux-delivery label:has(input:checked) {
+  border-color: #174638;
+  background: #edf2ee;
+}
+.ux-delivery small {
+  display: block;
+  margin-top: 8px;
+}
+.ux-checkout button:not(.button) {
+  background: white;
+  color: #17241d;
+  border: 1px solid #a4b2ab;
+  padding: 12px 18px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.ux-order-summary {
+  background: #edf2ee;
+  padding: 30px;
+  align-self: start;
+  position: sticky;
+  top: 20px;
+}
+.ux-order-summary dl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  padding: 25px 0;
+  border-block: 1px solid #b6c4bc;
+}
+.ux-order-summary dd {
+  margin: 0;
+  font-weight: 700;
+}
+.ux-order-summary p {
+  font-size: 13px;
+}
+.ux-order-summary nav {
+  display: grid;
+  gap: 16px;
+  margin-top: 30px;
+  font-size: 13px;
+}
+.ux-error-summary {
+  border: 2px solid #b33026;
+  padding: 15px;
+}
+.ux-error-summary a {
+  display: block;
+  text-decoration: underline;
+  padding: 6px;
+}
+.ux-checkout [hidden] {
+  display: none !important;
+}
+@media (max-width: 700px) {
+  .ux-stage,
+  .ux-lesson-grid,
+  .ux-lab-layout {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  .ux-stage article {
+    display: block;
+  }
+  .ux-stage article > span {
+    display: block;
+    width: auto;
+    margin-top: 15px;
+  }
+  .ux-stage header p {
+    max-width: none;
+  }
+  .ux-coverage-rows article,
+  .ux-boundaries dl {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  .ux-next {
+    display: block;
+  }
+  .ux-fields {
+    grid-template-columns: 1fr;
+  }
+  .ux-order-summary {
+    position: static;
+    grid-row: 1;
+  }
+  .ux-order-summary details,
+  .ux-order-summary nav {
+    display: none;
+  }
+}
+
+.cart-quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.cart-quantity-control input {
+  width: 48px !important;
+  text-align: center;
+  min-height: 44px;
+  padding: 4px !important;
+  font-size: 16px;
+}
+.cart-quantity-control button {
+  width: 44px;
+  min-height: 44px;
+  border: 1px solid #a4b2ab !important;
+  background: white !important;
+  text-decoration: none !important;
+  color: #17241d !important;
+  padding: 0 !important;
+  font-size: 20px;
+}
+.cart-quantity-control button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.cart-undo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 0;
+  font-size: 13px;
+}
+.cart-undo button {
+  border: 0;
+  padding: 10px;
+  min-height: 44px;
+  background: white;
+  color: #174638;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.cart-unavailable {
+  padding: 16px;
+  border: 1px solid #b77864;
+  margin-bottom: 12px;
+}
+.cart-unavailable button {
+  margin-top: 8px;
+  min-height: 44px;
+}
+.cart-row {
+  grid-template-columns: 76px minmax(0, 1fr) auto;
+}
+@media (max-width: 700px) {
+  .cart-row {
+    grid-template-columns: 60px minmax(0, 1fr);
+  }
+  .cart-row > .cart-quantity-control {
+    grid-column: 2;
   }
 }

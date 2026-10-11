@@ -6,7 +6,7 @@ resources/ for convenience; clients have no runtime dependency on either repo.
 
 ## What lives here
 
-- demo/content/: bilingual educational lessons and delivery-operation coverage.
+- demo/content/: bilingual platform lessons and original UX concepts with source links.
 - demo/src/: server-rendered demo storefront, static explanations, public API
   explorer and bounded same-origin hosted checkout startup.
 - demo/public/: reusable design, CSS, browser-local carts and illustrations;
@@ -47,6 +47,9 @@ npm run deploy checks and deploys locally; CI validates only.
 Set REAI_SITE_CREDENTIAL as a Worker secret. The published field guide at /features/
 explains payments, B2B/EHF, shipping/pickup, discounts, catalog, markets and
 integration; /api/ exercises all nine delivery reads, checkout, newsletter and back-in-stock signup.
+/ux/ links 15 research-informed concepts to the designs and 45 acceptance tasks.
+/ux/lab/checkout/ is an isolated browser simulation, never a real payment test.
+Use public research only; do not copy premium guidelines or claim certification.
 Shipping and inventory bundles are documented capabilities, not fulfillment
 promises for this digital catalog. The published demo uses Adyen LIVE
 and clearly labels real payments and the configured recipient. Offline preview
