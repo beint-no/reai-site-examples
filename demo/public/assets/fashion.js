@@ -288,7 +288,7 @@
       button.addEventListener("click", () =>
         quickAdd(
           find(button.dataset.fashionQuick),
-          button.closest("[data-fashion-card]").dataset.selectedColor,
+          button.closest("[data-fashion-card]")?.dataset.selectedColor,
         ),
       ),
     );

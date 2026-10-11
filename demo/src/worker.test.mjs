@@ -260,25 +260,28 @@ test("collection pages preserve API ordering while resolving lightweight members
     },
   ));
 
-test("canonical redirects preserve path/query and never forward writes", async () => {
-  const response = await worker.fetch(
-    new Request("http://demosite.reai.no/products/demo/?lang=en"),
+test("HTTPS redirect preserves path/query and all responses include hostname-only HSTS", async () => {
+  const redirect = await worker.fetch(
+    new Request("http://nettbutikk.reai.no/products/demo/?lang=en"),
     env,
     {},
   );
-  assert.equal(response.status, 308);
+  assert.equal(redirect.status, 308);
   assert.equal(
-    response.headers.get("Location"),
+    redirect.headers.get("Location"),
     "https://nettbutikk.reai.no/products/demo/?lang=en",
   );
-  const write = await worker.fetch(
-    new Request("https://demosite.reai.no/reai/checkout/start", {
-      method: "POST",
-    }),
-    env,
-    {},
-  );
-  assert.equal(write.status, 409);
+  for (const path of ["/", "/health", "/assets/demo.css", "/not-found"]) {
+    const r = await worker.fetch(
+      new Request("https://nettbutikk.reai.no" + path),
+      { ASSETS: env.ASSETS },
+      {},
+    );
+    assert.equal(
+      r.headers.get("Strict-Transport-Security"),
+      "max-age=31536000",
+    );
+  }
 });
 test("scenario lab is static and cannot submit fixture identifiers to live checkout", async () => {
   for (const design of ["studio", "supply"]) {

@@ -1,6 +1,41 @@
 (() => {
   const nb = document.body.dataset.locale === "nb";
   const text = (a, b) => (nb ? a : b);
+  document.querySelectorAll("[data-design-filter]").forEach((button) =>
+    button.addEventListener("click", () => {
+      const filter = button.dataset.designFilter;
+      let count = 0;
+      document.querySelectorAll("[data-design-features]").forEach((card) => {
+        card.hidden =
+          filter !== "all" &&
+          !card.dataset.designFeatures.split(" ").includes(filter);
+        if (!card.hidden) count++;
+      });
+      document
+        .querySelectorAll("[data-design-filter]")
+        .forEach((other) =>
+          other.setAttribute("aria-pressed", String(other === button)),
+        );
+      document.querySelector("[data-design-results]").textContent =
+        `${count} ${text("design", count === 1 ? "design" : "designs")}`;
+    }),
+  );
+  document.querySelectorAll("[data-commerce-tab]").forEach((button) =>
+    button.addEventListener("click", () => {
+      document
+        .querySelectorAll("[data-commerce-panel]")
+        .forEach(
+          (panel) =>
+            (panel.hidden =
+              panel.dataset.commercePanel !== button.dataset.commerceTab),
+        );
+      document
+        .querySelectorAll("[data-commerce-tab]")
+        .forEach((other) =>
+          other.setAttribute("aria-pressed", String(other === button)),
+        );
+    }),
+  );
   const escape = (value) =>
     String(value).replace(
       /[&<>"']/g,

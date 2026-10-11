@@ -1,11 +1,12 @@
 # ReAI sin test-nettbutikk
 
-One Worker at nettbutikk.reai.no; demosite.reai.no redirects here. The front page
-explains platform primitives. Five designs use the published ReAI catalog: Studio (swatches/cart drawer),
-Atelier (editorial), Supply (variant availability), Essential (three products with
-inline amount choices) and Index (collection browsing). Famme is a separate
-fashion design with licensed photography, collection/product pages, quick-add,
-size/color choices and an isolated fixture cart.
+One Worker at nettbutikk.reai.no. The front page explains platform primitives.
+Nine distinct designs: Studio, Atelier, Supply, Essential, Index, Launch and
+Trade use the published ReAI catalog; Famme and Lookbook share an isolated fashion
+fixture with licensed AVIF photos. Launch focuses on one product; Trade uses
+inline variant quantities; Index supports collection search, sorting and list/grid.
+The gallery filters by shopping feature. Learning pages explain collection
+membership and the full commerce flow without exposing private administration.
 Use white, ink and teal with open ruled feature rows; Atelier uses a warm serif
 palette and Supply a dark forest palette. Preserve Norwegian/English and mobile access.
 
@@ -41,6 +42,6 @@ for small live purchases; /learn/checkout-test/ provides the full checklist.
 Scenario stock/backorders are UI tests.
 
 Run npm run check; verify desktop/mobile, all designs, swatches, both cart drawers,
-stock scenarios, real API reads, newsletter errors and canonical redirects before deploy.
+stock scenarios, real API reads, newsletter errors and HTTPS redirects before deploy.
 Root AGENTS.md owns release policy. Keep operational docs concise and avoid duplicating
 field-guide content in Markdown.

@@ -356,9 +356,9 @@ export interface components {
             /** Format: int32 */
             catalogVersion: number;
             currency: components["schemas"]["CurrencyCode"];
-            /** @description Plain text for cards and previews, derived from the stored description in the selected locale. HTML markup is removed and HTML entities are decoded. */
+            /** @description Plain text for cards and previews, derived from the stored description in the selected locale. HTML markup is removed. Common HTML entities and numeric character references are decoded; other named entities remain literal text. */
             description?: string | null;
-            /** @description Sanitized HTML body fragment for product or collection content. Plain descriptions are escaped and line breaks are preserved. Supports text formatting, links, images and tables; scripts, styles and event handlers are removed. Insert only into an HTML body container, never an attribute or script. */
+            /** @description Sanitized HTML body fragment for product or collection content. Plain descriptions are escaped and line breaks are preserved. Supports paragraphs, headings, lists, emphasis, links and simple tables; scripts, styles and event handlers are removed. Insert only into an HTML body container, never an attribute or script. */
             descriptionHtml?: string | null;
             handle: string;
             /** Format: uuid */
@@ -382,9 +382,9 @@ export interface components {
             title: string;
         };
         SiteDeliveryCollectionRes: {
-            /** @description Plain text for cards and previews, derived from the stored description in the selected locale. HTML markup is removed and HTML entities are decoded. */
+            /** @description Plain text for cards and previews, derived from the stored description in the selected locale. HTML markup is removed. Common HTML entities and numeric character references are decoded; other named entities remain literal text. */
             description?: string | null;
-            /** @description Sanitized HTML body fragment for product or collection content. Plain descriptions are escaped and line breaks are preserved. Supports text formatting, links, images and tables; scripts, styles and event handlers are removed. Insert only into an HTML body container, never an attribute or script. */
+            /** @description Sanitized HTML body fragment for product or collection content. Plain descriptions are escaped and line breaks are preserved. Supports paragraphs, headings, lists, emphasis, links and simple tables; scripts, styles and event handlers are removed. Insert only into an HTML body container, never an attribute or script. */
             descriptionHtml?: string | null;
             handle: string;
             /** Format: uuid */
@@ -426,9 +426,9 @@ export interface components {
             catalogVersion: number;
             category?: components["schemas"]["SiteProductCategoryRecord"] | null;
             currency: components["schemas"]["CurrencyCode"];
-            /** @description Plain text for cards and previews, derived from the stored description in the selected locale. HTML markup is removed and HTML entities are decoded. */
+            /** @description Plain text for cards and previews, derived from the stored description in the selected locale. HTML markup is removed. Common HTML entities and numeric character references are decoded; other named entities remain literal text. */
             description?: string | null;
-            /** @description Sanitized HTML body fragment for product or collection content. Plain descriptions are escaped and line breaks are preserved. Supports text formatting, links, images and tables; scripts, styles and event handlers are removed. Insert only into an HTML body container, never an attribute or script. */
+            /** @description Sanitized HTML body fragment for product or collection content. Plain descriptions are escaped and line breaks are preserved. Supports paragraphs, headings, lists, emphasis, links and simple tables; scripts, styles and event handlers are removed. Insert only into an HTML body container, never an attribute or script. */
             descriptionHtml?: string | null;
             handle: string;
             /** Format: uuid */
@@ -449,9 +449,9 @@ export interface components {
             attributes: components["schemas"]["ProductAttributeDto"][];
             brand?: string | null;
             category?: components["schemas"]["SiteProductCategoryRecord"] | null;
-            /** @description Plain text for cards and previews, derived from the stored description in the selected locale. HTML markup is removed and HTML entities are decoded. */
+            /** @description Plain text for cards and previews, derived from the stored description in the selected locale. HTML markup is removed. Common HTML entities and numeric character references are decoded; other named entities remain literal text. */
             description?: string | null;
-            /** @description Sanitized HTML body fragment for product or collection content. Plain descriptions are escaped and line breaks are preserved. Supports text formatting, links, images and tables; scripts, styles and event handlers are removed. Insert only into an HTML body container, never an attribute or script. */
+            /** @description Sanitized HTML body fragment for product or collection content. Plain descriptions are escaped and line breaks are preserved. Supports paragraphs, headings, lists, emphasis, links and simple tables; scripts, styles and event handlers are removed. Insert only into an HTML body container, never an attribute or script. */
             descriptionHtml?: string | null;
             handle: string;
             /** Format: uuid */
@@ -500,9 +500,9 @@ export interface components {
             name?: string | null;
         };
         SiteStorefrontCollectionRes: {
-            /** @description Plain text for cards and previews, derived from the stored description in the selected locale. HTML markup is removed and HTML entities are decoded. */
+            /** @description Plain text for cards and previews, derived from the stored description in the selected locale. HTML markup is removed. Common HTML entities and numeric character references are decoded; other named entities remain literal text. */
             description?: string | null;
-            /** @description Sanitized HTML body fragment for product or collection content. Plain descriptions are escaped and line breaks are preserved. Supports text formatting, links, images and tables; scripts, styles and event handlers are removed. Insert only into an HTML body container, never an attribute or script. */
+            /** @description Sanitized HTML body fragment for product or collection content. Plain descriptions are escaped and line breaks are preserved. Supports paragraphs, headings, lists, emphasis, links and simple tables; scripts, styles and event handlers are removed. Insert only into an HTML body container, never an attribute or script. */
             descriptionHtml?: string | null;
             handle: string;
             /** Format: uuid */

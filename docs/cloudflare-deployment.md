@@ -16,8 +16,8 @@ Enter the token through stdin/prompt; never commit it or supply it in a command
 argument. Root .dev.vars is ignored and is not uploaded by deployment.
 
 The routes entry in wrangler.jsonc creates the Worker custom domain, DNS and TLS
-certificate during deployment. Do not add a separate DNS record or change
-sibling client domains. HTTP redirects to HTTPS. Verify TLS, homepage, static pages, public API
+certificate during deployment. Removing an old route also requires verifying its custom-domain, DNS and certificate cleanup. Do not add a separate DNS record or change
+sibling client domains. HTTP redirects to HTTPS. If a valid certificate reports “not yet valid”, compare the client clock with network time before changing certificates. HSTS is hostname-only; sibling domains are unaffected. Verify TLS, homepage, static pages, public API
 routes, variants, cart, hosted checkout return behavior and recent Worker logs.
 Confirm the displayed payment mode agrees with the actual backend provider.
 New hostnames can remain negatively cached by recursive DNS resolvers; compare

@@ -13,6 +13,37 @@ export const arrow =
   '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>';
 export const designs = [
   {
+    slug: "launch",
+    name: "Launch",
+    image: "gift.svg",
+    title: ["Én vare, hele flyten", "One product, the whole flow"],
+    text: [
+      "Et gavekort får hele forsiden. Inline beløpsvalg, live tilgjengelighet og kurv i skuff.",
+      "A gift card takes the full front page. Inline amounts, live availability and a cart drawer.",
+    ],
+  },
+  {
+    slug: "lookbook",
+    name: "Lookbook",
+    image: "famme/editorial.avif",
+    fixture: true,
+    title: ["Handle fra bildene", "Shop from the photographs"],
+    text: [
+      "Redaksjonelle antrekk med klikkbare plagg, produktvalg i skuff og innganger til kolleksjoner. Separat testkurv.",
+      "Editorial outfits with clickable pieces, product selection in a drawer and collection navigation. Separate test cart.",
+    ],
+  },
+  {
+    slug: "trade",
+    name: "Trade",
+    image: "cloud.svg",
+    title: ["Kompakt bestillingsliste", "Compact order list"],
+    text: [
+      "Flere varianter og antall på samme side. Live priser og tilgjengelighet, med forklaring av fakturaordre og EHF.",
+      "Several variants and quantities on one page. Live prices and availability, with invoice order and EHF explanations.",
+    ],
+  },
+  {
     slug: "famme",
     name: "Famme",
     image: "famme/hero-mobile.avif",
@@ -156,8 +187,37 @@ const primitives = [
 export function featureMatrix(c) {
   return `<section class="shell primitive-section" id="primitives"><div class="section-heading"><h2>${pick(c, "Dette håndterer ReAI.", "What ReAI handles.")}</h2><p>${pick(c, "Åpne en funksjon for å se dataene, oppsettet og hvordan du kan prøve den.", "Open a feature to see its data, configuration and how to try it.")}</p></div><div class="primitive-rows">${primitives.map(([slug, a, b, x, y, scope], i) => `<a class="primitive-row" href="/learn/${slug}/"><span class="row-number">${String(i + 1).padStart(2, "0")}</span><h3>${pick(c, a, b)}</h3><p>${pick(c, x, y)}</p><span class="scope">${scope}</span><span class="row-arrow">${arrow}</span></a>`).join("")}</div></section>`;
 }
+function designTraits(d) {
+  const extras = {
+    famme: "collections banners variants",
+    lookbook: "collections banners variants",
+    essential: "few variants",
+    launch: "few variants",
+    collections: "collections",
+    trade: "variants",
+    studio: "variants",
+    atelier: "collections banners",
+    supply: "variants",
+  };
+  return `${d.fixture ? "fixture" : "live"} drawer ${extras[d.slug]}`;
+}
 export function designGallery(c) {
-  return `<section class="shell designs-section" id="designs"><div class="section-heading"><div><h2>${pick(c, "Seks butikkdesign du kan prøve.", "Six storefront designs to try.")}</h2><p>${pick(c, "Prøv bannere, kolleksjoner, fargevalg, hurtigkjøp og handlekurver. Fem design bruker live ReAI-data; Famme er en separat design-test.", "Try banners, collections, swatches, quick-add and carts. Five designs use live ReAI data; Famme is a separate design test.")}</p></div></div><div class="design-grid">${designs.map((d) => `<a class="design-card" href="/designs/${d.slug}/"><div class="design-preview preview-${d.slug}"><div class="preview-header"><b>${d.name.toUpperCase()}</b><span>${pick(c, "Kolleksjon", "Collection")} ${arrow}</span></div><img src="/assets/${d.image || d.slug + ".jpg"}" width="840" height="1050" loading="lazy" alt="${h(d.name)} ${pick(c, "designillustrasjon", "design illustration")}"><div class="preview-overlay"><span>${d.title[nb(c) ? 0 : 1]}</span>${d.slug === "studio" ? '<div class="swatch-preview"><i></i><i></i><i></i></div>' : ""}</div></div><span class="design-data-label">${d.fixture ? pick(c, "Illustrerende testdata", "Illustrative test data") : "Live ReAI Site API"}</span><div class="design-card-caption"><h3>${d.name} <span>— ${d.title[nb(c) ? 0 : 1]}</span></h3>${arrow}</div><p>${d.text[nb(c) ? 0 : 1]}</p></a>`).join("")}</div><p class="fineprint">${pick(c, "Famme-fotografier brukes med tillatelse. Den illustrerende motekatalogen er isolert fra live-butikken med testkjøp, gavekort og utviklingsstøtte.", "Famme photography is used with permission. Its illustrative fashion catalog is isolated from the live store’s test purchases, gift cards and development support.")}</p></section>`;
+  return `<section class="shell designs-section" id="designs"><div class="section-heading"><div><h2>${pick(c, "Ni butikkdesign du kan prøve.", "Nine storefront designs to try.")}</h2><p>${pick(c, "Prøv bannere, kolleksjoner, fargevalg, hurtigkjøp og handlekurver. Sju design bruker live ReAI-data. Famme og Lookbook bruker en isolert motekatalog.", "Try banners, collections, swatches, quick-add and carts. Seven designs use live ReAI data. Famme and Lookbook use an isolated fashion catalog.")}</p></div></div><div class="design-filters" role="group" aria-label="${pick(c, "Filtrer butikkdesign", "Filter storefront designs")}">${[
+    ["all", "Alle", "All"],
+    ["live", "Live API", "Live API"],
+    ["collections", "Kolleksjoner", "Collections"],
+    ["banners", "Bannere", "Banners"],
+    ["few", "Få produkter", "Few products"],
+    ["variants", "Variantvalg", "Variant controls"],
+    ["drawer", "Kurv i skuff", "Cart drawer"],
+  ]
+    .map(
+      ([key, a, b]) =>
+        `<button type="button" data-design-filter="${key}" aria-pressed="${key === "all"}">${pick(c, a, b)}</button>`,
+    )
+    .join(
+      "",
+    )}<span data-design-results role="status">9 ${pick(c, "design", "designs")}</span></div><div class="design-grid">${designs.map((d) => `<a class="design-card" data-design-features="${designTraits(d)}" href="/designs/${d.slug}/"><div class="design-preview preview-${d.slug}"><div class="preview-header"><b>${d.name.toUpperCase()}</b><span>${pick(c, "Kolleksjon", "Collection")} ${arrow}</span></div><img src="/assets/${d.image || d.slug + ".jpg"}" width="840" height="1050" loading="lazy" alt="${h(d.name)} ${pick(c, "designillustrasjon", "design illustration")}"><div class="preview-overlay"><span>${d.title[nb(c) ? 0 : 1]}</span>${d.slug === "studio" ? '<div class="swatch-preview"><i></i><i></i><i></i></div>' : ""}</div></div><span class="design-data-label">${d.fixture ? pick(c, "Illustrerende testdata", "Illustrative test data") : "Live ReAI Site API"}</span><div class="design-card-caption"><h3>${d.name} <span>— ${d.title[nb(c) ? 0 : 1]}</span></h3>${arrow}</div><p>${d.text[nb(c) ? 0 : 1]}</p></a>`).join("")}</div><p class="fineprint">${pick(c, "Famme-fotografier brukes med tillatelse. Den illustrerende motekatalogen i Famme og Lookbook er isolert fra live-butikken med testkjøp, gavekort og utviklingsstøtte.", "Famme photography is used with permission. The illustrative fashion catalog in Famme and Lookbook is isolated from the live store’s test purchases, gift cards and development support.")}</p></section>`;
 }
 export function newsletter(c) {
   return `<section class="shell" id="newsletter"><div class="newsletter-band"><div><h2>${pick(c, "Prøv også e-postpåmelding.", "Try email signup, too.")}</h2><p>${pick(c, "Et ekte Site API-kall med eksplisitt samtykke. Ingen e-post sendes automatisk.", "A real Site API request with explicit consent. No email is sent automatically.")}</p><a href="/learn/newsletter/">${pick(c, "Slik virker samtykke", "How consent works")} ${arrow}</a></div><form data-newsletter><label class="sr-only" for="signup-email">${pick(c, "E-postadresse", "Email address")}</label><div class="newsletter-input"><input id="signup-email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="${pick(c, "din@epost.no", "you@example.com")}"><button class="button" type="submit">${pick(c, "Meld meg på", "Subscribe")}</button></div><label class="consent"><input type="checkbox" name="consent" required> <span>${pick(c, "Jeg vil motta nyheter fra", "I want to receive news from")} ${h(c.merchantName || "Better Integration")}. <a href="/privacy/">${pick(c, "Personvern", "Privacy")}</a></span></label><input class="honeypot" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true"><p data-newsletter-message role="status"></p></form></div></section>`;
@@ -169,8 +229,8 @@ export function platformExplanation(c) {
       "Butikkdesignet",
       "Storefront design",
       "HTML · CSS · JavaScript",
-      "Velg typografi, bilder, fargevalg og handlekurv. Fem design viser ulike løsninger med den samme publiserte katalogen. Famme viser i tillegg et isolert motedesign.",
-      "Choose typography, photography, swatches and a cart. Five designs show different approaches using the same published catalog. Famme adds an isolated fashion design.",
+      "Velg typografi, bilder, fargevalg og handlekurv. Sju design viser ulike løsninger med den samme publiserte katalogen. Famme og Lookbook viser i tillegg isolerte motedesign.",
+      "Choose typography, photography, swatches and a cart. Seven designs show different approaches using the same published catalog. Famme and Lookbook add isolated fashion designs.",
       "/#designs",
       "Se designene",
       "Compare the designs",
@@ -233,6 +293,110 @@ export function checkoutTest(c) {
     )
     .join("")}</ol></div></section>`;
 }
+const commerceTopics = [
+  {
+    key: "collections",
+    label: ["Kolleksjoner", "Collections"],
+    title: [
+      "Kurater selv. Eller bruk regler.",
+      "Curate by hand. Or use rules.",
+    ],
+    text: [
+      "ReAI støtter manuelle samlinger og automatiske samlinger med regler. Site API leverer resultatet, mens du velger hvordan det presenteres.",
+      "ReAI supports manual collections and automated collections with rules. The Site API supplies the result; you choose how to present it.",
+    ],
+    rows: [
+      [
+        "Manuell: valgte produkter + rekkefølge",
+        "Manual: chosen products + ordering",
+      ],
+      [
+        "Automatisk: regel → publiserte treff",
+        "Automated: rule → published matches",
+      ],
+      ["Site API → ditt butikkdesign", "Site API → your storefront design"],
+    ],
+    links: [
+      [
+        "/designs/collections/",
+        "Prøv kolleksjonsbutikken",
+        "Try the collection store",
+      ],
+      [
+        "/learn/collections/",
+        "Slik fungerer samlinger",
+        "How collections work",
+      ],
+      ["/api/?endpoint=collections", "Se API-data", "Inspect API data"],
+    ],
+  },
+  {
+    key: "pos",
+    label: ["Kassasystem", "Point of sale"],
+    title: [
+      "Samme virksomhet. Også i butikk.",
+      "The same business. Also in store.",
+    ],
+    text: [
+      "Nettbutikken viser publiserte produkter via Site API. Fysisk salg skjer i ReAIs kassasystem. Produkter, kvitteringer, betalinger og regnskapsoppfølging håndteres i samme plattform, med riktig oppsett for hvert salgssted.",
+      "The storefront shows published products through the Site API. In-store sales use ReAI’s point of sale. Products, receipts, payments and accounting follow-up belong to the same platform, with the right configuration for each sales location.",
+    ],
+    rows: [
+      ["På nett: eget design + Site API", "Online: custom design + Site API"],
+      ["I butikk: ReAI kassasystem", "In store: ReAI point of sale"],
+      [
+        "I ReAI: salg, betaling og regnskap",
+        "In ReAI: sales, payments and accounting",
+      ],
+    ],
+    links: [
+      [
+        "/learn/integration/",
+        "Se plattformens grenser",
+        "See the platform boundaries",
+      ],
+      ["/learn/commerce-flow/", "Følg salget videre", "Follow the sale"],
+    ],
+  },
+  {
+    key: "operations",
+    label: ["Ordre & regnskap", "Orders & accounting"],
+    title: [
+      "Betalt, levert og bokført er ulike steg.",
+      "Paid, fulfilled and posted are separate steps.",
+    ],
+    text: [
+      "ReAI håndterer ordre og betaling. Selger følger opp levering, faktura, refusjon og oppgjør i plattformen. B2B kan opprette en ubetalt fakturaordre. Fraktetikett betyr ikke levert, og retur fra checkout betyr ikke betalt.",
+      "ReAI handles orders and payments. The merchant follows up fulfillment, invoicing, refunds and settlement in the platform. B2B can create an unpaid invoice order. A shipping label does not mean delivered; returning from checkout does not mean paid.",
+    ],
+    rows: [
+      [
+        "Checkout → bekreftet betalingsutfall",
+        "Checkout → confirmed payment outcome",
+      ],
+      ["Ordre → levering eller henting", "Order → shipping or pickup"],
+      [
+        "Faktura, refusjon, oppgjør → regnskap",
+        "Invoice, refund, settlement → accounting",
+      ],
+    ],
+    links: [
+      [
+        "/learn/commerce-flow/",
+        "Følg hele handelsflyten",
+        "Follow the commerce flow",
+      ],
+      [
+        "/learn/business/",
+        "Lær om faktura og EHF",
+        "Learn about invoices and EHF",
+      ],
+    ],
+  },
+];
+export function commerceExplanation(c) {
+  return `<section class="shell commerce-explanation" id="commerce"><div class="section-heading"><h2>${pick(c, "Samme produkter.<br>Flere måter å handle på.", "The same products.<br>More ways to shop.")}</h2><p>${pick(c, "En kolleksjon er data. Et rutenett, en liste eller en bildestory er design.", "A collection is data. A grid, a list or a photo story is design.")}</p></div><div class="commerce-tabs" role="group" aria-label="${pick(c, "Utforsk handelsflyten", "Explore the commerce flow")}">${commerceTopics.map((topic, i) => `<button type="button" data-commerce-tab="${topic.key}" aria-controls="commerce-${topic.key}" aria-pressed="${i === 0}">${pick(c, ...topic.label)}</button>`).join("")}</div>${commerceTopics.map((topic, i) => `<div id="commerce-${topic.key}" class="commerce-panel" data-commerce-panel="${topic.key}" ${i === 0 ? "" : "hidden"}><div><h3>${pick(c, ...topic.title)}</h3><p>${pick(c, ...topic.text)}</p><div class="commerce-links">${topic.links.map(([url, a, b]) => `<a class="under-link" href="${url}">${pick(c, a, b)} ${arrow}</a>`).join("")}</div></div><ol>${topic.rows.map((row) => `<li>${pick(c, ...row)}</li>`).join("")}</ol></div>`).join("")}<p class="commerce-boundary">${pick(c, "Site API viser publiserte butikkdata. Privat regnskap blir i ReAI.", "The Site API exposes published store data. Private accounting stays in ReAI.")}</p></section>`;
+}
 export function homeContent(c) {
   return `<section class="hero shell"><div class="hero-copy"><h1>${pick(c, '<span class="platform-products">Nettbutikk + Kassasystem + Regnskap</span><span class="platform-promise">Alt i en plattform</span>', '<span class="platform-products">Online store + Point of sale + Accounting</span><span class="platform-promise">All in one platform</span>')}</h1><p>${pick(c, "Publiser produkter i ReAI. Hent dem til et butikkdesign du styrer selv. Bruk samme plattform til checkout, kassasystem, ordre og regnskap, uten dyre integrasjoner mellom disse systemene.", "Publish products in ReAI. Fetch them into a storefront design you control. Use the same platform for checkout, point of sale, orders and accounting, without expensive integrations between those systems.")}</p><div class="hero-actions"><a class="button" href="#primitives">${pick(c, "Utforsk funksjonene", "Explore the features")} ${arrow}</a><a class="under-link" href="#designs">${pick(c, "Prøv butikkdesign", "Try storefront designs")} ${arrow}</a></div><a class="under-link" href="/products/test-betaling/">${pick(c, "Test hele kjøpsflyten fra 1 kr", "Test the full purchase flow from 1 kr")} ${arrow}</a></div><div class="platform-preview"><a class="mini-store" href="/scenarios/studio/"><div class="window-chrome"><i></i><i></i><i></i><span>STUDIO / UI scenario</span></div><div class="mini-product"><img src="/assets/studio.jpg" width="840" height="1050" alt="${pick(c, "Illustrasjon av et butikkdesign med en marineblå genser", "Illustrative storefront design with a navy sweatshirt")}" fetchpriority="high"><div><b>Studio / Essential</b><strong>349 kr</strong><small>${pick(c, "Simulert produkt & lager", "Simulated product & stock")}</small><p>${pick(c, "Farge", "Color")}</p><div class="swatch-preview"><i></i><i></i><i></i></div><p>${pick(c, "Størrelse", "Size")}</p><div class="size-preview"><span>S</span><span class="selected">M</span><s>L</s><span>XL</span></div><span class="mini-button">${pick(c, "Prøv variantvalg", "Try variant selection")}</span></div></div></a><div class="platform-nodes">${[
     ["Katalog", "Catalog", "Produkter · varianter"],
@@ -245,7 +409,7 @@ export function homeContent(c) {
     )
     .join(
       "",
-    )}</div></div></section>${featureMatrix(c)}${platformExplanation(c)}<section class="workflow-band"><div class="shell workflow"><h2>${pick(c, "Fra handlekurv<br>til regnskap.", "From cart<br>to accounting.")}</h2><ol>${[
+    )}</div></div></section>${featureMatrix(c)}${commerceExplanation(c)}${platformExplanation(c)}<section class="workflow-band"><div class="shell workflow"><h2>${pick(c, "Fra handlekurv<br>til regnskap.", "From cart<br>to accounting.")}</h2><ol>${[
     ["Butikken", "The storefront", "Design & Site API"],
     ["ReAI checkout", "ReAI checkout", "Adyen / B2B"],
     ["Ordre & levering", "Orders & delivery", "ReAI"],
