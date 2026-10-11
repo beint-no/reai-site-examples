@@ -18,11 +18,15 @@ import {
   renderFashion,
   renderEssential,
   renderCollections,
+  renderLaunch,
+  renderLookbook,
+  renderTrade,
 } from "./design-storefronts.mjs";
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const headers = {
   "X-Content-Type-Options": "nosniff",
+  "Strict-Transport-Security": "max-age=31536000",
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "X-Robots-Tag": "noindex, nofollow",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
@@ -54,17 +58,6 @@ export default {
   /** @param {Request} request @param {DemoEnv} env @param {ExecutionContext} ctx */
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    if (url.hostname === "demosite.reai.no") {
-      if (!["GET", "HEAD"].includes(request.method))
-        return response(
-          { error: "Use https://nettbutikk.reai.no for new requests" },
-          409,
-          true,
-        );
-      url.protocol = "https:";
-      url.hostname = "nettbutikk.reai.no";
-      return Response.redirect(url.href, 308);
-    }
     if (url.protocol === "http:" && url.hostname === "nettbutikk.reai.no") {
       url.protocol = "https:";
       return Response.redirect(url.href, 308);
@@ -93,7 +86,13 @@ export default {
       checkoutOrigin: new URL(env.REAI_API_BASE_URL || "https://app.reai.no")
         .origin,
     };
-    if (url.pathname.startsWith("/assets/")) return env.ASSETS.fetch(request);
+    if (url.pathname.startsWith("/assets/")) {
+      const asset = await env.ASSETS.fetch(request);
+      const secured = new Response(asset.body, asset);
+      for (const [name, value] of Object.entries(headers))
+        secured.headers.set(name, value);
+      return secured;
+    }
     if (url.pathname === "/health")
       return response(
         {
@@ -159,6 +158,8 @@ export default {
           ? finish(html, context)
           : response(renderError(404, context), 404);
       }
+      if (request.method !== "POST" && path === "/designs/lookbook")
+        return finish(renderLookbook(context), context);
       if (!env.REAI_SITE_CREDENTIAL) {
         return response(
           path.startsWith("/reai/")
@@ -375,16 +376,29 @@ export default {
           context,
         );
       }
-      if (path === "/designs/essential") {
+      if (
+        ["/designs/essential", "/designs/launch", "/designs/trade"].includes(
+          path,
+        )
+      ) {
         const ids = store.products
           .filter((p) =>
-            ["test-betaling", "reai-gavekort", "heia-reai"].includes(p.handle),
+            (path === "/designs/launch"
+              ? ["reai-gavekort"]
+              : ["test-betaling", "reai-gavekort", "heia-reai"]
+            ).includes(p.handle),
           )
           .flatMap((p) => p.variants.map((v) => v.id));
         const availability = ids.length
           ? await data(client.availabilities(ids, delivery))
           : { variants: [] };
-        return finish(renderEssential(store, availability, context), context);
+        const render =
+          path === "/designs/launch"
+            ? renderLaunch
+            : path === "/designs/trade"
+              ? renderTrade
+              : renderEssential;
+        return finish(render(store, availability, context), context);
       }
       if (
         path === "/designs/collections" ||

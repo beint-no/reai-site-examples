@@ -22,6 +22,7 @@ test("fashion fixture works without credentials, rejects unknown nested routes a
     async () => {
       for (const path of [
         "/designs/famme/",
+        "/designs/lookbook/",
         "/designs/famme/collections/softy/",
         "/designs/famme/products/softy-straight-leg/",
       ]) {
@@ -52,6 +53,8 @@ test("fashion fixture works without credentials, rejects unknown nested routes a
 test("new live designs fail closed without credentials instead of showing fashion fixtures", async () => {
   for (const path of [
     "/designs/essential/",
+    "/designs/launch/",
+    "/designs/trade/",
     "/designs/collections/",
     "/designs/collections/softy/",
   ])
@@ -60,7 +63,7 @@ test("new live designs fail closed without credentials instead of showing fashio
       503,
     );
 });
-test("Essential uses published variant price and availability; Index respects collection membership", async () =>
+test("Live designs use published prices and availability; Index respects collection membership", async () =>
   mocked(
     async () => {
       const essential = await worker.fetch(
@@ -77,6 +80,20 @@ test("Essential uses published variant price and availability; Index respects co
         html,
         /value="fashion-|server-only|value="extra-variant"/,
       );
+      for (const path of [
+        "/designs/launch/?lang=en",
+        "/designs/trade/?lang=en",
+      ]) {
+        const r = await worker.fetch(request(path), env, {});
+        assert.equal(r.status, 200);
+        const content = await r.text();
+        assert.match(content, /value="live-variant-available"/);
+        assert.match(content, /NOK\s*42/);
+        assert.doesNotMatch(content, /value="extra-variant"|server-only/);
+        if (path.includes("launch"))
+          assert.match(content, /value="live-variant-soldout"[^>]*disabled/);
+        else assert.match(content, /data-add-inline/);
+      }
       const index = await worker.fetch(
         request("/designs/collections/test-collection/?lang=en"),
         env,
@@ -123,7 +140,7 @@ test("Essential uses published variant price and availability; Index respects co
           products: [
             {
               id: "chosen",
-              handle: "test-betaling",
+              handle: "reai-gavekort",
               title: "Chosen product",
               description: "Chosen description",
               variants: [

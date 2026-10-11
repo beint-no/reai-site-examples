@@ -797,6 +797,50 @@ export const lessons = [
 ];
 
 // Complete operation coverage of the current delivery contract; management is separate.
+lessons.push(
+  {
+    slug: "collections", shortTitle: ["Samlinger", "Collections"], icon: "≡",
+    tag: ["SITE API + DESIGN", "SITE API + DESIGN"],
+    title: ["Kolleksjonen er data. Visningen er din.", "The collection is data. The layout is yours."],
+    summary: ["Manuelle og automatiske samlinger, fra publisering til butikkdesign.", "Manual and automated collections, from publication to storefront designs."],
+    intro: ["Samlinger organiserer publiserte produkter. Den samme listen kan bli et rutenett, en kompakt katalog eller en fotohistorie. Designet trenger ikke en egen kopi av produktdataene.", "Collections organize published products. The same list can become a grid, a compact catalog or a photo story. The design needs no separate copy of product data."],
+    steps: [
+      ["Publiser produkter med offentlige handles og markedspriser.", "Publish products with public handles and market prices."],
+      ["Velg produkter og rekkefølge manuelt, eller bruk en automatisk regel i ReAI.", "Choose products and ordering manually, or use an automated rule in ReAI."],
+      ["Hent resultatet fra Site API. La nettsiden bestemme presentasjonen.", "Fetch the result from the Site API. Let the website control presentation."]
+    ],
+    sections: [
+      { title: ["Kuratering og regler", "Curation and rules"], text: ["En manuell samling er en valgt, ordnet produktliste. Automatiske samlinger bruker regler; testbutikken samler for eksempel produkter med merket ReAI Demo. ReAI gjør medlemskapet klart før levering. Nettsiden skal ikke tolke reglene på nytt.", "A manual collection is a chosen, ordered list. Automated collections use rules; the test store groups products branded ReAI Demo. ReAI materializes membership before delivery. The website should not evaluate rules again."] },
+      { title: ["Prøv ulike visninger", "Try different layouts"], text: ["Index har søk, prissortering og rutenett/liste. «Utvalgt» gjenoppretter API-rekkefølgen. Søk og sortering skjer her i nettleseren på den leverte samlingen. Famme og Lookbook viser fotobaserte innganger med tydelig merkede testdata.", "Index offers search, price sorting and grid/list layouts. Featured restores API ordering. Search and sorting here operate in the browser on the delivered collection. Famme and Lookbook show photo-based navigation with clearly labelled fixtures."] },
+      { title: ["Medlemskap er ikke lagerstatus", "Membership is not availability"], text: ["En variant kan være utsolgt selv om produktet er i en samling. Hent tilgjengelighet separat; checkout validerer pris og lager igjen. Bruk samme marked og språk for katalog, detaljer og kurv.", "A variant may be sold out while its product belongs to a collection. Fetch availability separately; checkout revalidates price and stock. Use the same market and locale across catalog, details and cart."] }
+    ],
+    links: [["/designs/collections/", ["Prøv Index", "Try Index"]], ["/designs/lookbook/", ["Prøv Lookbook", "Try Lookbook"]], ["/api/?endpoint=collections", ["Se API-data", "Inspect API data"]]],
+    code: "GET /site/v1/commerce/storefront?market=default&locale=nb-NO\nGET /site/v1/commerce/collections/{handle}?market=default&locale=nb-NO\n\nMembership + ordering → grid / list / photo story\nVariant IDs → fresh availability → checkout validation",
+    codeLabel: ["Ett medlemskap, flere presentasjoner.", "One membership, several presentations."]
+  },
+  {
+    slug: "commerce-flow", shortTitle: ["Handelsflyt", "Commerce flow"], icon: "→",
+    tag: ["REAI PLATTFORM", "REAI PLATFORM"],
+    title: ["Følg ordren, ikke bare betalingsknappen.", "Follow the order, not just the payment button."],
+    summary: ["Fra produktvalg til betaling, levering, faktura og regnskapsoppfølging.", "From product selection to payment, fulfillment, invoicing and accounting follow-up."],
+    intro: ["ReAI samler nettbutikk, kassasystem og regnskap. Du kan følge salget i samme plattform. Betaling, levering, faktura og oppgjør er likevel ulike steg med egne statuser.", "ReAI brings together online commerce, point of sale and accounting. You can follow the sale in the same platform. Payment, fulfillment, invoicing and settlement remain separate steps with their own statuses."],
+    steps: [
+      ["Nettsiden viser publiserte data og samler variant-ID-er og antall.", "The storefront displays published data and collects variant IDs and quantities."],
+      ["Checkout validerer og bruker betaling eller tillatt fakturakjøp.", "Checkout validates and uses payment or permitted invoice checkout."],
+      ["Selger følger bekreftet ordre og betalingsutfall i ReAI.", "The merchant follows confirmed orders and payment outcomes in ReAI."],
+      ["Levering, faktura, refusjon og oppgjør følges opp i plattformen.", "Fulfillment, invoicing, refunds and settlement are followed up in the platform."]
+    ],
+    sections: [
+      { title: ["Betal nå eller selg på kreditt", "Pay now or sell on credit"], text: ["Adyen håndterer konfigurerte betalingsmåter. B2B kan opprette en ubetalt fakturaordre etter firmasøk. Selger utsteder faktura og kan sende EHF senere når mottaker og oppsett tillater det. Fakturaordre skal ikke merkes betalt fordi checkout er fullført.", "Adyen handles configured payment methods. B2B can create an unpaid invoice order after company search. The merchant issues the invoice and can send EHF later when recipient and configuration permit it. An invoice order must not be marked paid merely because checkout completed."] },
+      { title: ["Fysisk levering eller digitale varer", "Physical fulfillment or digital products"], text: ["Fysiske varer kan bruke frakt, hentested eller lokal henting når Site-et er satt opp for det. En etikett er ikke bevis på levering. Her er live-produktene digitale: testbetaling leverer ingenting, donasjon er utviklingsstøtte, og gavekort innløses manuelt via post@reai.no etter bekreftet betaling.", "Physical products can use shipping, pickup points or local collection when configured for the Site. A label is not proof of delivery. Live products here are digital: test payments deliver nothing, donations support development and gift cards are manually redeemed through post@reai.no after confirmed payment."] },
+      { title: ["Kasse, nettbutikk og regnskap", "Point of sale, storefront and accounting"], text: ["Fysisk salg bruker ReAIs kassasystem; nettbutikken bruker Site API og hosted checkout. Selger håndterer ordre, betalinger og regnskap i ReAI med riktig tilgang og oppsett. Site API eksponerer publiserte butikkdata, ikke privat regnskap. Retur til nettsiden er ikke betalingsbekreftelse; faktura, innbetaling og oppgjør er ulike steg.", "In-store sales use ReAI point of sale; the storefront uses the Site API and hosted checkout. The merchant handles orders, payments and accounting in ReAI with appropriate access and setup. The Site API exposes published store data, not private accounting. Returning to the website does not confirm payment; invoice, payment and settlement are distinct steps."] }
+    ],
+    links: [["/learn/checkout-test/", ["Test fra 1 kr", "Test from 1 kr"]], ["/designs/trade/", ["Prøv bestillingslisten", "Try the order list"]], ["/learn/shipping/", ["Frakt og henting", "Shipping and pickup"]], ["/learn/business/", ["Faktura og EHF", "Invoice and EHF"]]],
+    code: "Storefront → published catalog + variants + availability\nCheckout → payment OR unpaid invoice order\nReAI → order / fulfillment / invoice / refund\nSettlement + reconciliation → accounting\n\nA return URL ≠ confirmed payment\nA label ≠ delivery\nAn invoice order ≠ paid order",
+    codeLabel: ["Én plattform, tydelige statuser.", "One platform, explicit statuses."]
+  }
+);
+
 export const operations = [
   [
     "site",

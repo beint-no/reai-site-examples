@@ -60,7 +60,13 @@ document.querySelectorAll("[data-add-to-cart]").forEach((form) =>
     form.querySelector("[data-add-message]").textContent = nb
       ? "Lagt i handlekurven."
       : "Added to cart.";
-    liveDrawer?.showModal();
+    if (form.hasAttribute("data-add-inline")) {
+      const message = document.querySelector("[data-trade-feedback]");
+      if (message)
+        message.textContent = nb
+          ? "Lagt i kurven. Fortsett å velge, eller se bestillingen nederst."
+          : "Added to cart. Keep choosing, or review the order below.";
+    } else liveDrawer?.showModal();
     refreshDrawer();
   }),
 );
@@ -345,10 +351,12 @@ async function refreshDrawer() {
       : "The catalog is temporarily unavailable. Try again.";
   }
 }
-document.querySelector("[data-cart-open]")?.addEventListener("click", () => {
-  liveDrawer.showModal();
-  refreshDrawer();
-});
+document.querySelectorAll("[data-cart-open]").forEach((button) =>
+  button.addEventListener("click", () => {
+    liveDrawer.showModal();
+    refreshDrawer();
+  }),
+);
 document
   .querySelector("[data-cart-close]")
   ?.addEventListener("click", () => liveDrawer.close());
