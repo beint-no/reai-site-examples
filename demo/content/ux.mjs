@@ -1,5 +1,8 @@
 // Original ReAI explanations and acceptance scenarios based on public research.
 // No premium guidelines, copied benchmark screenshots, or certification claims.
+import { additionalTopics, learningPaths } from "./ux-extension.mjs";
+import { topicDepth } from "./ux-depth.mjs";
+export { learningPaths };
 const topic = (
   slug,
   stage,
@@ -21,7 +24,7 @@ const topic = (
   cases,
   boundary,
 });
-export const uxTopics = [
+const baseTopics = [
   topic(
     "navigation",
     "discover",
@@ -617,14 +620,16 @@ export const uxTopics = [
     ],
   ),
 ];
+export const uxTopics = [...baseTopics.map((t) => ({ ...t, ...topicDepth[t.slug], cases: [...t.cases, ...topicDepth[t.slug].extra] })), ...additionalTopics];
+export const acceptanceCount = uxTopics.reduce((n, t) => n + t.cases.length, 0);
 export const designTopics = {
-  starter: ["search", "filters", "mobile-filters", "cart", "images", "errors"],
+  starter: ["breadcrumbs", "sorting", "search", "filters", "mobile-filters", "cart", "images", "errors"],
   collections: [
     "navigation",
     "search",
     "filters",
     "mobile-filters",
-    "product-lists",
+    "product-lists", "breadcrumbs", "sorting",
   ],
   famme: [
     "navigation",
@@ -633,7 +638,7 @@ export const designTopics = {
     "variants",
     "images",
     "stock",
-    "cart",
+    "cart", "size-guide", "breadcrumbs", "product-sections",
   ],
   lookbook: ["navigation", "images", "variants", "cart"],
   essential: ["navigation", "variants", "cart", "costs"],
@@ -646,5 +651,8 @@ export const designTopics = {
 export const uxRoutes = [
   "/ux",
   "/ux/lab/checkout",
+  "/ux/lab/discovery",
+  "/ux/lab/compare",
+  "/ux/test-plan",
   ...uxTopics.map((t) => `/ux/${t.slug}`),
 ];

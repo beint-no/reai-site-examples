@@ -1,5 +1,6 @@
 import {
   checkoutTotal,
+  deliveryWindow,
   validateCheckout,
   checkoutOutcome,
 } from "./checkout-lab-model.js";
@@ -10,6 +11,13 @@ if (root) {
   const form = root.querySelector("[data-lab-form]"),
     review = root.querySelector("[data-lab-review]"),
     confirmation = root.querySelector("[data-lab-confirmation]");
+  const testDay = new Date().toISOString().slice(0,10);
+  const dateText = (method) => {
+    const dates = deliveryWindow(testDay, method);
+    const display = (value) => new Intl.DateTimeFormat(nb ? "nb-NO" : "en", {day:"numeric",month:"short",timeZone:"UTC"}).format(new Date(value+"T12:00:00Z"));
+    return dates.from === dates.to ? display(dates.from) : `${display(dates.from)} – ${display(dates.to)}`;
+  };
+  const deliveryText = (method) => t("Simulert dato: ","Simulated date: ") + dateText(method);
   const input = () => {
     const v = Object.fromEntries(new FormData(form));
     return { ...v, business: form.elements.business.checked };
@@ -26,6 +34,9 @@ if (root) {
     root.querySelector("[data-lab-address]").hidden = v.delivery === "pickup";
     root.querySelector("[data-lab-business]").hidden = !v.business;
     root.querySelector("[data-lab-invoice]").hidden = !v.business;
+    form.elements.org.required = v.business;
+    for (const key of ["address", "postal", "city"]) form.elements[key].required = v.delivery === "shipping";
+    for (const method of ["shipping", "pickup"]) root.querySelector(`[data-lab-date-${method}]`).textContent = t("Simulert: ","Simulated: ") + dateText(method);
     if (
       !v.business &&
       root.querySelector("[name=outcome]:checked").value === "invoice"
@@ -94,7 +105,8 @@ if (root) {
     }
     root.querySelector("[data-lab-payment-error]").textContent = "";
     root.querySelector("[data-lab-review-text]").textContent =
-      `${v.name} · ${v.email} · ${v.delivery === "pickup" ? t("Henting i Testgata 1, Oslo", "Pickup at Testgata 1, Oslo") : `${v.address}, ${v.postal} ${v.city}`} · ${v.quantity} × ${t("testprodukt", "test product")}`;
+      `${v.name} · ${v.email} · ${v.delivery === "pickup" ? t("Henting i Testgata 1, Oslo", "Pickup at Testgata 1, Oslo") : `${v.address}${v.address2 ? ", "+v.address2 : ""}, ${v.postal} ${v.city}`} · ${v.quantity} × ${t("testprodukt", "test product")}`;
+    root.querySelector("[data-lab-delivery-summary]").textContent = deliveryText(v.delivery);
     form.hidden = true;
     review.hidden = false;
     review.focus();
@@ -141,7 +153,7 @@ if (root) {
     root.querySelector("[data-lab-confirm-title]").textContent = title;
     root.querySelector("[data-lab-confirm-text]").textContent = note;
     root.querySelector("[data-lab-confirm-details]").textContent =
-      root.querySelector("[data-lab-review-text]").textContent;
+      root.querySelector("[data-lab-review-text]").textContent + " · " + deliveryText(input().delivery);
     review.hidden = true;
     confirmation.hidden = false;
     confirmation.focus();

@@ -166,7 +166,7 @@ test("all learning routes are bilingual, static and never call commerce or imply
       if (path !== "/ux/lab/checkout") assert.match(html, /Baymard/);
     }
   assert.equal(Object.keys(designTopics).length, 10);
-  assert.equal(uxTopics.flatMap((t) => t.cases).length, 45);
+  assert.equal(uxTopics.flatMap((t) => t.cases).length, 105);
   assert.equal(new Set(uxTopics.map((t) => t.slug)).size, uxTopics.length);
   for (const ids of Object.values(designTopics))
     assert.ok(ids.every((id) => uxTopics.some((t) => t.slug === id)));

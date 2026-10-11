@@ -1,4 +1,15 @@
 // Deliberately fictional checkout model. No storage, payment, email or API calls.
+export function deliveryWindow(day, method) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !["shipping", "pickup"].includes(method)) return null;
+  const start = new Date(day + "T12:00:00Z");
+  if (!Number.isFinite(start.getTime()) || start.toISOString().slice(0,10) !== day) return null;
+  const businessDay = (count) => {
+    const date = new Date(start);
+    while (count) { date.setUTCDate(date.getUTCDate() + 1); if (![0,6].includes(date.getUTCDay())) count--; }
+    return date.toISOString().slice(0,10);
+  };
+  return method === "pickup" ? { from: businessDay(1), to: businessDay(1) } : { from: businessDay(2), to: businessDay(4) };
+}
 export function checkoutTotal(delivery, quantity) {
   if (
     !["shipping", "pickup"].includes(delivery) ||
