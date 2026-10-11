@@ -7,3 +7,4 @@ node_modules/
 dist/
 templates/*/public/
 .local/
+demo/public/starter/

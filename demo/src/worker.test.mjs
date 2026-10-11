@@ -394,3 +394,70 @@ test("newsletter upstream failure is explicit, never a fabricated success", asyn
     async () => new Response("Private upstream details", { status: 403 }),
   );
 });
+
+test("starter design uses the real implementation, prefixes its paths and disables writes in offline preview", async () =>
+  mocked(
+    async () => {
+      const r = await worker.fetch(
+        new Request("https://nettbutikk.reai.no/designs/starter/"),
+        env,
+        {},
+      );
+      assert.equal(r.status, 200);
+      const html = await r.text();
+      assert.match(html, /data-newsletter/);
+      assert.match(html, /data-cart-dialog/);
+      assert.match(html, /src="\/designs\/starter\/store.js"/);
+      assert.match(html, /Mottaker: Better Integration/);
+      assert.doesNotMatch(html, /not-public-secret/);
+      const preview = {
+        ...env,
+        DEMO_PREVIEW: "true",
+        DEMO_CHECKOUT_ENABLED: "false",
+      };
+      assert.equal(
+        (
+          await worker.fetch(
+            request("/designs/starter/newsletter/subscribe", {
+              email: "qa@example.test",
+              consent: true,
+            }),
+            preview,
+            {},
+          )
+        ).status,
+        503,
+      );
+      assert.equal(
+        (
+          await worker.fetch(
+            request("/designs/starter/checkout/start", {
+              lines: [{ variantId: id, quantity: 1 }],
+            }),
+            preview,
+            {},
+          )
+        ).status,
+        503,
+      );
+    },
+    async (input) =>
+      String(input).endsWith("/site")
+        ? Response.json({
+            name: "Demo",
+            markets: [
+              {
+                handle: "default",
+                defaultLocale: "nb-NO",
+                locales: ["nb-NO"],
+                isDefault: true,
+              },
+            ],
+          })
+        : Response.json({
+            locale: "nb-NO",
+            currency: "NOK",
+            products: [],
+            collections: [],
+          }),
+  ));

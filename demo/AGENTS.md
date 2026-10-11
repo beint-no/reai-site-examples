@@ -1,7 +1,8 @@
 # ReAI sin test-nettbutikk
 
 One Worker at nettbutikk.reai.no. The front page explains platform primitives.
-Nine distinct designs: Studio, Atelier, Supply, Essential, Index, Launch and
+Ten distinct designs: Everyday uses the actual exported starter. Studio, Atelier,
+Supply, Essential, Index, Launch and
 Trade use the published ReAI catalog; Famme and Lookbook share an isolated fashion
 fixture with licensed AVIF photos. Launch focuses on one product; Trade uses
 inline variant quantities; Index and the main catalog use backend-derived category,
@@ -29,7 +30,9 @@ never substitute for unavailable live data. Product photographs on design pages
 illustrate layouts, not physical goods for sale. seed/catalog.json is operator input.
 
 Newsletter signup requires an unchecked consent box and newsletter:subscribe;
-show the Site owner and link privacy. Never claim it sends a welcome email or coupon.
+show the Site owner and link privacy. New consent may queue a configured welcome
+flow; signup creates no coupon. Back-in-stock signup has separate one-notification
+consent and requires an enabled merchant flow. Never promise unconfigured emails.
 The offline preview records no consent and accepts no payments.
 
 Live digital test checkout names Better Integration and discloses real payments and

@@ -13,7 +13,7 @@ resources/ for convenience; clients have no runtime dependency on either repo.
   explicitly licensed Famme test photography is documented in ASSETS.md.
 - demo/seed/: product definitions for explicit operator-managed seeding.
 - packages/: generated Site client and reusable advanced Cloudflare integration.
-- starter/ and templates/storefront/: the simple standalone export used to refresh
+- starter/ and templates/storefront/: the complete standalone export used to refresh
   the separate private reai-storefront-starter provisioning repository.
 - docs/: focused API/integration guides. Each directory's AGENTS.md is for humans
   and agents alike; keep one document per directory instead of parallel READMEs.
@@ -46,7 +46,7 @@ wrangler.jsonc targets only reai-demo-store at https://nettbutikk.reai.no.
 npm run deploy checks and deploys locally; CI validates only.
 Set REAI_SITE_CREDENTIAL as a Worker secret. The published field guide at /features/
 explains payments, B2B/EHF, shipping/pickup, discounts, catalog, markets and
-integration; /api/ exercises all nine delivery reads, checkout and newsletter signup.
+integration; /api/ exercises all nine delivery reads, checkout, newsletter and back-in-stock signup.
 Shipping and inventory bundles are documented capabilities, not fulfillment
 promises for this digital catalog. The published demo uses Adyen LIVE
 and clearly labels real payments and the configured recipient. Offline preview

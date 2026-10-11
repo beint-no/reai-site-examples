@@ -7,7 +7,12 @@ const h = (value) =>
         x
       ],
   );
-export function renderCatalogFilters(products, store, locale) {
+export function renderCatalogFilters(
+  products,
+  store,
+  locale,
+  { explain = true } = {},
+) {
   const nb = locale === "nb",
     facets = catalogFacets(products, locale);
   const model = products.map(
@@ -61,7 +66,7 @@ export function renderCatalogFilters(products, store, locale) {
     )
     .join(
       "",
-    )}<p class="catalog-filter-note">${nb ? "Valgene kommer fra denne samlingens produktdata i ReAI." : "Choices come from this collection’s ReAI product data."}</p></div></details><div hidden data-catalog-model="${h(JSON.stringify({ products: model, facets, currency: store.currency, locale }))}"></div>`;
+    )}${explain ? `<p class="catalog-filter-note">${nb ? "Valgene kommer fra denne samlingens produktdata i ReAI." : "Choices come from this collection’s ReAI product data."}</p>` : ""}</div></details><div hidden data-catalog-model="${h(JSON.stringify({ products: model, facets, currency: store.currency, locale }))}"></div>`;
 }
 export function renderCatalogTools(products, locale) {
   const nb = locale === "nb";

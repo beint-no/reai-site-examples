@@ -32,9 +32,16 @@ if (root) {
       maximumFractionDigits: 2,
       minimumFractionDigits: 0,
     }).format(value);
-  const languageLinks = [...document.querySelectorAll('a[href*="?lang="]')].map(
-    (link) => ({ link, language: new URL(link.href).searchParams.get("lang") }),
-  );
+  const languageLinks = [
+    ...document.querySelectorAll('a[href*="?lang="], a[data-language-link]'),
+  ].map((link) => ({
+    link,
+    key: link.hasAttribute("data-language-link") ? "locale" : "lang",
+    language: new URL(link.href).searchParams.get(
+      link.hasAttribute("data-language-link") ? "locale" : "lang",
+    ),
+    market: new URL(link.href).searchParams.get("market"),
+  }));
   let state = readFilterState(new URL(location.href).searchParams, facets),
     stockPromise,
     stockReady = false;
@@ -62,9 +69,10 @@ if (root) {
     writeFilterState(target.searchParams, state);
     if (target.href !== location.href)
       history[mode === "push" ? "pushState" : "replaceState"](null, "", target);
-    languageLinks.forEach(({ link, language }) => {
+    languageLinks.forEach(({ link, language, key, market }) => {
       const next = new URL(target);
-      next.searchParams.set("lang", language);
+      next.searchParams.set(key, language);
+      if (market) next.searchParams.set("market", market);
       link.href = next.pathname + next.search;
     });
   }
@@ -181,7 +189,7 @@ if (root) {
         }
       }
       // Keep links on the matching variant without bypassing normal product-page availability checks.
-      for (const link of card.querySelectorAll('a[href^="/products/"]')) {
+      for (const link of card.querySelectorAll('a[href*="/products/"]')) {
         const target = new URL(link.href);
         target.searchParams.delete("variant");
         if (constrained && variants.length)
@@ -233,8 +241,15 @@ if (root) {
           ...new Set(products.flatMap((p) => p.variants.map((v) => v.id))),
         ];
         for (let i = 0; i < ids.length; i += 100) {
+          const stockParams = new URLSearchParams({
+            resource: ids.slice(i, i + 100).join(","),
+          });
+          for (const key of ["market", "locale"]) {
+            const value = new URL(location.href).searchParams.get(key);
+            if (value) stockParams.set(key, value);
+          }
           const response = await fetch(
-            `/reai/availabilities?${new URLSearchParams({ resource: ids.slice(i, i + 100).join(",") })}`,
+            `${document.body.dataset.storeBase || ""}/reai/availabilities?${stockParams}`,
             { cache: "no-store" },
           );
           if (!response.ok) throw new Error("Availability unavailable");

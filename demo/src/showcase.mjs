@@ -13,6 +13,16 @@ export const arrow =
   '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>';
 export const designs = [
   {
+    slug: "starter",
+    name: "Everyday",
+    imagePath: "/designs/starter/storefront-hero.avif",
+    title: ["Startklar nettbutikk", "A complete starter store"],
+    text: [
+      "Samme mal som ReAI oppretter for nye butikker: nyhetsbrev, kolleksjonsfiltre, produktbilder, språkvalg, kurv i skuff og checkout.",
+      "The template ReAI creates for new stores: newsletter signup, collection filters, product images, languages, cart drawer and checkout.",
+    ],
+  },
+  {
     slug: "launch",
     name: "Launch",
     image: "gift.svg",
@@ -189,6 +199,7 @@ export function featureMatrix(c) {
 }
 function designTraits(d) {
   const extras = {
+    starter: "collections banners variants",
     famme: "collections banners variants",
     lookbook: "collections banners variants",
     essential: "few variants",
@@ -202,7 +213,7 @@ function designTraits(d) {
   return `${d.fixture ? "fixture" : "live"} drawer ${extras[d.slug]}`;
 }
 export function designGallery(c) {
-  return `<section class="shell designs-section" id="designs"><div class="section-heading"><div><h2>${pick(c, "Ni butikkdesign du kan prøve.", "Nine storefront designs to try.")}</h2><p>${pick(c, "Prøv bannere, kolleksjoner, fargevalg, hurtigkjøp og handlekurver. Sju design bruker live ReAI-data. Famme og Lookbook bruker en isolert motekatalog.", "Try banners, collections, swatches, quick-add and carts. Seven designs use live ReAI data. Famme and Lookbook use an isolated fashion catalog.")}</p></div></div><div class="design-filters" role="group" aria-label="${pick(c, "Filtrer butikkdesign", "Filter storefront designs")}">${[
+  return `<section class="shell designs-section" id="designs"><div class="section-heading"><div><h2>${pick(c, "Ti butikkdesign du kan prøve.", "Ten storefront designs to try.")}</h2><p>${pick(c, "Prøv bannere, kolleksjoner, fargevalg, hurtigkjøp og handlekurver. Åtte design bruker live ReAI-data. Famme og Lookbook bruker en isolert motekatalog.", "Try banners, collections, swatches, quick-add and carts. Eight designs use live ReAI data. Famme and Lookbook use an isolated fashion catalog.")}</p></div></div><div class="design-filters" role="group" aria-label="${pick(c, "Filtrer butikkdesign", "Filter storefront designs")}">${[
     ["all", "Alle", "All"],
     ["live", "Live API", "Live API"],
     ["collections", "Kolleksjoner", "Collections"],
@@ -217,7 +228,7 @@ export function designGallery(c) {
     )
     .join(
       "",
-    )}<span data-design-results role="status">9 ${pick(c, "design", "designs")}</span></div><div class="design-grid">${designs.map((d) => `<a class="design-card" data-design-features="${designTraits(d)}" href="/designs/${d.slug}/"><div class="design-preview preview-${d.slug}"><div class="preview-header"><b>${d.name.toUpperCase()}</b><span>${pick(c, "Kolleksjon", "Collection")} ${arrow}</span></div><img src="/assets/${d.image || d.slug + ".jpg"}" width="840" height="1050" loading="lazy" alt="${h(d.name)} ${pick(c, "designillustrasjon", "design illustration")}"><div class="preview-overlay"><span>${d.title[nb(c) ? 0 : 1]}</span>${d.slug === "studio" ? '<div class="swatch-preview"><i></i><i></i><i></i></div>' : ""}</div></div><span class="design-data-label">${d.fixture ? pick(c, "Illustrerende testdata", "Illustrative test data") : "Live ReAI Site API"}</span><div class="design-card-caption"><h3>${d.name} <span>— ${d.title[nb(c) ? 0 : 1]}</span></h3>${arrow}</div><p>${d.text[nb(c) ? 0 : 1]}</p></a>`).join("")}</div><p class="fineprint">${pick(c, "Famme-fotografier brukes med tillatelse. Den illustrerende motekatalogen i Famme og Lookbook er isolert fra live-butikken med testkjøp, gavekort og utviklingsstøtte.", "Famme photography is used with permission. The illustrative fashion catalog in Famme and Lookbook is isolated from the live store’s test purchases, gift cards and development support.")}</p></section>`;
+    )}<span data-design-results role="status">${designs.length} ${pick(c, "design", "designs")}</span></div><div class="design-grid">${designs.map((d) => `<a class="design-card" data-design-features="${designTraits(d)}" href="/designs/${d.slug}/"><div class="design-preview preview-${d.slug}"><div class="preview-header"><b>${d.name.toUpperCase()}</b><span>${pick(c, "Kolleksjon", "Collection")} ${arrow}</span></div><img src="${d.imagePath || "/assets/" + (d.image || d.slug + ".jpg")}" width="840" height="1050" loading="lazy" alt="${h(d.name)} ${pick(c, "designillustrasjon", "design illustration")}"><div class="preview-overlay"><span>${d.title[nb(c) ? 0 : 1]}</span>${d.slug === "studio" ? '<div class="swatch-preview"><i></i><i></i><i></i></div>' : ""}</div></div><span class="design-data-label">${d.fixture ? pick(c, "Illustrerende testdata", "Illustrative test data") : "Live ReAI Site API"}</span><div class="design-card-caption"><h3>${d.name} <span>— ${d.title[nb(c) ? 0 : 1]}</span></h3>${arrow}</div><p>${d.text[nb(c) ? 0 : 1]}</p></a>`).join("")}</div><p class="fineprint">${pick(c, "Famme-fotografier brukes med tillatelse. Den illustrerende motekatalogen i Famme og Lookbook er isolert fra live-butikken med testkjøp, gavekort og utviklingsstøtte.", "Famme photography is used with permission. The illustrative fashion catalog in Famme and Lookbook is isolated from the live store’s test purchases, gift cards and development support.")}</p></section>`;
 }
 export function newsletter(c) {
   return `<section class="shell" id="newsletter"><div class="newsletter-band"><div><h2>${pick(c, "Prøv også e-postpåmelding.", "Try email signup, too.")}</h2><p>${pick(c, "Et ekte Site API-kall med eksplisitt samtykke. Ingen e-post sendes automatisk.", "A real Site API request with explicit consent. No email is sent automatically.")}</p><a href="/learn/newsletter/">${pick(c, "Slik virker samtykke", "How consent works")} ${arrow}</a></div><form data-newsletter><label class="sr-only" for="signup-email">${pick(c, "E-postadresse", "Email address")}</label><div class="newsletter-input"><input id="signup-email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="${pick(c, "din@epost.no", "you@example.com")}"><button class="button" type="submit">${pick(c, "Meld meg på", "Subscribe")}</button></div><label class="consent"><input type="checkbox" name="consent" required> <span>${pick(c, "Jeg vil motta nyheter fra", "I want to receive news from")} ${h(c.merchantName || "Better Integration")}. <a href="/privacy/">${pick(c, "Personvern", "Privacy")}</a></span></label><input class="honeypot" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true"><p data-newsletter-message role="status"></p></form></div></section>`;
