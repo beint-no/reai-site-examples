@@ -1,6 +1,8 @@
 // @ts-check
 /** @typedef {{ REAI_SITE_CREDENTIAL?: string, REAI_API_BASE_URL?: string, DEMO_MARKET?: string, DEMO_CHECKOUT_ENABLED?: string, DEMO_PAYMENT_MODE?: string, DEMO_MERCHANT_NAME?: string, DEMO_MERCHANT_ORG_NUMBER?: string, DEMO_PREVIEW?: string, ASSETS: Fetcher }} DemoEnv */
 import { ReaiSiteClient } from "../../packages/reai-site-client/client.mjs";
+import { storeContent as starterContent } from "../../starter/src/store-content.js";
+import starter from "../../starter/src/worker.js";
 import {
   HANDLE,
   learningRoutes,
@@ -92,6 +94,48 @@ export default {
       for (const [name, value] of Object.entries(headers))
         secured.headers.set(name, value);
       return secured;
+    }
+    const starterBase = "/designs/starter";
+    if (
+      url.pathname === starterBase ||
+      url.pathname.startsWith(starterBase + "/")
+    ) {
+      const target = new URL(url);
+      target.pathname = url.pathname.slice(starterBase.length) || "/";
+      if (!target.searchParams.has("locale"))
+        target.searchParams.set("locale", locale);
+      const result = await starter.fetch(new Request(target, request), {
+        REAI_API_BASE_URL: env.REAI_API_BASE_URL,
+        REAI_SITE_CREDENTIAL: env.REAI_SITE_CREDENTIAL,
+        STOREFRONT_BASE_PATH: starterBase,
+        STOREFRONT_CONTENT: {
+          ...starterContent,
+          legalName: "Better Integration",
+          organizationNumber: "935733944",
+          contactEmail: "post+owner@reai.no",
+        },
+        STOREFRONT_CHECKOUT_ENABLED:
+          paymentMode === "disabled" ? "false" : "true",
+        STOREFRONT_SIGNUP_ENABLED: context.preview ? "false" : "true",
+        ASSETS: {
+          fetch: (assetRequest) => {
+            const assetUrl = new URL(assetRequest.url);
+            assetUrl.pathname = "/starter" + assetUrl.pathname;
+            return env.ASSETS.fetch(new Request(assetUrl, assetRequest));
+          },
+        },
+      });
+      if (result.headers.get("content-type")?.includes("text/html")) {
+        const markup = (await result.text()).replace(
+          /(<body[^>]*>)/,
+          `$1<div class="demo-notice"><a href="/designs/">← Alle butikkdesign / All designs</a> · ${context.preview ? "Simulerte data. Checkout og påmelding er deaktivert." : "ReAI sin test-nettbutikk · Betaling i kassen fungerer · Mottaker: Better Integration"}</div>`,
+        );
+        return new Response(request.method === "HEAD" ? null : markup, {
+          status: result.status,
+          headers: { ...headers, ...Object.fromEntries(result.headers) },
+        });
+      }
+      return result;
     }
     if (url.pathname === "/health")
       return response(

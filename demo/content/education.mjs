@@ -1,6 +1,73 @@
 // Educational copy is static; the connected shop and explorer use ReAI delivery data.
 export const lessons = [
   {
+    slug: "back-in-stock",
+    shortTitle: ["Lagervarsel", "Stock alerts"],
+    icon: "↺",
+    tag: ["SITE API", "SITE API"],
+    title: [
+      "Varsle når riktig variant er tilbake.",
+      "Notify when the right variant returns.",
+    ],
+    summary: [
+      "Ett varsel for en utsolgt variant, med eget samtykke.",
+      "One alert for a sold-out variant, with separate consent.",
+    ],
+    intro: [
+      "Kunden velger akkurat den utsolgte størrelsen eller fargen hun ønsker. ReAI lagrer forespørselen og kan sende varselet gjennom virksomhetens konfigurerte e-postflyt.",
+      "The shopper selects the sold-out size or color they want. ReAI records the request and can send the alert through the business’s configured email flow.",
+    ],
+    steps: [
+      [
+        "Aktiver e-postmarkedsføring og en back-in-stock-flyt for virksomheten i ReAI. Aktiver deretter stockNotificationsEnabled i starterens store-content.js.",
+        "Enable email marketing and a back-in-stock flow for the business in ReAI. Then enable stockNotificationsEnabled in the starter’s store-content.js.",
+      ],
+      [
+        "Vis skjemaet bare for publiserte, utsolgte varianter. Kunden oppgir e-post og samtykker til ett lagervarsel.",
+        "Show the form only for published, sold-out variants. The shopper enters an email and consents to one stock notification.",
+      ],
+      [
+        "Worker sender variantId, email og consent med den serverlagrede Site-nøkkelen og newsletter:subscribe-tilgang.",
+        "The Worker sends variantId, email and consent with the server-held Site credential and newsletter:subscribe scope.",
+      ],
+      [
+        "Flyten følger lagerstatus og sender varselet når varianten kan kjøpes. Gjentatte forespørsler lager ikke flere ventende varsler for samme variant og adresse.",
+        "The flow follows availability and sends the alert when the variant can be bought. Repeated requests do not create multiple pending alerts for the same variant and address.",
+      ],
+    ],
+    sections: [
+      {
+        title: ["Eget samtykke", "Separate consent"],
+        text: [
+          "Et lagervarsel melder ikke kunden på nyhetsbrevet. Ventende forespørsler utløper etter 180 dager. Kontakt virksomheten for å trekke tilbake forespørselen.",
+          "A stock alert does not subscribe the shopper to the newsletter. Pending requests expire after 180 days. Contact the business to withdraw the request.",
+        ],
+      },
+      {
+        title: ["Ingen tomme løfter", "No empty promises"],
+        text: [
+          "Starteren skjuler skjemaet som standard. Vis det først når utsendelse er konfigurert. API-et avviser varianter som kan kjøpes og virksomheter uten en aktiv varslingsflyt.",
+          "The starter hides the form by default. Show it once sending is configured. The API rejects available variants and businesses without an active notification flow.",
+        ],
+      },
+    ],
+    links: [
+      [
+        "/designs/starter/",
+        ["Se den ferdige starteren", "See the complete starter"],
+      ],
+      [
+        "/learn/newsletter/",
+        ["Nyhetsbrev og velkomstflyt", "Newsletter and welcome flow"],
+      ],
+    ],
+    code: 'POST /site/v1/commerce/stock-subscriptions\nAuthorization: Bearer <server-only Site credential>\n\n{ "email": "you@example.com", "variantId": "<published sold-out variant UUID>", "consent": true }\n\n200 { "accepted": true }',
+    codeLabel: [
+      "Svaret avslører ikke hvem som allerede har registrert seg.",
+      "The response does not reveal who already subscribed.",
+    ],
+  },
+  {
     slug: "newsletter",
     shortTitle: ["Samtykke", "Consent"],
     icon: "@",
@@ -28,16 +95,16 @@ export const lessons = [
         "ReAI reuses an existing contact or creates one without overwriting existing customer details.",
       ],
       [
-        "Du får samme kvittering for ny og eksisterende kontakt. Kallet sender ingen e-post og oppretter ingen rabatt.",
-        "New and existing contacts receive the same receipt. The request sends no email and creates no discount.",
+        "Du får samme kvittering for ny og eksisterende kontakt. Nytt samtykke kan starte en konfigurert velkomstflyt; påmeldingen oppretter ingen rabatt.",
+        "New and existing contacts receive the same receipt. New consent may start a configured welcome flow; signup creates no discount.",
       ],
     ],
     sections: [
       {
         title: ["Samtykke er ikke en kampanje", "Consent is not a campaign"],
         text: [
-          "Dette API-et registrerer ønsket om nyhetsbrev. Det er ikke en utsendelsesmotor eller automatisk velkomstrabatt. Virksomheten må håndtere utsendelse og tilbaketrekking av samtykke. I demoen kan du kontakte post+owner@reai.no for å trekke det tilbake.",
-          "This API records a newsletter request. It is not an email campaign engine or automatic welcome discount. The business handles sending and consent withdrawal. In this demo, contact post+owner@reai.no to withdraw consent.",
+          "Dette API-et registrerer ønsket om nyhetsbrev. En konfigurert velkomstflyt kan legge e-post i kø ved nytt samtykke; påmeldingen oppretter ingen rabatt. Virksomheten konfigurerer utsendelse og håndterer tilbaketrekking av samtykke. I demoen kan du kontakte post+owner@reai.no for å trekke det tilbake.",
+          "This API records a newsletter request. New consent may queue a configured welcome flow; signup creates no discount. The business configures sending and handles consent withdrawal. In this demo, contact post+owner@reai.no to withdraw consent.",
         ],
       },
       {
@@ -908,6 +975,15 @@ export const operations = [
     [
       "Grov tilgjengelighet for opptil 100 varianter",
       "Coarse availability for up to 100 variants",
+    ],
+  ],
+  [
+    "stock-subscriptions",
+    "POST",
+    "/site/v1/commerce/stock-subscriptions",
+    [
+      "Én lagerpåminnelse med eget samtykke og konfigurert flyt",
+      "One stock notification with separate consent and a configured flow",
     ],
   ],
   [

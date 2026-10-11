@@ -8,6 +8,7 @@ instructs browsers to keep using HTTPS for this hostname.
 | Surface | Data and purpose |
 | --- | --- |
 | / | Platform primitives, ownership boundaries, design gallery and consent signup |
+| /designs/starter/ | Everyday: the app’s actual standalone starter with live catalog, filters, variants, cart drawer and email signup |
 | /designs/studio/ | Live catalog, API-backed color choices and a cart drawer |
 | /designs/atelier/ | Same live catalog in an editorial design |
 | /designs/supply/ | Same live catalog with per-variant availability |
@@ -20,8 +21,8 @@ instructs browsers to keep using HTTPS for this hostname.
 | /designs/famme/collections/<handle>/ and /designs/famme/products/<handle>/ | Illustrative clothing, search/sort, size availability, swatches and isolated cart |
 | /scenarios/studio/ and /scenarios/supply/ | Isolated physical-product UI fixtures: mixed stock, all available, sold out, backorders and availability changes |
 | /shop/, /products/, /collections/, /cart/ | Live catalog, manual ReAI gift cards, development support and hosted checkout |
-| /features/ and /learn/ | Payments, checkout test checklist, B2B/EHF, shipping/pickup, discounts, catalog, markets, integration, collection membership, full commerce flow and newsletter consent |
-| /api/ | All nine delivery reads; checkout and newsletter have their own forms |
+| /features/ and /learn/ | Payments, checkout test checklist, B2B/EHF, shipping/pickup, discounts, catalog, markets, integration, collection membership, full commerce flow, newsletter consent/welcome flows and back-in-stock alerts |
+| /api/ | All nine delivery reads; checkout and newsletter have their own forms; stock alerts are documented separately |
 
 Scenario carts use separate storage keys and non-UUID choices. They never call
 checkout or create fulfillment. Live unavailable data produces an error. Studio/Atelier/Supply
@@ -40,8 +41,9 @@ ReAI/open-source development. Checkout identifies Better Integration as recipien
 real payments and unpaid invoice orders.
 
 Newsletter signup forwards only email and explicit consent through newsletter:subscribe.
-No campaign email, discount or customer-existence disclosure is produced. An offline
-preview cannot record consent. The merchant handles consent withdrawal.
+New consent can queue a configured welcome flow; signup creates no discount and
+discloses no customer identity. Optional stock alerts require a configured flow and
+separate one-notification consent. An offline preview cannot record consent. The merchant handles consent withdrawal.
 
 Run npm run demo for the offline catalog, or npm run dev with an ignored .dev.vars
 Site credential for real reads. Run npm run check before release. Check mobile and
