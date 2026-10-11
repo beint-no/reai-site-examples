@@ -62,7 +62,7 @@ export async function exportStorefront(name, destination) {
           scripts: {
             dev: "wrangler dev",
             check:
-              "node --check src/worker.js && node --check public/store.js && node --check public/assets/catalog-filters.js && node --check public/assets/cart-controls.js && node --test src/*.test.js",
+              "node --check src/worker.js && node --check public/store.js && node --check public/assets/catalog-filters.js && node --check public/assets/catalog-context.js && node --check public/assets/cart-controls.js && node --test src/*.test.js",
             deploy: "npm run check && wrangler deploy",
           },
           devDependencies: { wrangler: "4.148.0" },

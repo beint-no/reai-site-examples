@@ -1,3 +1,4 @@
+import { installFashionGuides } from "./fashion-guide.js";
 import {
   quantityControl,
   undoControl,
@@ -53,6 +54,7 @@ import {
       );
     return;
   }
+  installFashionGuides(products, nb);
   const find = (handle) => products.find((p) => p.handle === handle);
   const valid = (line) =>
     find(line.handle)?.colors.some((c) => c.key === line.color) &&
@@ -173,6 +175,10 @@ import {
     restoreCartFocus(box, focus);
   }
   function bindForm(form, p, scope) {
+    const guide = el("button", text("Størrelsesguide", "Size guide"), "ux-guide-open");
+    guide.type = "button"; guide.dataset.sizeGuide = p.handle;
+    const sizeSet = form.querySelector("[name=size]").closest("fieldset");
+    sizeSet.prepend(guide);
     function sync() {
       const data = new FormData(form),
         color = String(data.get("color")),

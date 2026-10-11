@@ -47,7 +47,8 @@ npm run deploy checks and deploys locally; CI validates only.
 Set REAI_SITE_CREDENTIAL as a Worker secret. The published field guide at /features/
 explains payments, B2B/EHF, shipping/pickup, discounts, catalog, markets and
 integration; /api/ exercises all nine delivery reads, checkout, newsletter and back-in-stock signup.
-/ux/ links 15 research-informed concepts to the designs and 45 acceptance tasks.
+/ux/ links research-informed concepts, learning paths and a printable manual test plan to the designs.
+Discovery and Comparison labs use original fictional catalogs. Size measurements and delivery dates are explicitly illustrative.
 /ux/lab/checkout/ is an isolated browser simulation, never a real payment test.
 Use public research only; do not copy premium guidelines or claim certification.
 Shipping and inventory bundles are documented capabilities, not fulfillment
