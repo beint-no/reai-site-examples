@@ -18,6 +18,9 @@ shop; showcase.mjs owns the educational front page, design gallery and isolated
 UI scenarios. content/education.mjs covers every delivery operation, checked against
 live OpenAPI. public/assets/demo.js owns the real cart and read-only API explorer;
 showcase.js owns newsletter signup and the separate scenario cart.
+content/ux.mjs owns original research-linked concepts and acceptance tasks;
+src/ux.mjs renders /ux/ and the checkout lab. Each design links its applicable
+concepts. checkout-lab*.js simulates outcomes in memory without API calls or storage.
 src/design-storefronts.mjs owns standalone design shells. fashion.js uses only
 assets/famme/catalog.json; its non-UUID product choices never enter checkout.
 Famme photo ownership, permission and source URLs are in ASSETS.md and
@@ -46,7 +49,11 @@ digital products create no physical shipments. Test betaling has 1/10/100 kr var
 for small live purchases; /learn/checkout-test/ provides the full checklist.
 Scenario stock/backorders are UI tests.
 
-Run npm run check; verify desktop/mobile, all designs, swatches, both cart drawers,
+Shared catalog filters use desktop immediate updates and mobile draft/apply/cancel.
+cart-controls.js supplies quantity changes and undo to the demo and exported starter.
+Keep demo learning content and fixture adapters out of generated client sites.
+
+Run npm run check; verify desktop/mobile, all designs, swatches, cart quantities/undo,
 stock scenarios, real API reads, newsletter errors and HTTPS redirects before deploy.
 Root AGENTS.md owns release policy. Keep operational docs concise and avoid duplicating
 field-guide content in Markdown.

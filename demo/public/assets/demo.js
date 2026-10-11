@@ -1,3 +1,9 @@
+import {
+  quantityControl,
+  undoControl,
+  rememberCartFocus,
+  restoreCartFocus,
+} from "./cart-controls.js";
 const lang = document.body.dataset.locale,
   nb = lang === "nb",
   key = "reai-demo-cart-v1";
@@ -76,7 +82,12 @@ document.querySelectorAll("[data-add-to-cart]").forEach((form) =>
         message.textContent = nb
           ? "Lagt i kurven. Fortsett å velge, eller se bestillingen nederst."
           : "Added to cart. Keep choosing, or review the order below.";
-    } else liveDrawer?.showModal();
+    } else {
+      cartOpener =
+        form.querySelector("button[type=submit]") ||
+        form.querySelector("button");
+      liveDrawer?.showModal();
+    }
     refreshDrawer();
   }),
 );
@@ -89,21 +100,83 @@ document.querySelector("[data-search]")?.addEventListener("input", (e) => {
   });
   document.querySelector("[data-search-empty]").hidden = count > 0;
 });
-let catalog;
+let catalog,
+  catalogRequest,
+  removed = null;
+async function loadCatalog() {
+  if (catalog) return catalog;
+  if (!catalogRequest)
+    catalogRequest = (async () => {
+      const response = await fetch("/reai/catalog");
+      if (!response.ok) throw new Error("Catalog unavailable");
+      catalog = await response.json();
+      return catalog;
+    })().finally(() => {
+      catalogRequest = null;
+    });
+  return catalogRequest;
+}
+function removeLine(line, label) {
+  removed = { line: { ...line }, label, index: cart.indexOf(line) };
+  cart = cart.filter((x) => x !== line);
+  save();
+  renderCart();
+}
+function addUndo(target) {
+  if (removed)
+    target.append(
+      undoControl(
+        removed.label,
+        () => {
+          if (!cart.some((x) => x.variantId === removed.line.variantId))
+            cart.splice(removed.index, 0, removed.line);
+          removed = null;
+          save();
+          renderCart();
+        },
+        nb,
+      ),
+    );
+}
+
 async function renderCart() {
   const box = document.querySelector("[data-cart-lines]");
   if (!box) return;
   try {
-    const response = await fetch("/reai/catalog");
-    if (!response.ok) throw new Error();
-    catalog = await response.json();
+    catalog ||= await loadCatalog();
+    const focus = rememberCartFocus(box);
     box.replaceChildren();
-    let total = 0;
+    addUndo(box);
+    let total = 0,
+      unavailable = false;
     for (const line of cart) {
       const product = catalog.products.find((p) =>
         p.variants.some((v) => v.id === line.variantId),
       );
-      if (!product) continue;
+      if (!product) {
+        unavailable = true;
+        const row = el("article", null, "cart-unavailable");
+        row.append(
+          el(
+            "p",
+            nb
+              ? "En vare i kurven er ikke lenger tilgjengelig. Fjern den før du fortsetter."
+              : "An item in your cart is no longer available. Remove it before continuing.",
+          ),
+        );
+        const remove = el(
+          "button",
+          nb ? "Fjern utilgjengelig vare" : "Remove unavailable item",
+        );
+        remove.type = "button";
+        remove.dataset.cartFocus = line.variantId + ":remove";
+        remove.addEventListener("click", () =>
+          removeLine(line, nb ? "Utilgjengelig vare" : "Unavailable item"),
+        );
+        row.append(remove);
+        box.append(row);
+        continue;
+      }
       const variant = product.variants.find((v) => v.id === line.variantId);
       total += Number(variant.price) * line.quantity;
       const row = el("article", null, "cart-row");
@@ -130,38 +203,44 @@ async function renderCart() {
           "p",
           variant.options?.map((o) => o.value).join(" / ") || variant.sku,
         ),
-        el("p", format(variant.price, catalog.currency)),
+        el(
+          "p",
+          format(variant.price, catalog.currency) +
+            (nb ? " / stk." : " / item"),
+        ),
+        el(
+          "strong",
+          format(Number(variant.price) * line.quantity, catalog.currency),
+        ),
       );
       const remove = el("button", nb ? "Fjern" : "Remove");
       remove.type = "button";
       remove.addEventListener("click", () => {
-        cart = cart.filter((l) => l !== line);
-        save();
-        renderCart();
+        removeLine(line, product.title);
       });
       details.append(remove);
       row.append(details);
-      const quantity = el("input");
-      quantity.type = "number";
-      quantity.min = "1";
-      quantity.max = "20";
-      quantity.value = String(line.quantity);
-      quantity.setAttribute(
-        "aria-label",
-        `${nb ? "Antall" : "Quantity"} ${product.title}`,
+      remove.dataset.cartFocus = line.variantId + ":remove";
+      row.append(
+        quantityControl(
+          line.quantity,
+          product.title,
+          line.variantId,
+          (n) => {
+            if (n === 0) removeLine(line, product.title);
+            else {
+              line.quantity = n;
+              save();
+              renderCart();
+            }
+          },
+          nb,
+        ),
       );
-      quantity.addEventListener("change", () => {
-        const n = Number(quantity.value);
-        if (Number.isInteger(n) && n > 0 && n <= 20) {
-          line.quantity = n;
-          save();
-          renderCart();
-        }
-      });
-      row.append(quantity);
       box.append(row);
     }
-    if (!box.childElementCount)
+    restoreCartFocus(box, focus);
+    if (!cart.length)
       box.append(
         el(
           "p",
@@ -171,12 +250,13 @@ async function renderCart() {
           "cart-empty",
         ),
       );
-    document.querySelector("[data-cart-total]").textContent = format(
-      total,
-      catalog.currency,
-    );
+    document.querySelector("[data-cart-total]").textContent = unavailable
+      ? "—"
+      : format(total, catalog.currency);
     document.querySelector("[data-checkout]").disabled =
-      !cart.length || document.body.dataset.paymentMode === "disabled";
+      !cart.length ||
+      unavailable ||
+      document.body.dataset.paymentMode === "disabled";
   } catch {
     box.replaceChildren(
       el(
@@ -187,6 +267,7 @@ async function renderCart() {
       ),
     );
     document.querySelector("[data-checkout]").disabled = true;
+    document.querySelector("[data-cart-total]").textContent = "—";
   }
 }
 let pendingKey = null,
@@ -222,9 +303,9 @@ document
               ? "En variant er ikke tilgjengelig. Endre kurven og prøv igjen."
               : "An item is unavailable. Update your cart and try again."
             : data.error ||
-                (nb
-                  ? "Checkout kunne ikke åpnes."
-                  : "Checkout could not be opened."),
+              (nb
+                ? "Checkout kunne ikke åpnes."
+                : "Checkout could not be opened."),
         );
       const destination = new URL(data.checkoutUrl);
       if (
@@ -300,22 +381,25 @@ async function populateApiSample(form) {
 }
 
 const liveDrawer = document.querySelector("[data-cart-drawer]");
+let cartOpener;
+liveDrawer?.addEventListener("close", () => cartOpener?.focus());
 let drawerRequest = 0;
 async function refreshDrawer() {
   if (!liveDrawer?.open) return;
   const version = ++drawerRequest;
   const target = document.querySelector("[data-drawer-lines]");
+  const focus = rememberCartFocus(target);
   target.textContent = nb ? "Henter katalogen…" : "Loading catalog…";
   const totalBox = document.querySelector("[data-drawer-total]");
   if (totalBox) totalBox.textContent = cart.length ? "—" : format(0);
   if (!cart.length) {
     target.textContent = nb ? "Handlekurven er tom." : "Your cart is empty.";
+    addUndo(target);
+    restoreCartFocus(target, focus);
     return;
   }
   try {
-    const result = await fetch("/reai/catalog");
-    if (!result.ok) throw new Error();
-    const catalog = await result.json();
+    const catalog = await loadCatalog();
     if (version !== drawerRequest) return;
     let total = 0;
     let totalKnown = true;
@@ -327,34 +411,48 @@ async function refreshDrawer() {
         const variant = product?.variants.find((v) => v.id === line.variantId);
         if (variant) total += Number(variant.price) * line.quantity;
         else totalKnown = false;
-        return `<article class="drawer-line"><div><b>${esc(product?.title || (nb ? "Utilgjengelig produkt" : "Unavailable product"))}</b><small>${esc(variant?.options?.map((o) => o.value).join(" / ") || "")}</small><div class="cart-quantity"><button data-drawer-quantity="${esc(line.variantId)}" data-delta="-1" aria-label="${nb ? "Reduser" : "Decrease"} ${esc(product?.title || "")}" ${line.quantity <= 1 ? "disabled" : ""}>−</button><span>${line.quantity}</span><button data-drawer-quantity="${esc(line.variantId)}" data-delta="1" aria-label="${nb ? "Øk" : "Increase"} ${esc(product?.title || "")}" ${line.quantity >= 20 ? "disabled" : ""}>+</button></div><button data-drawer-remove="${esc(line.variantId)}">${nb ? "Fjern" : "Remove"}</button></div><span>${variant ? esc(format(Number(variant.price) * line.quantity, catalog.currency)) : ""}</span></article>`;
+        return `<article class="drawer-line"><div><b>${esc(product?.title || (nb ? "Utilgjengelig produkt" : "Unavailable product"))}</b><small>${esc(variant?.options?.map((o) => o.value).join(" / ") || "")}</small><div data-drawer-quantity="${esc(line.variantId)}"></div><button data-drawer-remove="${esc(line.variantId)}">${nb ? "Fjern" : "Remove"}</button></div><span>${variant ? esc(format(Number(variant.price) * line.quantity, catalog.currency)) : ""}</span></article>`;
       })
       .join("");
     if (totalBox)
       totalBox.textContent = totalKnown ? format(total, catalog.currency) : "—";
-    target.querySelectorAll("[data-drawer-quantity]").forEach((button) =>
+    addUndo(target);
+    target.querySelectorAll("[data-drawer-quantity]").forEach((box) => {
+      const line = cart.find((x) => x.variantId === box.dataset.drawerQuantity);
+      const product = catalog.products.find((p) =>
+        p.variants.some((v) => v.id === line.variantId),
+      );
+      box.append(
+        quantityControl(
+          line.quantity,
+          product?.title || "",
+          line.variantId,
+          (n) => {
+            if (n === 0) removeLine(line, product?.title || "");
+            else {
+              line.quantity = n;
+              save();
+              renderCart();
+            }
+          },
+          nb,
+        ),
+      );
+    });
+    target.querySelectorAll("[data-drawer-remove]").forEach((button) => {
+      button.dataset.cartFocus = button.dataset.drawerRemove + ":remove";
       button.addEventListener("click", () => {
         const line = cart.find(
-          (line) => line.variantId === button.dataset.drawerQuantity,
+          (x) => x.variantId === button.dataset.drawerRemove,
         );
-        if (!line) return;
-        line.quantity = Math.max(
-          1,
-          Math.min(20, line.quantity + Number(button.dataset.delta)),
-        );
-        save();
-        renderCart();
-      }),
-    );
-    target.querySelectorAll("[data-drawer-remove]").forEach((button) =>
-      button.addEventListener("click", () => {
-        cart = cart.filter(
-          (line) => line.variantId !== button.dataset.drawerRemove,
-        );
-        save();
-        renderCart();
-      }),
-    );
+        if (line)
+          removeLine(
+            line,
+            button.closest("article").querySelector("b").textContent,
+          );
+      });
+    });
+    restoreCartFocus(target, focus);
   } catch {
     target.textContent = nb
       ? "Katalogen er midlertidig utilgjengelig. Prøv igjen."
@@ -363,6 +461,7 @@ async function refreshDrawer() {
 }
 document.querySelectorAll("[data-cart-open]").forEach((button) =>
   button.addEventListener("click", () => {
+    cartOpener = button;
     liveDrawer.showModal();
     refreshDrawer();
   }),

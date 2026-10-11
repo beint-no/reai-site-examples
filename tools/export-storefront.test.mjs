@@ -23,7 +23,7 @@ test("exports a standalone site without a parent dependency or demo catalog", as
       "utf8",
     );
     assert.match(filters, /\.\.\/public\/assets\/catalog-filter-data\.js/);
-    for (const asset of ["catalog-filters.js", "catalog-filter-data.js"]) {
+    for (const asset of ["catalog-filters.js", "catalog-filter-data.js", "cart-controls.js"]) {
       assert.equal(
         await readFile(path.join(destination, "public/assets", asset), "utf8"),
         await readFile(
@@ -36,6 +36,8 @@ test("exports a standalone site without a parent dependency or demo catalog", as
     await assert.rejects(
       readdir(path.join(destination, "public/assets/famme")),
     );
+    const assets = await readdir(path.join(destination, "public/assets"));
+    assert.ok(!assets.some((name) => /checkout-lab|ux-notes|fashion/.test(name)));
     assert.match(worker, /newsletter\/subscribe/);
     assert.match(worker, /stock\/subscribe/);
     assert.ok(

@@ -1,3 +1,9 @@
+import {
+  quantityControl,
+  undoControl,
+  rememberCartFocus,
+  restoreCartFocus,
+} from "./cart-controls.js";
 // Explicit UI fixture. This script has no order, payment or newsletter mutation.
 (async () => {
   const nb = document.body.dataset.locale === "nb",
@@ -54,7 +60,10 @@
     Number.isInteger(line.quantity) &&
     line.quantity > 0 &&
     line.quantity <= 20;
-  let cart = [];
+  let cart = [],
+    removed = null,
+    cartOpener,
+    quickOpener;
   try {
     const saved = JSON.parse(localStorage.getItem(key) || "[]");
     if (Array.isArray(saved)) cart = saved.filter(valid).slice(0, 30);
@@ -76,7 +85,28 @@
   }
   function renderCart() {
     const box = document.querySelector("[data-fashion-lines]");
+    const focus = rememberCartFocus(box);
     box.replaceChildren();
+    if (removed)
+      box.append(
+        undoControl(
+          removed.label,
+          () => {
+            if (
+              !cart.some(
+                (x) =>
+                  x.handle === removed.line.handle &&
+                  x.color === removed.line.color &&
+                  x.size === removed.line.size,
+              )
+            )
+              cart.splice(removed.index, 0, removed.line);
+            removed = null;
+            save();
+          },
+          nb,
+        ),
+      );
     let total = 0;
     document
       .querySelectorAll("[data-fashion-count]")
@@ -99,35 +129,33 @@
           `${colorName(line.color)} / ${line.size}${status(p, line.color, line.size) === "BACKORDER" ? text(" · Restordre", " · Backorder") : ""}`,
         ),
       );
-      const quantity = el("div", undefined, "cart-quantity");
-      for (const [delta, label] of [
-        [-1, "−"],
-        [1, "+"],
-      ]) {
-        const b = el("button", label);
-        b.type = "button";
-        b.setAttribute(
-          "aria-label",
-          `${delta < 0 ? text("Reduser", "Decrease") : text("Øk", "Increase")} ${p.title}`,
-        );
-        b.disabled = delta < 0 ? line.quantity <= 1 : line.quantity >= 20;
-        b.addEventListener("click", () => {
-          line.quantity += delta;
-          save();
-        });
-        quantity.append(b);
-        if (delta === -1) quantity.append(el("span", String(line.quantity)));
-      }
-      const remove = el("button", text("Fjern", "Remove"), "fashion-remove");
-      remove.type = "button";
-      remove.setAttribute(
-        "aria-label",
-        `${text("Fjern", "Remove")} ${p.title}`,
-      );
-      remove.addEventListener("click", () => {
+      const key = line.handle + ":" + line.color + ":" + line.size;
+      const removeLine = () => {
+        removed = {
+          line: { ...line },
+          label: p.title,
+          index: cart.indexOf(line),
+        };
         cart = cart.filter((x) => x !== line);
         save();
-      });
+      };
+      const quantity = quantityControl(
+        line.quantity,
+        p.title,
+        key,
+        (n) => {
+          if (n === 0) removeLine();
+          else {
+            line.quantity = n;
+            save();
+          }
+        },
+        nb,
+      );
+      const remove = el("button", text("Fjern", "Remove"), "fashion-remove");
+      remove.type = "button";
+      remove.dataset.cartFocus = key + ":remove";
+      remove.addEventListener("click", removeLine);
       info.append(quantity, remove);
       row.append(info, el("strong", money(p.price * line.quantity)));
       box.append(row);
@@ -142,6 +170,7 @@
         ),
       );
     document.querySelector("[data-fashion-total]").textContent = money(total);
+    restoreCartFocus(box, focus);
   }
   function bindForm(form, p, scope) {
     function sync() {
@@ -153,9 +182,33 @@
         image.src = `/assets/famme/${p.colors.find((c) => c.key === color).image}.avif`;
         image.alt = `${p.title} / ${colorName(color)}`;
       }
+      scope
+        .querySelectorAll("[data-fashion-image]")
+        .forEach((b) =>
+          b.setAttribute(
+            "aria-pressed",
+            String(
+              b.dataset.fashionImage ===
+                p.colors.find((c) => c.key === color).image,
+            ),
+          ),
+        );
       form.querySelectorAll("[name=size]").forEach((input) => {
         input.disabled = status(p, color, input.value) === "OUT_OF_STOCK";
         if (input.disabled) input.checked = false;
+        let statusLabel = input
+          .closest("label")
+          .querySelector("[data-size-status]");
+        if (!statusLabel) {
+          statusLabel = el("small");
+          statusLabel.dataset.sizeStatus = "";
+          input.closest("label").lastElementChild.append(statusLabel);
+        }
+        statusLabel.textContent = input.disabled
+          ? text("Utsolgt", "Sold out")
+          : status(p, color, input.value) === "BACKORDER"
+            ? text("Restordre", "Backorder")
+            : "";
         input.closest("label").title = input.disabled
           ? text("Utsolgt i denne varianten", "Sold out in this variant")
           : status(p, color, input.value) === "BACKORDER"
@@ -199,12 +252,15 @@
         cart.push({ handle: p.handle, color, size, quantity: 1 });
       else return;
       save();
+      cartOpener = quick.open
+        ? quickOpener
+        : form.querySelector("button[type=submit]");
       quick.close();
       drawer.showModal();
     });
     sync();
   }
-  function quickAdd(p, selectedColor) {
+  function quickAdd(p, selectedColor, selectedSize) {
     const content = document.querySelector("[data-fashion-quick-content]");
     content.replaceChildren();
     const photo = el("div");
@@ -242,6 +298,7 @@
         input = el("input");
       input.type = "radio";
       input.name = "size";
+      input.checked = size === selectedSize;
       input.value = size;
       input.required = true;
       label.append(input, el("span", size));
@@ -262,6 +319,20 @@
     bindForm(form, p, content);
     quick.showModal();
   }
+  const chosenVariant = new URL(location.href).searchParams.get("variant");
+  const initialForm = document.querySelector("[data-fashion-add]");
+  if (initialForm && chosenVariant) {
+    const p = find(initialForm.dataset.fashionAdd);
+    for (const color of p.colors)
+      for (const size of p.sizes)
+        if (chosenVariant === `fashion-${p.handle}-${color.key}-${size}`) {
+          initialForm.querySelector(
+            `[name=color][value="${color.key}"]`,
+          ).checked = true;
+          initialForm.querySelector(`[name=size][value="${size}"]`).checked =
+            status(p, color.key, size) !== "OUT_OF_STOCK";
+        }
+  }
   document
     .querySelectorAll("[data-fashion-add]")
     .forEach((form) =>
@@ -280,27 +351,72 @@
       card.querySelector("img").src =
         `/assets/famme/${button.dataset.cardColor}.avif`;
       card.dataset.selectedColor = button.dataset.colorName;
+      for (const link of card.querySelectorAll('a[href*="/products/"]')) {
+        const url = new URL(link.href);
+        url.searchParams.set(
+          "variant",
+          `fashion-${card.dataset.productId}-${button.dataset.colorName}-${card.dataset.selectedSize || find(card.dataset.productId).sizes[0]}`,
+        );
+        link.href = url.pathname + url.search;
+      }
+    }),
+  );
+  function syncFilteredCards() {
+    document
+      .querySelectorAll("[data-fashion-card][data-catalog-variant]")
+      .forEach((card) => {
+        const p = find(card.dataset.productId);
+        const match = p.colors
+          .flatMap((color) =>
+            p.sizes.map((size) => ({
+              color,
+              size,
+              id: `fashion-${p.handle}-${color.key}-${size}`,
+            })),
+          )
+          .find((variant) => variant.id === card.dataset.catalogVariant);
+        card.dataset.selectedSize = match?.size || "";
+        card.dataset.selectedColor = match?.color.key || p.colors[0].key;
+        const color = match?.color || p.colors[0];
+        card.querySelector("img").src = `/assets/famme/${color.image}.avif`;
+        card
+          .querySelectorAll("[data-card-color]")
+          .forEach((button) =>
+            button.setAttribute(
+              "aria-pressed",
+              String(button.dataset.colorName === color.key),
+            ),
+          );
+      });
+  }
+  document.addEventListener("reai:catalog-render", syncFilteredCards);
+  syncFilteredCards();
+  document.querySelectorAll("[data-fashion-quick]").forEach((button) =>
+    button.addEventListener("click", () => {
+      quickOpener = button;
+      quickAdd(
+        find(button.dataset.fashionQuick),
+        button.closest("[data-fashion-card]")?.dataset.selectedColor,
+        button.closest("[data-fashion-card]")?.dataset.selectedSize,
+      );
     }),
   );
   document
-    .querySelectorAll("[data-fashion-quick]")
-    .forEach((button) =>
-      button.addEventListener("click", () =>
-        quickAdd(
-          find(button.dataset.fashionQuick),
-          button.closest("[data-fashion-card]")?.dataset.selectedColor,
-        ),
-      ),
-    );
-  document
     .querySelector("[data-fashion-cart-open]")
-    .addEventListener("click", () => drawer.showModal());
+    .addEventListener("click", (e) => {
+      cartOpener = e.currentTarget;
+      drawer.showModal();
+    });
   document
     .querySelector("[data-fashion-cart-close]")
     .addEventListener("click", () => drawer.close());
   document
     .querySelector("[data-fashion-quick-close]")
     .addEventListener("click", () => quick.close());
+  drawer.addEventListener("close", () => cartOpener?.focus());
+  quick.addEventListener("close", () => {
+    if (!drawer.open) quickOpener?.focus();
+  });
   for (const dialog of [drawer, quick])
     dialog.addEventListener("click", (e) => {
       if (
@@ -309,43 +425,14 @@
       )
         dialog.close();
     });
-  const grid = document.querySelector("[data-fashion-grid]");
-  if (grid) {
-    const search = document.querySelector("[data-fashion-search]"),
-      stock = document.querySelector("[data-fashion-stock]"),
-      sort = document.querySelector("[data-fashion-sort]"),
-      cards = Array.from(grid.children);
-    function filter() {
-      let count = 0;
-      for (const card of cards) {
-        const p = find(
-          card.querySelector("[data-fashion-quick]").dataset.fashionQuick,
-        );
-        card.hidden =
-          !p.title.toLowerCase().includes(search.value.trim().toLowerCase()) ||
-          (stock.value !== "all" &&
-            !p.colors.some(
-              (c) => status(p, c.key, stock.value) !== "OUT_OF_STOCK",
-            ));
-        if (!card.hidden) count++;
-      }
-      const ordered =
-        sort.value === "featured"
-          ? cards
-          : [...cards].sort((a, b) =>
-              sort.value === "asc"
-                ? Number(a.dataset.price) - Number(b.dataset.price)
-                : Number(b.dataset.price) - Number(a.dataset.price),
-            );
-      ordered.forEach((card) => grid.append(card));
-      document.querySelector("[data-fashion-empty]").hidden = count > 0;
-      document.querySelector("[data-fashion-results]").textContent =
-        `${count} ${count === 1 ? text("produkt vist", "product shown") : text("produkter vist", "products shown")}`;
-    }
-    search.addEventListener("input", filter);
-    stock.addEventListener("change", filter);
-    sort.addEventListener("change", filter);
-    filter();
-  }
+  document.querySelectorAll("[data-fashion-image]").forEach((button) =>
+    button.addEventListener("click", () => {
+      const target = document.querySelector("[data-fashion-main-image] img");
+      target.src = `/assets/famme/${button.dataset.fashionImage}.avif`;
+      document
+        .querySelectorAll("[data-fashion-image]")
+        .forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+    }),
+  );
   renderCart();
 })();

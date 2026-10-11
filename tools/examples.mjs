@@ -15,7 +15,11 @@ export async function build(name) {
   await cp(path.join(root, "starter/public"), path.join(directory, "public"), {
     recursive: true,
   });
-  for (const file of ["catalog-filter-data.js", "catalog-filters.js"]) {
+  for (const file of [
+    "catalog-filter-data.js",
+    "catalog-filters.js",
+    "cart-controls.js",
+  ]) {
     await cp(
       path.join(root, "demo/public/assets", file),
       path.join(directory, "public/assets", file),
