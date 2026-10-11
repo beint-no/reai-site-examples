@@ -4,7 +4,9 @@ One Worker at nettbutikk.reai.no. The front page explains platform primitives.
 Nine distinct designs: Studio, Atelier, Supply, Essential, Index, Launch and
 Trade use the published ReAI catalog; Famme and Lookbook share an isolated fashion
 fixture with licensed AVIF photos. Launch focuses on one product; Trade uses
-inline variant quantities; Index supports collection search, sorting and list/grid.
+inline variant quantities; Index and the main catalog use backend-derived category,
+type, attribute and option filters, variant prices and live availability. Filter
+choices come from each collection; match every condition on the same variant.
 The gallery filters by shopping feature. Learning pages explain collection
 membership and the full commerce flow without exposing private administration.
 Use white, ink and teal with open ruled feature rows; Atelier uses a warm serif

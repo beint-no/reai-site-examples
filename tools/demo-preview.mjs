@@ -9,6 +9,29 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."),
 const blueprint = JSON.parse(
   await readFile(path.join(root, "demo/seed/catalog.json"), "utf8"),
 );
+const metadata = JSON.parse(
+  await readFile(path.join(root, "demo/seed/filter-metadata.json"), "utf8"),
+);
+const attributeValues = new Map(
+  Object.entries(metadata.values).map(([key, v], i) => [
+    key,
+    {
+      id: `10000000-0000-4000-8000-${String(700 + i).padStart(12, "0")}`,
+      label: v.label,
+      taxonomyValues: v.taxonomyValues,
+      colors: v.colors,
+      aliases: [key],
+    },
+  ]),
+);
+function fixtureAttributes(handle, optionValue = null) {
+  const values = (metadata.products[handle]?.attributes || [])
+    .filter((a) =>
+      optionValue == null ? !a.option : a.option?.value === optionValue,
+    )
+    .map((a) => attributeValues.get(a.value));
+  return values.length ? [{ key: "color", name: "Color", values }] : [];
+}
 const uuid = (n) => `10000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 let next = 100;
 const products = blueprint.products.map((p, i) => ({
@@ -17,6 +40,9 @@ const products = blueprint.products.map((p, i) => ({
   title: p.title,
   description: p.description,
   brand: "ReAI Demo",
+  productType: metadata.products[p.handle]?.productType || null,
+  category: metadata.products[p.handle]?.category || null,
+  attributes: fixtureAttributes(p.handle),
   seoTitle: p.title,
   images: [],
   variants: p.variants.map((v, index) => ({
@@ -26,6 +52,7 @@ const products = blueprint.products.map((p, i) => ({
     sku: `REAI-DEMO-${p.handle}-${index + 1}`,
     options: [{ name: "Dose", value: v.title }],
     vatRate: 25,
+    attributes: fixtureAttributes(p.handle, v.title),
   })),
 }));
 const collections = blueprint.collections.map((c, i) => ({

@@ -1,0 +1,54 @@
+{
+  "values": {
+    "sun-yellow": {
+      "key": "color",
+      "label": "Solgul",
+      "taxonomyValues": [
+        { "id": "gid://shopify/TaxonomyValue/14", "name": "Yellow" }
+      ],
+      "colors": ["#f2dc74"]
+    },
+    "reai-blue": {
+      "key": "color",
+      "label": "ReAI-blå",
+      "taxonomyValues": [
+        { "id": "gid://shopify/TaxonomyValue/2", "name": "Blue" }
+      ],
+      "colors": ["#444de5"]
+    }
+  },
+  "products": {
+    "heia-reai": { "productType": "Utviklingsstøtte", "attributes": [] },
+    "motivasjon-til-greg": {
+      "productType": "Symbolske testprodukter",
+      "attributes": [{ "value": "sun-yellow" }]
+    },
+    "reai-gavekort": {
+      "productType": "Gavekort",
+      "category": { "id": "gc", "name": "Gift Cards" },
+      "attributes": []
+    },
+    "zen-i-innboksen": {
+      "productType": "Symbolske testprodukter",
+      "attributes": [{ "value": "reai-blue" }]
+    },
+    "kvitteringskonfetti": {
+      "productType": "Symbolske testprodukter",
+      "attributes": [
+        {
+          "value": "sun-yellow",
+          "option": { "name": "Dose", "value": "Solgul" }
+        },
+        {
+          "value": "reai-blue",
+          "option": { "name": "Dose", "value": "ReAI-blå" }
+        }
+      ]
+    },
+    "mandagsmot": {
+      "productType": "Symbolske testprodukter",
+      "attributes": [{ "value": "sun-yellow" }]
+    },
+    "test-betaling": { "productType": "Testbetaling", "attributes": [] }
+  }
+}

@@ -23,3 +23,11 @@ and free demo-only store pickup, with explicit flags and --apply. It preflights
 Site/domains/market and pickup conflicts, preserves carrier methods and safely
 reuses existing configuration. It never creates orders, issues invoices or sends
 EHF. Pickup is hidden for digital-only carts. Commands live in docs/demo-setup.md.
+
+catalog-metadata.mjs seeds filter-metadata.json through SSH ax42/PostgreSQL because
+product types and structured attributes have no public management write API yet.
+Plan by default; --apply needs explicit tenant/Site IDs. It requires the exact named
+demo publications, ReAI Demo brand, digital products and REAI-DEMO-* SKUs, rejects
+conflicting classifications/source ownership, preserves prices/tax/inventory and
+bumps catalog versions. A pre-change metadata snapshot is saved under ignored .local/.
+Color metadata describes the symbolic test illustrations, not physical goods.
