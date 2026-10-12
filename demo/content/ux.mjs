@@ -3,6 +3,7 @@
 import { additionalTopics, learningPaths } from "./ux-extension.mjs";
 import { topicDepth } from "./ux-depth.mjs";
 import { commerceTopics } from "./ux-commerce.mjs";
+import { libraryTopics } from "./ux-library.mjs";
 import { topicTitles, uxGroups, groupForTopic } from "./ux-groups.mjs";
 export { learningPaths, uxGroups, groupForTopic };
 const topic = (
@@ -622,7 +623,7 @@ const baseTopics = [
     ],
   ),
 ];
-export const uxTopics = [...baseTopics.map((t) => ({ ...t, ...topicDepth[t.slug], cases: [...t.cases, ...topicDepth[t.slug].extra] })), ...additionalTopics, ...commerceTopics].map(t => ({...t, title: topicTitles[t.slug] || t.title, group: groupForTopic(t.slug).slug}));
+export const uxTopics = [...baseTopics.map((t) => ({ ...t, ...topicDepth[t.slug], cases: [...t.cases, ...topicDepth[t.slug].extra] })), ...additionalTopics, ...commerceTopics, ...libraryTopics].map(t => ({...t, title: topicTitles[t.slug] || t.title, group: groupForTopic(t.slug).slug}));
 uxTopics.find(t => t.slug === "product-lists").examples.push(["Product decision lab", "/ux/lab/product/"]);
 export const acceptanceCount = uxTopics.reduce((n, t) => n + t.cases.length, 0);
 export const designTopics = {
@@ -653,6 +654,7 @@ export const designTopics = {
 };
 export const uxRoutes = [
   "/ux",
+  "/ux/library",
   "/ux/lab/checkout",
   "/ux/lab/discovery",
   "/ux/lab/compare",

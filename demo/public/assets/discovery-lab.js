@@ -1,8 +1,15 @@
-import { searchDiscovery, discoverySuggestions } from "./discovery-model.js";
+import { searchDiscovery, discoverySuggestions, discoveryCorrection } from "./discovery-model.js";
 const root = document.querySelector("[data-discovery-lab]");
 if (root) {
   const nb = document.body.dataset.locale === "nb", t = (a, b) => nb ? a : b;
   const field = root.querySelector("[name=q]"), list = root.querySelector("[role=listbox]");
+  const scope = () => root.querySelector('[name=scope]:checked').value;
+  function restoreUrl() {
+    const u = new URL(location.href);
+    field.value = u.searchParams.get('q') || '';
+    const value = ['products','help'].includes(u.searchParams.get('scope')) ? u.searchParams.get('scope') : 'all';
+    root.querySelector(`[name=scope][value=${value}]`).checked = true;
+  }
   let typed = "", active = -1, suggestions = [];
   const el = (tag, text) => { const n = document.createElement(tag); if (text != null) n.textContent = text; return n; };
   function close() { list.hidden = true; field.setAttribute("aria-expanded", "false"); field.removeAttribute("aria-activedescendant"); active = -1; }
@@ -18,10 +25,19 @@ if (root) {
     list.hidden = !suggestions.length; field.setAttribute("aria-expanded", String(!!suggestions.length));
   }
   function render(query) {
-    const result = searchDiscovery(query), box = root.querySelector("[data-discovery-results]"), help = root.querySelector("[data-discovery-help]");
+    const result = searchDiscovery(query, scope()), box = root.querySelector("[data-discovery-results]"), help = root.querySelector("[data-discovery-help]");
     box.replaceChildren(); help.replaceChildren();
+    const correction = discoveryCorrection(query), correctionBox = root.querySelector('[data-discovery-correction]');
+    correctionBox.replaceChildren(); correctionBox.hidden = !correction;
+    if (correction) {
+      correctionBox.append(document.createTextNode(t('Mente du ', 'Did you mean ')));
+      const button = el('button', correction); button.type = 'button';
+      button.addEventListener('click', () => { field.value = correction; submit(); field.focus(); });
+      correctionBox.append(button);
+    }
+    root.querySelector('[data-discovery-widen]').hidden = scope() === 'all';
     root.querySelector("[data-discovery-count]").textContent = `${result.products.length} ${t("produkter", result.products.length === 1 ? "product" : "products")} · ${result.help.length} ${t("hjelpesvar", result.help.length === 1 ? "help answer" : "help answers")}${query ? ` · “${query}”` : ""}`;
-    document.querySelectorAll(".language").forEach((link) => { const target = new URL(link.href); if(query) target.searchParams.set("q",query); else target.searchParams.delete("q"); link.href = target.pathname + target.search; });
+    document.querySelectorAll(".language").forEach((link) => { const target = new URL(link.href); if(query) target.searchParams.set("q",query); else target.searchParams.delete("q"); if(scope() !== 'all') target.searchParams.set('scope',scope()); else target.searchParams.delete('scope'); link.href = target.pathname + target.search; });
     result.products.forEach((p) => {
       const row = el("article"), art = el("span", p.title.slice(0, 1)); art.className = "ux-search-art"; art.setAttribute("aria-hidden", "true");
       row.append(art, el("h2", p.title), el("strong", p.price + " kr"), el("p", nb ? p.type : p.type === "Termokopp" ? "Travel mug" : "Water bottle"));
@@ -37,6 +53,7 @@ if (root) {
   function submit(mode = "push") {
     const q = field.value.trim().slice(0,120), u = new URL(location.href); field.value = q;
     if (q) u.searchParams.set("q", q); else u.searchParams.delete("q");
+    if (scope() !== 'all') u.searchParams.set('scope', scope()); else u.searchParams.delete('scope');
     if (u.href !== location.href) history[mode === "push" ? "pushState" : "replaceState"](null, "", u);
     close(); render(q);
   }
@@ -52,7 +69,9 @@ if (root) {
   field.addEventListener("blur", () => close());
   root.querySelector("form").addEventListener("submit", (e) => { e.preventDefault(); submit(); });
   root.querySelectorAll("[data-discovery-example]").forEach((b) => b.addEventListener("click", () => { field.value = b.dataset.discoveryExample; submit(); field.focus(); }));
-  root.querySelector("[data-discovery-clear]").addEventListener("click", () => { field.value = ""; submit(); field.focus(); });
-  window.addEventListener("popstate", () => { field.value = new URL(location.href).searchParams.get("q") || ""; close(); render(field.value); });
-  field.value = new URL(location.href).searchParams.get("q") || ""; submit("replace");
+  root.querySelectorAll('[name=scope]').forEach((radio) => radio.addEventListener('change', () => submit()));
+  root.querySelector('[data-discovery-widen]').addEventListener('click', () => { root.querySelector('[name=scope][value=all]').checked = true; submit(); field.focus(); });
+  root.querySelector("[data-discovery-clear]").addEventListener("click", () => { field.value = ""; root.querySelector('[name=scope][value=all]').checked = true; submit(); field.focus(); });
+  window.addEventListener("popstate", () => { restoreUrl(); close(); render(field.value); });
+  restoreUrl(); submit("replace");
 }

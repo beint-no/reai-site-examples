@@ -1,3 +1,5 @@
+import { fashionStock, editFashionVariant } from "./fashion-cart-model.js";
+import { installFashionZoom } from "./fashion-zoom.js";
 import { installFashionGuides } from "./fashion-guide.js";
 import {
   quantityControl,
@@ -55,6 +57,7 @@ import {
     return;
   }
   installFashionGuides(products, nb);
+  installFashionZoom(nb);
   const find = (handle) => products.find((p) => p.handle === handle);
   const valid = (line) =>
     find(line.handle)?.colors.some((c) => c.key === line.color) &&
@@ -78,13 +81,7 @@ import {
     } catch {}
     renderCart();
   }
-  function status(p, color, size) {
-    return p.backorder[color]?.includes(size)
-      ? "BACKORDER"
-      : p.soldOut[color]?.includes(size)
-        ? "OUT_OF_STOCK"
-        : "AVAILABLE";
-  }
+  const status = fashionStock;
   function renderCart() {
     const box = document.querySelector("[data-fashion-lines]");
     const focus = rememberCartFocus(box);
@@ -158,7 +155,13 @@ import {
       remove.type = "button";
       remove.dataset.cartFocus = key + ":remove";
       remove.addEventListener("click", removeLine);
-      info.append(quantity, remove);
+      const edit = el('button', text('Endre variant', 'Edit variant'), 'fashion-remove');
+      edit.type = 'button'; edit.dataset.cartFocus = key + ':edit';
+      edit.setAttribute('aria-label', text('Endre variant for ', 'Edit variant for ') + p.title);
+      edit.addEventListener('click', () => { quickOpener = edit; quickAdd(p, line.color, line.size, line); });
+      if (status(p, line.color, line.size) === 'OUT_OF_STOCK') info.append(el('p', text('Denne varianten er utsolgt. Endre variant eller fjern varen.', 'This variant is sold out. Edit the variant or remove the item.'), 'fashion-cart-disclosure'));
+      const actions = el('div', undefined, 'fashion-cart-actions'); actions.append(edit, remove);
+      info.append(quantity, actions);
       row.append(info, el("strong", money(p.price * line.quantity)));
       box.append(row);
       total += p.price * line.quantity;
@@ -174,7 +177,7 @@ import {
     document.querySelector("[data-fashion-total]").textContent = money(total);
     restoreCartFocus(box, focus);
   }
-  function bindForm(form, p, scope) {
+  function bindForm(form, p, scope, editingLine) {
     const guide = el("button", text("Størrelsesguide", "Size guide"), "ux-guide-open");
     guide.type = "button"; guide.dataset.sizeGuide = p.handle;
     const sizeSet = form.querySelector("[name=size]").closest("fieldset");
@@ -250,6 +253,17 @@ import {
         status(p, color, size) === "OUT_OF_STOCK"
       )
         return;
+      if (editingLine) {
+        const updated = editFashionVariant(cart, cart.indexOf(editingLine), p, color, size);
+        if (!updated) {
+          form.querySelector('[data-fashion-stock-message]').textContent = text('Kan ikke oppdatere: varianten er utsolgt, eller samlet antall overstiger 20.', 'Cannot update: the variant is sold out or the combined quantity exceeds 20.');
+          return;
+        }
+        cart = updated; removed = null; save(); quick.close();
+        quickOpener = [...drawer.querySelectorAll('[data-cart-focus]')].find((b) => b.dataset.cartFocus === p.handle + ':' + color + ':' + size + ':edit');
+        quickOpener?.focus();
+        return;
+      }
       const existing = cart.find(
         (x) => x.handle === p.handle && x.color === color && x.size === size,
       );
@@ -266,7 +280,7 @@ import {
     });
     sync();
   }
-  function quickAdd(p, selectedColor, selectedSize) {
+  function quickAdd(p, selectedColor, selectedSize, editingLine) {
     const content = document.querySelector("[data-fashion-quick-content]");
     content.replaceChildren();
     const photo = el("div");
@@ -276,6 +290,7 @@ import {
     img.alt = p.title;
     photo.append(img);
     content.append(photo, el("h3", p.title), el("strong", money(p.price)));
+    if (editingLine) content.append(el('p', text('Antall beholdes: ', 'Quantity retained: ') + editingLine.quantity));
     const form = el("form");
     form.dataset.fashionAdd = p.handle;
     const colorSet = el("fieldset");
@@ -316,13 +331,13 @@ import {
     message.setAttribute("role", "status");
     const button = el(
       "button",
-      text("Legg i testkurven +", "Add to test cart +"),
+      editingLine ? text("Oppdater variant", "Update variant") : text("Legg i testkurven +", "Add to test cart +"),
       "fashion-button",
     );
     button.type = "submit";
     form.append(colorSet, sizeSet, message, button);
     content.append(form);
-    bindForm(form, p, content);
+    bindForm(form, p, content, editingLine);
     quick.showModal();
   }
   const chosenVariant = new URL(location.href).searchParams.get("variant");
@@ -421,7 +436,7 @@ import {
     .addEventListener("click", () => quick.close());
   drawer.addEventListener("close", () => cartOpener?.focus());
   quick.addEventListener("close", () => {
-    if (!drawer.open) quickOpener?.focus();
+    quickOpener?.focus();
   });
   for (const dialog of [drawer, quick])
     dialog.addEventListener("click", (e) => {
@@ -435,6 +450,7 @@ import {
     button.addEventListener("click", () => {
       const target = document.querySelector("[data-fashion-main-image] img");
       target.src = `/assets/famme/${button.dataset.fashionImage}.avif`;
+      target.alt = button.querySelector("img").alt;
       document
         .querySelectorAll("[data-fashion-image]")
         .forEach((b) => b.setAttribute("aria-pressed", String(b === button)));

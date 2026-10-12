@@ -1,3 +1,4 @@
+import { libraryTopics } from './ux-library.mjs';
 // A single primary group per concept. Names describe visitor tasks, not internal modules.
 const group = (slug,title,summary,topics,decision,observe,guardrail,platform) => ({slug,title,summary,topics,decision,observe,guardrail,platform});
 export const uxGroups = [
@@ -43,7 +44,14 @@ export const uxGroups = [
     ['Definer målgruppe, eksponering, nevner og primært utfall før start. Registrer hva som kan invalidere datagrunnlaget.','Define audience, exposure, denominator and primary outcome before starting. Record what could invalidate the data.'],
     ['Datatap, feil fordeling mellom varianter, retur/refusjon, margin, tilgjengelighet og ytelse på mobil.','Data loss, incorrect variant allocation, returns/refunds, margin, accessibility and mobile performance.'],
     [['Integrasjon og ansvar','Integration and responsibilities','integration'],['Test hele checkout','Test full checkout','checkout-test']]),
+  group('accessibility', ['Tilgjengelige valg, skjema og dialoger','Accessible choices, forms and dialogs'],
+    ['La kunden løse samme kjøpsoppgave med tastatur, berøring og egne visningspreferanser.','Let shoppers complete the same tasks using keyboard, touch and display preferences.'], [],
+    ['Bruk native kontroller og tydelige navn. Test hele oppgaven; en enkelt ARIA-attributt eller stor knapp gir ingen sertifisering.','Use native controls and clear names. Test the entire task; one ARIA attribute or large button proves no certification.'],
+    ['Observer om kunden kan velge variant, rette en feil og returnere fra dialogen uten hjelp.','Observe whether shoppers can select variants, correct errors and return from a dialog without assistance.'],
+    ['Skjult fokus, tastaturfeller, feil uten forklaring og kontroller som dekker innhold ved zoom.','Hidden focus, keyboard traps, unexplained errors and controls covering content when zoomed.'],
+    [['Integrasjon og frontendansvar','Integration and frontend responsibilities','integration']]),
 ];
+for (const topic of libraryTopics) uxGroups.find(g=>g.slug===topic.group).topics.push(topic.slug);
 export const groupForTopic = id => uxGroups.find(g=>g.topics.includes(id));
 export const topicTitles = {
   navigation:['Kategorinavigasjon i nettbutikk','Store category navigation'], search:['Produktsøk og nulltreff','Product search and zero results'],

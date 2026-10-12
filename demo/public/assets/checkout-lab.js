@@ -28,33 +28,7 @@ if (root) {
       currency: "NOK",
       maximumFractionDigits: 0,
     }).format(n);
-  function refresh() {
-    const v = input(),
-      totals = checkoutTotal(v.delivery, Number(v.quantity));
-    root.querySelector("[data-lab-address]").hidden = v.delivery === "pickup";
-    root.querySelector("[data-lab-business]").hidden = !v.business;
-    root.querySelector("[data-lab-invoice]").hidden = !v.business;
-    form.elements.org.required = v.business;
-    for (const key of ["address", "postal", "city"]) form.elements[key].required = v.delivery === "shipping";
-    for (const method of ["shipping", "pickup"]) root.querySelector(`[data-lab-date-${method}]`).textContent = t("Simulert: ","Simulated: ") + dateText(method);
-    if (
-      !v.business &&
-      root.querySelector("[name=outcome]:checked").value === "invoice"
-    )
-      root.querySelector("[name=outcome][value=paid]").checked = true;
-    for (const key of ["subtotal", "shipping", "total"])
-      root.querySelector(`[data-lab-${key}]`).textContent = totals
-        ? amount(totals[key])
-        : "—";
-  }
-  form.addEventListener("input", refresh);
-  form.addEventListener("change", refresh);
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const v = input(),
-      errors = validateCheckout(v),
-      box = root.querySelector("[data-lab-errors]");
-    const messages = {
+  const messages = {
       name: t("Oppgi et navn.", "Enter a name."),
       email: t(
         "Oppgi en gyldig e-postadresse, for eksempel demo@example.invalid.",
@@ -78,27 +52,65 @@ if (root) {
         "Choose a whole quantity from 1 to 20.",
       ),
     };
-    box.replaceChildren();
-    box.hidden = !errors.length;
-    for (const field of form.querySelectorAll("[data-field-error]")) {
-      field.textContent = "";
-      form.elements[field.dataset.fieldError].removeAttribute("aria-invalid");
+  let submitted = false;
+  function paintError(name, invalid) {
+    const field = form.elements[name], error = form.querySelector(`[data-field-error=${name}]`);
+    if (!error) return;
+    error.textContent = invalid ? messages[name] : '';
+    if (invalid) field.setAttribute('aria-invalid','true'); else field.removeAttribute('aria-invalid');
+  }
+  function summary() {
+    const box = root.querySelector('[data-lab-errors]'); box.replaceChildren();
+    if (submitted) for (const field of form.querySelectorAll('[aria-invalid=true]')) {
+      const link = document.createElement('a'); link.href = '#' + field.id;
+      link.textContent = field.closest('label').firstChild.textContent;
+      link.addEventListener('click', (event) => { event.preventDefault(); field.focus(); }); box.append(link);
     }
-    for (const name of errors) {
-      const field = form.elements[name],
-        error = form.querySelector(`[data-field-error=${name}]`),
-        label = field.closest("label").firstChild.textContent;
-      error.textContent = messages[name];
-      field.setAttribute("aria-invalid", "true");
-      const link = document.createElement("a");
-      link.href = "#" + (field.id || "");
-      link.textContent = label;
-      link.addEventListener("click", (e) => {
-        e.preventDefault();
-        field.focus();
-      });
-      box.append(link);
-    }
+    box.hidden = !box.children.length;
+  }
+  form.addEventListener('focusout', (event) => {
+    const name = event.target.name;
+    if (messages[name]) { paintError(name, validateCheckout(input()).includes(name)); summary(); }
+  });
+  function reviewTotals(prefix) {
+    const totals = checkoutTotal(input().delivery, Number(input().quantity));
+    for (const key of ['subtotal','shipping','total']) root.querySelector(`[data-${prefix}-${key}]`).textContent = amount(totals[key]);
+  }
+  function refresh() {
+    const v = input(),
+      totals = checkoutTotal(v.delivery, Number(v.quantity));
+    root.querySelector("[data-lab-address]").hidden = v.delivery === "pickup";
+    root.querySelector("[data-lab-business]").hidden = !v.business;
+    root.querySelector("[data-lab-invoice]").hidden = !v.business;
+    form.elements.org.required = v.business;
+    for (const key of ["address", "postal", "city"]) form.elements[key].required = v.delivery === "shipping";
+    for (const method of ["shipping", "pickup"]) root.querySelector(`[data-lab-date-${method}]`).textContent = t("Simulert: ","Simulated: ") + dateText(method);
+    if (
+      !v.business &&
+      root.querySelector("[name=outcome]:checked").value === "invoice"
+    )
+      root.querySelector("[name=outcome][value=paid]").checked = true;
+    for (const name of ['org','address','postal','city']) if (!form.elements[name].required) paintError(name, false);
+    summary();
+    for (const key of ["subtotal", "shipping", "total"])
+      root.querySelector(`[data-lab-${key}]`).textContent = totals
+        ? amount(totals[key])
+        : "—";
+  }
+  form.addEventListener('input', (event) => {
+    refresh();
+    const name = event.target.name;
+    if (messages[name] && event.target.hasAttribute('aria-invalid') && !validateCheckout(input()).includes(name)) { paintError(name, false); summary(); }
+  });
+  form.addEventListener("change", refresh);
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const v = input(),
+      errors = validateCheckout(v),
+      box = root.querySelector("[data-lab-errors]");
+    submitted = true;
+    for (const name of Object.keys(messages)) paintError(name, errors.includes(name));
+    summary();
     if (errors.length) {
       box.focus();
       return;
@@ -107,6 +119,7 @@ if (root) {
     root.querySelector("[data-lab-review-text]").textContent =
       `${v.name} · ${v.email} · ${v.delivery === "pickup" ? t("Henting i Testgata 1, Oslo", "Pickup at Testgata 1, Oslo") : `${v.address}${v.address2 ? ", "+v.address2 : ""}, ${v.postal} ${v.city}`} · ${v.quantity} × ${t("testprodukt", "test product")}`;
     root.querySelector("[data-lab-delivery-summary]").textContent = deliveryText(v.delivery);
+    reviewTotals("review");
     form.hidden = true;
     review.hidden = false;
     review.focus();
@@ -154,6 +167,7 @@ if (root) {
     root.querySelector("[data-lab-confirm-text]").textContent = note;
     root.querySelector("[data-lab-confirm-details]").textContent =
       root.querySelector("[data-lab-review-text]").textContent + " · " + deliveryText(input().delivery);
+    reviewTotals("confirm");
     review.hidden = true;
     confirmation.hidden = false;
     confirmation.focus();

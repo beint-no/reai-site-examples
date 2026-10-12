@@ -47,6 +47,13 @@ const format = (p, c = "NOK") =>
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(p);
+document.addEventListener('keydown', (event) => {
+  const header = document.querySelector('.header');
+  if (event.key === 'Escape' && header?.classList.contains('menu-open')) {
+    header.classList.remove('menu-open');
+    const trigger = header.querySelector('.menu-toggle'); trigger?.setAttribute('aria-expanded','false'); trigger?.focus();
+  }
+});
 document.querySelector(".menu-toggle")?.addEventListener("click", (e) => {
   const open = document.querySelector(".header").classList.toggle("menu-open");
   e.currentTarget.setAttribute("aria-expanded", String(open));

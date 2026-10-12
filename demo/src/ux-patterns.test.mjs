@@ -51,8 +51,8 @@ test('sizing measurements convert units instead of just relabeling',()=>{
   assert.equal(measurement(72,'inch','en'),'28.3');assert.equal(measurement(72,'inch','nb'),'28,3');assert.equal(measurement(72,'cm','nb'),'72');
 });
 test('every concept states applicability, integration boundary and executable tasks',()=>{
-  assert.equal(uxTopics.length,33);assert.equal(acceptanceCount,137);
-  for(const t of uxTopics){for(const pair of [t.challenge,t.when,t.data,t.boundary])assert.ok(pair.length===2&&pair.every(v=>v.length>20),t.slug);assert.ok(["baymard.com","developers.google.com","exp-platform.com","web.dev"].includes(new URL(t.source[1]).hostname),t.slug);}
+  assert.equal(uxTopics.length,87);assert.equal(acceptanceCount,299);
+  for(const t of uxTopics){for(const pair of [t.challenge,t.when,t.data,t.boundary])assert.ok(pair.length===2&&pair.every(v=>v.length>20),t.slug);assert.ok(["baymard.com","developers.google.com","exp-platform.com","web.dev","www.w3.org"].includes(new URL(t.source[1]).hostname),t.slug);}
   for(const p of learningPaths)for(const id of p.topics)assert.ok(uxTopics.some(t=>t.slug===id));
 });
 test('generic search respects same-variant tokens and public SKU',()=>{

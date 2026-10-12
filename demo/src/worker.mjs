@@ -180,7 +180,7 @@ export default {
         return finish(
           documentHtml(
             uxTitle(path, context),
-            renderUxBody(path, { ...context, topic: url.searchParams.get("topic") }),
+            renderUxBody(path, { ...context, topic: url.searchParams.get("topic"), library: url.searchParams }),
             context,
           ),
           context,
