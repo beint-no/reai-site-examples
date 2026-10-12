@@ -29,7 +29,9 @@ bilingual decision, data responsibility, honest example boundary, source and exe
 Curated articles are indexable; query/filter combinations are canonicalized and noindex. Each design links its applicable
 concepts. checkout-lab*.js simulates outcomes in memory without API calls or storage.
 src/ux-commerce.mjs renders the isolated Product lab and ephemeral CRO worksheet.
-product-lab-model.js holds fictional compatibility/discount rules; no fixture IDs enter real checkout.
+product-lab-model.js holds fictional compatibility/discount rules;
+product-delivery-model.js adds isolated region/pickup and post-discount shipping estimates.
+ux-worked-examples.mjs deepens selected articles with linked, reproducible tasks and tradeoffs; no fixture IDs enter real checkout.
 seo.mjs owns the education-only indexing allowlist, metadata, explicit locale links and sitemap.
 Do not index fictional products or add fabricated review/product rich results.
 Learning URLs default deterministically to Norwegian without relying on a visitor cookie.

@@ -17,7 +17,7 @@ const pages = new Map([
 ]);
 const designPages = new Map(designs.map(d=>['/designs/'+d.slug,{title:d.title.map(title=>d.name+' · '+title),description:d.text}]));
 const labTitles = {
-  '/ux/lab/product':['Produktlab: informasjon, tilbehør og rabatt','Product lab: information, accessories and discounts'],
+  '/ux/lab/product':['Produktlab: kjøpsvalg, fraktkostnader og rabatt','Product lab: decisions, delivery costs and discounts'],
   '/ux/lab/discovery':['Søkelab: SKU, varianter og hjelpesøk','Search lab: SKUs, variants and help'],
   '/ux/lab/compare':['Sammenligningslab: pakkepris og spesifikasjoner','Comparison lab: pack prices and specifications'],
   '/ux/lab/checkout':['Checkout-lab: levering, feil og betalingsstatus','Checkout lab: delivery, errors and payment status'],

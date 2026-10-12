@@ -49,7 +49,7 @@ const examples = {
 };
 const stages = {'find-products':'discover','choose-products':'evaluate','cart-checkout':'buy','after-purchase':'retain',seo:'visibility',cro:'measure',accessibility:'access'};
 const a = (slug, group, source, example, title, principle, challenge, when, data, boundary, cases, related=[]) =>
-  ({slug, group, stage:stages[group], source:sources[source], examples:examples[example], title, principle, challenge, when, data, boundary, cases, related, edition:'library'});
+  ({slug, group, stage:stages[group], source:sources[source], examples:['cart-edit-variants','cart-stock-recheck'].includes(slug)?[...examples[example],['Lookbook · cart drawer','/designs/lookbook/#outfit']]:examples[example], title, principle, challenge, when, data, boundary, cases, related, edition:'library'});
 export const libraryTopics = [
   a('homepage-scope','find-products','home','fashion',
     ['Forsiden: vis hva butikken faktisk selger','Homepage: communicate the actual catalog'],
@@ -261,22 +261,22 @@ export const libraryTopics = [
     ['ReAI checkout er autoritativt for pris og kjøpbarhet; lesedata gir tidligere hjelp i nettstedet.','ReAI checkout is authoritative for price and purchasability; delivery reads provide earlier guidance.'],
     ['Fixturen viser utilgjengelige lagrede varianter og tilbyr redigering. Den reserverer aldri lager.','The fixture flags saved unavailable variants and offers editing. It never reserves stock.'],
     [['Kontroller at utsolgt ikke blir presentert som på lager i kurven.','Check unavailable stock is not presented as in stock in the cart.'],['Endre en utilgjengelig variant til en tilgjengelig variant.','Edit an unavailable variant to an available one.'],['I ekte butikk: test serveravvisning uten å tømme hele kurven.','In a real store, test server rejection without clearing the entire cart.']],['stock','errors']),
-  a('free-shipping-threshold','cart-checkout','threshold','checkout',
+  a('free-shipping-threshold','cart-checkout','threshold','product',
     ['Fri frakt: forklar grense og unntak ved valget','Free shipping: explain thresholds and exceptions'],
     ['Vis både betingelsen og aktuell frakt. Et banner med fri frakt er utilstrekkelig hvis kjøpet ikke kvalifiserer.','Show both the condition and current shipping charge. A free-shipping banner is insufficient when the order is ineligible.'],
     ['Et terskelbudskap kan presse kunden til tillegg som koster mer enn frakten de sparer.','A threshold prompt can push shoppers toward extras costing more than the shipping they save.'],
     ['Beregn etter riktige rabatter og unntak. Gjør videre kjøp frivillig, og vis det normale leveringsvalget.','Calculate using correct discounts and exclusions. Keep additional purchasing optional and show normal delivery choices.'],
     ['Fraktregler og checkout-total kommer fra backend. Ikke lov gratis fysisk frakt for et digitalt gavekort.','Shipping rules and checkout totals come from the backend. Never promise free physical shipping for a digital gift card.'],
-    ['Checkout-laben har fast 49 kr eller gratis henting, ingen fri-frakt-terskel.','The checkout lab has fixed 49 kr shipping or free pickup, not a free-shipping threshold.'],
-    [['Velg sending og henting: totalsammenhengen skal være tydelig.','Choose shipping and pickup: totals should clearly correspond.'],['Ved terskel i egen butikk: test beløpet rett under og over grensen.','For your store threshold, test amounts just below and above it.'],['Bruk rabatt: kontroller om fraktgrensen beregnes før eller etter rabatt.','Apply a discount: verify whether the threshold uses the discounted amount.']],['costs','promotions']),
-  a('shipping-estimate-early','cart-checkout','shipping','checkout',
+    ['Produktlaben har fiktiv standardfrakt på 49 kr, fri frakt fra 300 kr etter rabatt, Oslo-henting og et område uten tilbud.','The product lab has fictional 49 kr standard delivery, free delivery from 300 kr after discounts, Oslo pickup and a region with no quote.'],
+    [['Legg til én Tur-kopp og to Bordunderlag: 300 kr gir fri frakt.','Add one Trail mug and two Coasters: 300 kr qualifies for free delivery.'],['Bruk LAB10: varebeløpet blir 276 kr, frakten 49 kr og totalen 325 kr.','Apply LAB10: merchandise becomes 276 kr, delivery 49 kr and total 325 kr.'],['Velg området uten dekning: total skal være ukjent, ikke gratis.','Choose the uncovered region: total must be unknown, not free.']],['costs','promotions']),
+  a('shipping-estimate-early','cart-checkout','shipping','product',
     ['Fraktestimat før kunden fyller hele checkout','Shipping estimates before completing checkout'],
     ['Gi tidlig informasjon om leveringspris og hva som kreves for et presist tilbud. Ukjent frakt skal ikke se gratis ut.','Provide early delivery-cost information and explain what a precise quote needs. Unknown shipping must not look free.'],
     ['En lav produktpris kan bli irrelevant når frakt først avsløres etter mange felt.','A low product price can become irrelevant when shipping appears after many fields.'],
     ['En fast pris kan vises direkte. Destinasjonsavhengig frakt bør merkes som estimat til tilbudet er bekreftet.','Show fixed prices directly. Destination-dependent shipping should remain labeled an estimate until a quote is confirmed.'],
     ['Tilgjengelige tjenester avhenger av selger, adresse og pakke. Hosted checkout eier det bindende fraktvalget.','Available services depend on merchant, address and parcel. Hosted checkout owns the binding shipping selection.'],
-    ['Laben har merkede simulerte priser og datoer. Den henter ingen transportørtilbud.','The lab uses labeled simulated prices and dates. It requests no carrier quotes.'],
-    [['Finn fraktprisen før du går til gjennomgang.','Find the shipping price before continuing to review.'],['Bytt til henting: se både nytt beløp og hentested.','Switch to pickup: see the new cost and pickup location.'],['I ekte frakt: test manglende tilbud uten å vise null som pris.','For live shipping, test missing quotes without displaying zero cost.']],['delivery','costs']),
+    ['Produktlaben viser pris for én valgt kopp før tillegg i kurven, med fiktive område- og fraktregler. Ingen transportørtilbud hentes.','The product lab shows the total for the selected mug before adding it, using fictional region and delivery rules. No carrier quotes are requested.'],
+    [['Velg Hjem-kopp: finn 120 kr + 49 kr = 169 kr før du legger den til.','Select Home mug: find 120 kr + 49 kr = 169 kr before adding it.'],['Bytt til henting: se både nytt beløp og hentested.','Switch to pickup: see the new cost and pickup location.'],['Velg henting i Oslo og bytt til fastlandet: forklar byttet til sending og behold kurven.','Choose Oslo pickup then switch to mainland: explain the change to shipping and retain the basket.']],['delivery','costs']),
   a('coupon-errors','cart-checkout','form','product',
     ['Rabattfeil med forklaring og beholdt kurv','Coupon errors with explanations and preserved baskets'],
     ['Forklar om koden er ukjent, utløpt eller ikke gjelder varene. Behold kurv og inntastet kode så kunden kan rette.','Explain whether a code is unknown, expired or ineligible. Preserve the basket and typed code for correction.'],

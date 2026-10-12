@@ -204,3 +204,13 @@
 .ux-search-scope input { width:auto; }
 .ux-review-totals { display:grid; grid-template-columns:1fr auto; border-block:1px solid #dedede; padding:16px 0; gap:10px; }
 .ux-review-totals dd { margin:0; text-align:right; font-weight:650; }
+.ux-delivery-estimate { border-block:1px solid #acbdb6; padding:1.25rem 0; margin:1.5rem 0; scroll-margin-top:2rem; }
+.ux-delivery-estimate label { display:block; margin-top:1rem; font-weight:600; }
+.ux-delivery-estimate select { width:100%; max-width:100%; min-height:48px; margin-top:.4rem; padding:.6rem; font:inherit; color:inherit; background:#fff; border:1px solid #acbdb6; }
+.ux-delivery-preview { font-weight:650; }
+.ux-worked-example { border-top:1px solid #acbdb6; padding-top:2rem; margin-top:2rem; scroll-margin-top:2rem; }
+.ux-worked-example > p { max-width:75ch; line-height:1.7; }
+.ux-worked-example ol { max-width:75ch; padding-left:1.4rem; }
+.ux-worked-example li { padding:.5rem 0; line-height:1.7; }
+.ux-lesson-jumps { display:flex; flex-wrap:wrap; gap:.5rem 1.5rem; margin:1.5rem 0; }
+.ux-lesson-jumps a { min-height:44px; display:flex; align-items:center; }
