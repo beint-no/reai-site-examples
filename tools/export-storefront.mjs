@@ -47,9 +47,13 @@ export async function exportStorefront(name, destination) {
       path.join(destination, ".dev.vars.example"),
     );
     await cp(path.join(root, "LICENSE"), path.join(destination, "LICENSE"));
+    await mkdir(path.join(destination, ".github/workflows"), { recursive: true });
+    await mkdir(path.join(destination, ".github/preview"), { recursive: true });
+    await cp(path.join(root, "starter/github/preview.yml"), path.join(destination, ".github/workflows/preview.yml"));
+    await cp(path.join(root, "starter/github/preview.mjs"), path.join(destination, ".github/preview/preview.mjs"));
     await writeFile(
       path.join(destination, ".gitignore"),
-      "node_modules/\n.dev.vars\n.wrangler/\n.DS_Store\n",
+      "node_modules/\n.dev.vars\n.wrangler/\n.preview/\n.DS_Store\n",
     );
     await writeFile(
       path.join(destination, "package.json"),
@@ -87,6 +91,7 @@ export async function exportStorefront(name, destination) {
             run_worker_first: true,
           },
           vars: { REAI_API_BASE_URL: "https://app.reai.no" },
+          previews: { vars: { REAI_API_BASE_URL: "https://app.reai.no" } },
         },
         null,
         2,
@@ -94,7 +99,7 @@ export async function exportStorefront(name, destination) {
     );
     await writeFile(
       path.join(destination, "AGENTS.md"),
-      `# Private ReAI storefront\n\nExported from the public ${name} design. This is a standalone source tree; no hub or public repository checkout is required at runtime.\n\nRun npm install once and commit package-lock.json; subsequent installs use npm ci. Run npm run check before changes are published. Copy .dev.vars.example to the ignored .dev.vars for local Worker development. Keep REAI_SITE_CREDENTIAL server-side and put it in a Cloudflare Worker secret for deployment.\n\nReplace the test Worker name, configure the Site preview/active domains, and fill in approved merchant details and policies in src/store-content.js before launch. Deploy only with authorized account credentials. Catalog, collection membership, filter attributes/options, variant prices, images and availability come from ReAI. The starter includes search/filter/sort, variant selection, a cart drawer plus a cart page, hosted checkout, newsletter consent and practical information pages. Mobile filters support apply/cancel; cart quantities update automatically with undo after removal. It preserves the Site market/language. A return redirect does not confirm payment or clear the cart.\n\nNewsletter signup is enabled by default and records explicit consent; a welcome email requires a configured ReAI flow. Optional stockNotificationsEnabled defaults to false: enable only with an active ReAI back-in-stock flow and approved privacy text. Stock alerts use separate consent and do not subscribe someone to the newsletter. Browser bundles never contain the Site credential.\n\nKeep the operator primary checkout on main, work in a dedicated worktree, and use pull requests and squash merges. Record approved business facts, content rules and launch constraints here; do not create a duplicate README.\n\nIntegration guide: https://github.com/beint-no/reai-site-examples\n`,
+      `# Private ReAI storefront\n\nExported from the public ${name} design. This is a standalone source tree; no hub or public repository checkout is required at runtime.\n\nRun npm install once and commit package-lock.json; subsequent installs use npm ci. Run npm run check before changes are published. Copy .dev.vars.example to the ignored .dev.vars for local Worker development. Keep REAI_SITE_CREDENTIAL server-side and put it in a Cloudflare Worker secret for deployment.\n\nReplace the test Worker name, configure the Site preview/active domains, and fill in approved merchant details and policies in src/store-content.js before launch. Deploy only with authorized account credentials. Catalog, collection membership, filter attributes/options, variant prices, images and availability come from ReAI. The starter includes search/filter/sort, variant selection, a cart drawer plus a cart page, hosted checkout, newsletter consent and practical information pages. Mobile filters support apply/cancel; cart quantities update automatically with undo after removal. It preserves the Site market/language. A return redirect does not confirm payment or clear the cart.\n\nNewsletter signup is enabled by default and records explicit consent; a welcome email requires a configured ReAI flow. Optional stockNotificationsEnabled defaults to false: enable only with an active ReAI back-in-stock flow and approved privacy text. Stock alerts use separate consent and do not subscribe someone to the newsletter. Browser bundles never contain the Site credential.\n\nOpen PRs automatically get a stable Cloudflare Preview URL, updated on pushes and removed on close. The preview build runs without deployment credentials; the deploy job uses reviewed default-branch tooling. Configure CLOUDFLARE_PREVIEW_API_TOKEN, CLOUDFLARE_PREVIEW_ACCOUNT_ID and REAI_PREVIEW_CREDENTIAL as GitHub secrets. The Site credential must use PREVIEW and only site:read, commerce:catalog:read and commerce:availability:read. Previews are noindex and reject orders, payments and form submissions. Manually dispatch PR previews with a pull request number to preview a PR opened before this workflow was installed.\n\nKeep the operator primary checkout on main, work in a dedicated worktree, and use pull requests and squash merges. Record approved business facts, content rules and launch constraints here; do not create a duplicate README.\n\nIntegration guide: https://github.com/beint-no/reai-site-examples\n`,
     );
     return destination;
   } catch (error) {

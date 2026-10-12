@@ -43,7 +43,7 @@ Requests use packages/reai-site-client; keep delivery credentials server-side.
 Never commit tokens, private customer data, or raw tenant/catalog exports.
 
 wrangler.jsonc targets only reai-demo-store at https://nettbutikk.reai.no.
-npm run deploy checks and deploys locally; CI validates only.
+npm run deploy checks and deploys production locally; CI also creates read-only PR previews.
 Set REAI_SITE_CREDENTIAL as a Worker secret. The published field guide at /features/
 explains payments, B2B/EHF, shipping/pickup, discounts, catalog, markets and
 integration; /api/ exercises all nine delivery reads, checkout, newsletter and back-in-stock signup.
@@ -91,3 +91,14 @@ Canonical contracts: [delivery](https://app.reai.no/openapi/site/ui) and
 are MIT; see ASSETS.md. Famme photographs are a specifically authorized design-test
 exception, owned by Famme and not MIT. Other customer assets must never be added
 to this public repo without explicit permission.
+
+## Automatic PR previews
+
+Open same-repository PRs get a stable Cloudflare Preview URL, refreshed on each push
+and removed on close. `.github/workflows/preview.yml` builds without credentials,
+then deploys with reviewed default-branch tooling in `.github/preview/preview.mjs`.
+The preview is noindex and read-only: orders, payments and form submissions are disabled.
+GitHub secrets: CLOUDFLARE_PREVIEW_API_TOKEN and CLOUDFLARE_PREVIEW_ACCOUNT_ID;
+commerce sites also need REAI_PREVIEW_CREDENTIAL with only Site, catalog and availability reads.
+Manually dispatch PR previews with a PR number to backfill an already-open PR.
+Production publishing and domain approval follow the existing site instructions.
