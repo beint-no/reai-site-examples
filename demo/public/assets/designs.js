@@ -11,6 +11,11 @@
       menu.setAttribute("aria-expanded", "false");
     }
   });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && header?.classList.contains('menu-open')) {
+      header.classList.remove('menu-open'); menu?.setAttribute('aria-expanded', 'false'); menu?.focus();
+    }
+  });
   document.querySelectorAll("[data-amount-form]").forEach((form) =>
     form.addEventListener("change", () => {
       const selected = form.querySelector("[name=variantId]:checked");

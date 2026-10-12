@@ -177,3 +177,30 @@
 [data-decision-title] {scroll-margin-top:110px}
 .ux-group-directory>div>a {position:relative}
 .ux-group-directory .ux-group-arrow {position:absolute;right:0;top:20px;font-size:22px;color:#35736a}
+/* The larger library is a separate, server-rendered task finder. */
+.ux-library h1 { font-size:clamp(2.5rem,5vw,4.5rem); letter-spacing:-.055em; line-height:1.08; max-width:24ch; }
+.ux-library .lead { max-width:66ch; }
+.ux-library-form { display:grid;grid-template-columns:2fr 2fr 1fr 1.3fr;gap:1rem;padding:1.5rem 0;border-top:1px solid var(--line,#d7ddda);border-bottom:1px solid var(--line,#d7ddda);margin-top:2.5rem;align-items:end; }
+.ux-library-form label { display:grid;gap:.5rem;font-size:.88rem;font-weight:600; }
+.ux-library-form input,.ux-library-form select { width:100%;min-width:0;min-height:48px;padding:.65rem;border:1px solid #abbdb7;background:white;color:#152b27;font:inherit; }
+.ux-library-form .button { justify-self:start; }
+.ux-library-form > a { padding:.8rem 0; }
+.ux-library-result-heading { display:flex;align-items:baseline;gap:2rem;justify-content:space-between;margin:2rem 0; }
+.ux-library-result-heading p { max-width:65ch;font-size:.9rem;color:#53615b; }
+.ux-library-group { margin:3rem 0; }
+.ux-library-group header { display:flex;justify-content:space-between;gap:1rem;border-bottom:1px solid #acbdb6;padding-bottom:.7rem; }
+.ux-library-group header h2 { font-size:1.4rem;margin:0; }
+.ux-library-group > div { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 2rem; }
+.ux-library-group article { padding:1.5rem 0;border-bottom:1px solid #d9e1dc; }
+.ux-library-group h3 { font-size:1.12rem;line-height:1.4;margin:.7rem 0; }
+.ux-library-group p { font-size:.95rem;line-height:1.6; }
+.ux-library-empty { padding:3rem 0; }
+@media(max-width:850px) { .ux-library-form { grid-template-columns:repeat(2,minmax(0,1fr)); }.ux-library-query{grid-column:1/-1}.ux-library-group>div{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media(max-width:540px) { .ux-library-form,.ux-library-group>div{grid-template-columns:1fr}.ux-library-result-heading{display:block}.ux-library-form{gap:1.2rem}.ux-library-group article{padding:1.4rem 0} }
+@media(prefers-reduced-motion:reduce) { html {scroll-behavior:auto!important} *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important} }
+
+.ux-search-scope { display:flex; flex-wrap:wrap; gap:12px; padding:14px 0; border:0; }
+.ux-search-scope label { display:flex; align-items:center; gap:6px; min-height:44px; }
+.ux-search-scope input { width:auto; }
+.ux-review-totals { display:grid; grid-template-columns:1fr auto; border-block:1px solid #dedede; padding:16px 0; gap:10px; }
+.ux-review-totals dd { margin:0; text-align:right; font-weight:650; }

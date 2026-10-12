@@ -10,6 +10,7 @@ const pages = new Map([
   ['/features',{title:['ReAI for nettbutikk: katalog, checkout og regnskap','ReAI commerce: catalog, checkout and accounting'],description:['Forstå Site API, produktdata, nyhetsbrev, Adyen, rabatter, levering, B2B og EHF. Se hvilke deler ReAI håndterer og hva nettstedet styrer.','Understand Site API, product data, newsletters, Adyen, discounts, delivery, B2B and EHF. Learn what ReAI handles and what the site controls.']}],
   ['/about',{title:['Om ReAI sin test-nettbutikk','About the ReAI test store'],description:['En test-nettbutikk og læringsressurs for ReAI. Forstå ekte betalinger, Better Integration, manuell gavekortinnløsning og fiktive design-eksempler.','A ReAI test store and learning resource. Understand real payments, Better Integration, manual gift-card redemption and fictional design examples.']}],
   ['/ux',{title:['Nettbutikk UX, SEO og CRO: konsepter og eksempler','E-commerce UX, SEO and CRO: concepts and examples'],description:['Finn riktig mønster for søk, produktvalg, checkout og oppfølging. Kildebaserte forklaringer, konkrete testoppgaver og originale ReAI-eksempler.','Find patterns for search, product choice, checkout and follow-up. Source-linked explanations, concrete test tasks and original ReAI examples.']}],
+  ['/ux/library',{title:['Artikkelbibliotek for nettbutikk: UX, SEO og CRO','E-commerce article library: UX, SEO and CRO'],description:['Finn konkrete råd for søk, filtre, produktvalg, handlekurv, checkout, oppfølging og måling. Hver artikkel kobler forskning til ReAI-eksempler og testoppgaver.','Find practical guidance for search, filters, product choice, carts, checkout, follow-up and measurement. Every article links research to ReAI examples and test tasks.']}],
   ...lessons.map(l=>['/learn/'+l.slug,{title:l.title.map(v=>v.replace(/\.$/,'')),description:l.summary}]),
   ...uxTopics.map(t=>['/ux/'+t.slug,{title:t.title,description:t.principle}]),
   ...uxGroups.map(g=>['/ux/group/'+g.slug,{title:g.title,description:g.summary}]),
@@ -29,7 +30,8 @@ const pageUrl = (path,locale) => publicOrigin+(path==='/'?'/':path+'/')+(String(
 export function pageMetadata(url,context={}) {
   const path=normalizedPath(url.pathname), page=pages.get(path)||designPages.get(path), locale=context.locale||'nb-NO';
   // Preview hosts and fictional/transactional routes are never search landing pages.
-  const indexable=pages.has(path) && !context.preview && url.origin===publicOrigin;
+  const filteredLibrary=path==='/ux/library' && ['q','group','design','edition'].some(key=>url.searchParams.has(key));
+  const indexable=pages.has(path) && !filteredLibrary && !context.preview && url.origin===publicOrigin;
   return {path,indexable,robots:indexable?'index, follow':'noindex, follow',canonical:pageUrl(path,locale),
     title:page?pick(page.title,locale):labTitles[path]?pick(labTitles[path],locale):null,
     description:page?pick(page.description,locale):pick(['Eksempel i ReAI sin test-nettbutikk. Bruk læringssenteret for forklaringer, testoppgaver og avgrensninger.','ReAI test-store example. Use the learning hub for explanations, test tasks and boundaries.'],locale)};

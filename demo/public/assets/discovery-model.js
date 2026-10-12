@@ -1,9 +1,9 @@
 // Small original fixtures, separate from the live ReAI catalog.
 export const discoveryProducts = [
-  { id: "nord-home", title: "Nord Hjem", type: "Termokopp", aliases: ["insulated mug", "travel cup", "termokopp", "leakproof", "lekkasjesikker"], price: 199, variants: [
+  { id: "nord-home", title: "Nord Hjem", type: "Termokopp", aliases: ["insulated mug", "travel cup", "travel mug", "termokopp", "leakproof", "lekkasjesikker"], price: 199, variants: [
     { sku: "NORD-01-B", values: ["blue", "blå", "350", "ml"] },
     { sku: "NORD-01-G", values: ["green", "grønn", "350", "ml"] }] },
-  { id: "nord-trail", title: "Nord Tur", type: "Termokopp", aliases: ["insulated mug", "travel cup", "termokopp", "leakproof", "lekkasjesikker"], price: 249, variants: [
+  { id: "nord-trail", title: "Nord Tur", type: "Termokopp", aliases: ["insulated mug", "travel cup", "travel mug", "termokopp", "leakproof", "lekkasjesikker"], price: 249, variants: [
     { sku: "NORD-02", values: ["blue", "blå", "500", "ml"] },
     { sku: "NORD-03", values: ["green", "grønn", "350", "ml"] }] },
   { id: "daily-bottle", title: "Dag Flaske", type: "Drikkeflaske", aliases: ["bottle", "flaske", "drikkeflaske"], price: 99, variants: [
@@ -15,7 +15,11 @@ export const discoveryHelp = [
 ];
 export const normalizedQuery = (s) => String(s || "").slice(0, 120).trim().normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase();
 const words = (s) => normalizedQuery(s).split(/\s+/).filter(Boolean);
-export function searchDiscovery(query) {
+// Corrections are suggestions, never silent rewrites of an exact identifier.
+export function discoveryCorrection(query) {
+  return ({ termokop: "termokopp", botle: "bottle", "insulatd mug": "insulated mug", returr: "retur", shiping: "shipping" })[normalizedQuery(query)] || null;
+}
+export function searchDiscovery(query, scope = "all") {
   const tokens = words(query);
   const products = discoveryProducts.flatMap((p) => {
     const base = [p.title, p.type, ...p.aliases].join(" ");
@@ -29,7 +33,7 @@ export function searchDiscovery(query) {
     const text = normalizedQuery(item.aliases.join(" "));
     return tokens.every((token) => text.includes(token));
   }) : [];
-  return { products, help };
+  return { products: scope === "help" ? [] : products, help: scope === "products" ? [] : help };
 }
 export function discoverySuggestions(query, locale = "nb") {
   const q = normalizedQuery(query);
@@ -37,6 +41,7 @@ export function discoverySuggestions(query, locale = "nb") {
   return [...new Set([
     ...discoveryProducts.map((p) => p.title),
     ...discoveryProducts.map((p) => p.type),
+    ...discoveryProducts.flatMap((p) => p.aliases),
     ...discoveryHelp.map((item) => item.query[locale === "nb" ? 0 : 1]),
   ])].filter((s) => normalizedQuery(s).includes(q)).slice(0, 6);
 }

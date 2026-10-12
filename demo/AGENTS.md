@@ -22,7 +22,11 @@ content/ux.mjs owns original research-linked concepts and acceptance tasks;
 src/ux.mjs renders /ux/, learning paths and the in-memory printable test plan;
 src/ux-labs.mjs renders isolated search and comparison labs. content/ux-extension.mjs
 owns search/selection concepts; ux-depth.mjs owns site-specific decisions and regressions.
-ux-commerce.mjs adds product decisions, SEO and measurement; ux-groups.mjs is the single task taxonomy. Each design links its applicable
+ux-commerce.mjs adds product decisions, SEO and measurement; ux-library.mjs adds
+focused merchant decisions. ux-groups.mjs is the single task taxonomy; src/ux-directory.mjs
+renders the searchable, server-rendered /ux/library/. Every article needs an original
+bilingual decision, data responsibility, honest example boundary, source and executable tasks.
+Curated articles are indexable; query/filter combinations are canonicalized and noindex. Each design links its applicable
 concepts. checkout-lab*.js simulates outcomes in memory without API calls or storage.
 src/ux-commerce.mjs renders the isolated Product lab and ephemeral CRO worksheet.
 product-lab-model.js holds fictional compatibility/discount rules; no fixture IDs enter real checkout.
@@ -31,6 +35,9 @@ Do not index fictional products or add fabricated review/product rich results.
 Learning URLs default deterministically to Norwegian without relying on a visitor cookie.
 src/design-storefronts.mjs owns standalone design shells. fashion.js uses only
 assets/famme/catalog.json; its non-UUID product choices never enter checkout.
+fashion-cart-model.js preserves quantities while editing variants and rejects unavailable
+choices or excessive merges. Cached sold-out lines stay visible for correction.
+fashion-zoom.js uses a native dialog; galleries do not change the selected variant.
 Famme photo ownership, permission and source URLs are in ASSETS.md and
 assets/famme/sources.json. Do not reuse these images as MIT template assets.
 
