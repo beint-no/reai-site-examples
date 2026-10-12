@@ -27,13 +27,14 @@ import {
 import { uxRoutes } from "../content/ux.mjs";
 import { renderUxBody, designLearning, uxTitle } from "./ux.mjs";
 import { documentHtml } from "./storefront.mjs";
+import { educationalPaths, normalizedPath, pageMetadata, applyPageMetadata, educationalSitemap, publicOrigin } from "./seo.mjs";
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const headers = {
   "X-Content-Type-Options": "nosniff",
   "Strict-Transport-Security": "max-age=31536000",
   "Referrer-Policy": "strict-origin-when-cross-origin",
-  "X-Robots-Tag": "noindex, nofollow",
+  "X-Robots-Tag": "noindex, follow",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
   "Content-Security-Policy":
     "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https://app.reai.no https://app-test.reai.no data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
@@ -67,12 +68,14 @@ export default {
       url.protocol = "https:";
       return Response.redirect(url.href, 308);
     }
+    const educational = educationalPaths.includes(normalizedPath(url.pathname));
+    const requestedLocale = url.searchParams.get("lang") || (url.pathname.startsWith("/designs/starter") ? url.searchParams.get("locale") : null);
     let locale =
-      url.searchParams.get("lang") === "en"
+      requestedLocale === "en"
         ? "en"
-        : url.searchParams.get("lang") === "nb"
+        : ["nb", "nb-NO"].includes(requestedLocale || "")
           ? "nb-NO"
-          : request.headers.get("Cookie")?.includes("reai-demo-lang=en")
+          : !educational && request.headers.get("Cookie")?.includes("reai-demo-lang=en")
             ? "en"
             : "nb-NO";
     const paymentMode =
@@ -133,15 +136,15 @@ export default {
           /(<body[^>]*>)/,
           `$1<div class="demo-notice"><a href="/designs/">← Alle butikkdesign / All designs</a> · ${context.preview ? "Simulerte data. Checkout og påmelding er deaktivert." : "ReAI sin test-nettbutikk · Betaling i kassen fungerer · Mottaker: Better Integration"}</div>`,
         );
-        const annotated = markup
+        const annotated = applyPageMetadata(markup
           .replace("</main>", designLearning("starter", context) + "</main>")
           .replace(
             "</head>",
             `<link rel="stylesheet" href="/assets/ux-notes.css"></head>`,
-          );
+          ), url, context);
         return new Response(request.method === "HEAD" ? null : annotated, {
           status: result.status,
-          headers: { ...headers, ...Object.fromEntries(result.headers) },
+          headers: { ...headers, ...Object.fromEntries(result.headers), "X-Robots-Tag": "noindex, follow" },
         });
       }
       return result;
@@ -157,10 +160,12 @@ export default {
         true,
       );
     if (url.pathname === "/robots.txt")
-      return new Response("User-agent: *\nDisallow: /\n", {
+      return new Response(`User-agent: *\nAllow: /\nSitemap: ${publicOrigin}/sitemap.xml\n`, {
         headers: { ...headers, "Content-Type": "text/plain" },
       });
-    const path = url.pathname.replace(/\/$/, "") || "/";
+    if (url.pathname === "/sitemap.xml")
+      return new Response(request.method === "HEAD" ? null : educationalSitemap(), { headers: { ...headers, "Content-Type": "application/xml; charset=utf-8" } });
+    const path = normalizedPath(url.pathname);
     try {
       if (!["GET", "HEAD", "POST"].includes(request.method))
         return response({ error: "Method not allowed" }, 405, true);
@@ -175,7 +180,7 @@ export default {
         return finish(
           documentHtml(
             uxTitle(path, context),
-            renderUxBody(path, context),
+            renderUxBody(path, { ...context, topic: url.searchParams.get("topic") }),
             context,
           ),
           context,
@@ -534,7 +539,8 @@ export default {
       );
     }
     function finish(html, context) {
-      const result = response(request.method === "HEAD" ? null : html);
+      const result = response(request.method === "HEAD" ? null : applyPageMetadata(html, url, context));
+      result.headers.set("X-Robots-Tag", pageMetadata(url, context).robots);
       result.headers.set("Content-Language", context.locale);
       if (url.searchParams.has("lang"))
         result.headers.set(

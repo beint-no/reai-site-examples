@@ -430,8 +430,8 @@ export const lessons = [
     icon: "◇",
     tag: ["INTEGRERT I REAI", "INTEGRATED IN REAI"],
     title: [
-      "Fra handlekurv til hentested.",
-      "From shopping cart to pickup point.",
+      "Frakt, hentesteder og lokal henting med ReAI.",
+      "Shipping, pickup points and local pickup with ReAI.",
     ],
     summary: [
       "Bring og PostNord, hentesteder og hent selv hos selger. Ulike leveringsvalg, samme ordre.",
@@ -868,7 +868,7 @@ lessons.push(
   {
     slug: "collections", shortTitle: ["Samlinger", "Collections"], icon: "≡",
     tag: ["SITE API + DESIGN", "SITE API + DESIGN"],
-    title: ["Kolleksjonen er data. Visningen er din.", "The collection is data. The layout is yours."],
+    title: ["Samlinger og kolleksjonssider i ReAI.", "Collections and collection pages in ReAI."],
     summary: ["Manuelle og automatiske samlinger, fra publisering til butikkdesign.", "Manual and automated collections, from publication to storefront designs."],
     intro: ["Samlinger organiserer publiserte produkter. Den samme listen kan bli et rutenett, en kompakt katalog eller en fotohistorie. Designet trenger ikke en egen kopi av produktdataene.", "Collections organize published products. The same list can become a grid, a compact catalog or a photo story. The design needs no separate copy of product data."],
     steps: [
@@ -890,7 +890,7 @@ lessons.push(
   {
     slug: "commerce-flow", shortTitle: ["Handelsflyt", "Commerce flow"], icon: "→",
     tag: ["REAI PLATTFORM", "REAI PLATFORM"],
-    title: ["Følg ordren, ikke bare betalingsknappen.", "Follow the order, not just the payment button."],
+    title: ["Fra checkout til ordre, levering og regnskap.", "From checkout to orders, delivery and accounting."],
     summary: ["Fra produktvalg til betaling, levering, faktura og regnskapsoppfølging.", "From product selection to payment, fulfillment, invoicing and accounting follow-up."],
     intro: ["ReAI samler nettbutikk, kassasystem og regnskap. Du kan følge salget i samme plattform. Betaling, levering, faktura og oppgjør er likevel ulike steg med egne statuser.", "ReAI brings together online commerce, point of sale and accounting. You can follow the sale in the same platform. Payment, fulfillment, invoicing and settlement remain separate steps with their own statuses."],
     steps: [

@@ -21,8 +21,14 @@ showcase.js owns newsletter signup and the separate scenario cart.
 content/ux.mjs owns original research-linked concepts and acceptance tasks;
 src/ux.mjs renders /ux/, learning paths and the in-memory printable test plan;
 src/ux-labs.mjs renders isolated search and comparison labs. content/ux-extension.mjs
-owns added public-research concepts; ux-depth.mjs owns site-specific decisions and regressions. Each design links its applicable
+owns search/selection concepts; ux-depth.mjs owns site-specific decisions and regressions.
+ux-commerce.mjs adds product decisions, SEO and measurement; ux-groups.mjs is the single task taxonomy. Each design links its applicable
 concepts. checkout-lab*.js simulates outcomes in memory without API calls or storage.
+src/ux-commerce.mjs renders the isolated Product lab and ephemeral CRO worksheet.
+product-lab-model.js holds fictional compatibility/discount rules; no fixture IDs enter real checkout.
+seo.mjs owns the education-only indexing allowlist, metadata, explicit locale links and sitemap.
+Do not index fictional products or add fabricated review/product rich results.
+Learning URLs default deterministically to Norwegian without relying on a visitor cookie.
 src/design-storefronts.mjs owns standalone design shells. fashion.js uses only
 assets/famme/catalog.json; its non-UUID product choices never enter checkout.
 Famme photo ownership, permission and source URLs are in ASSETS.md and
