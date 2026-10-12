@@ -1,9 +1,10 @@
-# Public examples and private client repositories
+# Public examples and customer repositories
 
 This is the public source for one full ReAI demo store, reusable code and integration documentation.
 Use it for generic design systems, fictional fixtures and reusable integration.
 A real client's source, previews, branding and handoff notes belong in an
-independent **private** repository from the start.
+independent customer repository from the start. Its visibility follows the owner’s
+policy; never commit secrets or private data.
 
 The private customer-sites operator hub holds overall instructions and Git
 submodule pointers. Each child repository owns its history, collaborators,
