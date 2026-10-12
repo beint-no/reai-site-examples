@@ -1,7 +1,7 @@
 # ReAI test store and Site API guide
 
 One public source repository and one deployed demo Worker. Real client sites live
-in independent private repositories. The operator hub checks this repo out under
+in independent customer repositories. The operator hub checks this repo out under
 resources/ for convenience; clients have no runtime dependency on either repo.
 
 ## What lives here
@@ -96,7 +96,7 @@ to this public repo without explicit permission.
 
 Open PRs receive a stable isolated Cloudflare Preview URL, updated on pushes
 and removed on close. `.github/workflows/preview.yml` builds without deployment
-credentials, then requests the trusted workflow in beint-no/reai through signed
+credentials, then requests the trusted preview workflow in beint-no/reai-site-examples through signed
 GitHub Actions OIDC. Cloudflare credentials stay in the central deployment repository.
 The server maps this repository to its assigned Worker, verifies the current PR,
 and provides only a read-only PREVIEW Site credential where catalog access is needed.
@@ -104,3 +104,5 @@ Previews are noindex and reject orders, payments and form submissions.
 Manually dispatch PR previews with a PR number to backfill an already-open PR.
 Register independently created repositories in the server's customer preview registry;
 new repositories created through the e-commerce module are recognized automatically.
+
+The reviewed default-branch storefront-preview.yml also publishes customer previews. Deployment credentials are encrypted GitHub Actions secrets. ReAI verifies signed workflow identity and supplies the current PR, assigned Worker and read-only Site credential. PR artifacts are never executed as CI scripts; publishing uses this repository’s trusted helper.

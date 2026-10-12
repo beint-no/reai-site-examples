@@ -25,3 +25,9 @@ authoritative/public DNS and the workers.dev URL before treating that as a Worke
 
 CI validates source; it holds no production credential and does not deploy.
 Changing the public repo or private template does not redeploy client sites.
+
+PR builds and preview publishing run on standard hosted GitHub Actions. The central
+preview publisher is the reviewed default-branch workflow in this public repository.
+Its deployment credentials are encrypted Actions secrets, not source files. ReAI
+retains the deployment target registry and checks the exact signed workflow identity.
+Customer previews do not depend on private ReAI Actions billing.
