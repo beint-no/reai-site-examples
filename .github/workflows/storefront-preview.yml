@@ -7,7 +7,7 @@ permissions:
   contents: read
   id-token: write
 concurrency:
-  group: storefront-preview-${{ github.event.client_payload.repository_id }}-${{ github.event.client_payload.pull_request }}
+  group: storefront-preview-${{ github.event.client_payload.repository_id }}-${{ github.event.client_payload.pull_request }}-${{ github.event.client_payload.artifact_name }}
   cancel-in-progress: false
 jobs:
   preview:
