@@ -6,13 +6,13 @@ import { tmpdir } from "node:os";
 import { setTimeout } from "node:timers/promises";
 
 const require = createRequire(import.meta.url);
-const globalModules = execFileSync("npm", ["root", "-g"], { encoding: "utf8" }).trim();
-const { experimental_readRawConfig } = require(path.join(globalModules, "wrangler"));
+const wranglerModule = process.env.REAI_WRANGLER_MODULE ?? path.join(execFileSync("npm", ["root", "-g"], { encoding: "utf8" }).trim(), "wrangler");
+const { experimental_readRawConfig } = require(wranglerModule);
 const [command, configPath, artifactPath = ".preview"] = process.argv.slice(2);
 const configFile = path.resolve(configPath);
 const { rawConfig: config } = experimental_readRawConfig({ config: configFile });
 const artifact = path.resolve(artifactPath);
-const previewName = `review-${process.env.PR_NUMBER}`;
+const previewName = process.env.REAI_PREVIEW_NAME ?? `review-${process.env.PR_NUMBER}`;
 const environment = `${config.name}-${previewName}`;
 const marker = `<!-- reai-pr-preview:${config.name} -->`;
 
@@ -112,6 +112,7 @@ if (command === "build") {
   }
   await writeFile(path.join(artifact, "entrypoint.json"), JSON.stringify(await compiledEntrypoint(path.basename(config.main))));
 } else if (["deploy", "cleanup", "publish", "remove"].includes(command)) {
+  if (!/^[a-z0-9][a-z0-9-]{0,62}$/.test(previewName)) throw new Error("Invalid preview name");
   const vars = { ...config.vars, ...config.previews?.vars, CHECKOUT_ENABLED: "false", DEMO_CHECKOUT_ENABLED: "false" };
   // Build hooks, routes and production resource bindings never enter the credentialed job.
   const previewConfig = {

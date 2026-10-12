@@ -35,12 +35,12 @@ GitHub repository, grant permissions, create a ReAI Site, deploy or change DNS.
 
 ## Automated provisioning
 
-ReAI's existing automatic store creator uses a private GitHub template named
+ReAI's existing automatic store creator uses a public GitHub template named
 reai-storefront-starter. That template is an operational copy exported from
 this public repo's standalone storefront template, not a second public examples project.
 The public repo is the canonical editable starter source.
 
-An operator refreshes the private template using the export tool, regenerates
+An operator refreshes the public template using the export tool, regenerates
 its npm lockfile, runs its checks and reviews the resulting change. Existing
 client repos are not overwritten when a template changes. GitHub template
 creation copies a complete repository; do not point the store creator directly

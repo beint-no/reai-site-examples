@@ -14,7 +14,7 @@ resources/ for convenience; clients have no runtime dependency on either repo.
 - demo/seed/: product definitions for explicit operator-managed seeding.
 - packages/: generated Site client and reusable advanced Cloudflare integration.
 - starter/ and templates/storefront/: the complete standalone export used to refresh
-  the separate private reai-storefront-starter provisioning repository.
+  the separate public reai-storefront-starter provisioning repository.
 - docs/: focused API/integration guides. Each directory's AGENTS.md is for humans
   and agents alike; keep one document per directory instead of parallel READMEs.
 
@@ -32,7 +32,7 @@ npm run export -- storefront /absolute/path/to/new-private-repo
 ```
 
 The exporter refuses existing destinations and excludes the demo catalog/server.
-Edit generic exported designs here, then refresh and validate the private template.
+Edit generic exported designs here, then refresh and validate the public template.
 Existing client repositories do not change when either source/template changes.
 
 ## Data and publishing
