@@ -31,3 +31,8 @@ preview publisher is the reviewed default-branch workflow in this public reposit
 Its deployment credentials are encrypted Actions secrets, not source files. ReAI
 retains the deployment target registry and checks the exact signed workflow identity.
 Customer previews do not depend on private ReAI Actions billing.
+
+Preview artifacts record the JavaScript bundle emitted by Wrangler. A .mjs or
+TypeScript source entrypoint may be emitted as .js; the controller resolves that
+bundle rather than assuming the original extension. Multiple sites in one
+customer PR publish independently and keep separate update/removal queues.
