@@ -122,3 +122,58 @@
 @media(max-width:1000px) {.ux-paths>div{grid-template-columns:1fr 1fr}.ux-discovery-layout{grid-template-columns:minmax(0,1fr) 230px;gap:25px}.ux-lab-cards{gap:12px}.ux-lab-cards article{padding:16px}}
 @media(max-width:700px) {.ux-paths,.ux-lab-directory{margin:40px 0}.ux-paths>div,.ux-lab-directory>div,.ux-decision-grid,.ux-discovery-layout{grid-template-columns:1fr}.ux-lab-cards{grid-template-columns:1fr}.ux-lab-cards article{display:grid;grid-template-columns:90px minmax(0,1fr);gap:0 18px;padding:18px}.ux-lab-cards article>span{grid-row:span 5;height:110px}.ux-lab-cards h2,.ux-lab-cards h3{margin:0 0 10px}.ux-lab-cards p{margin:6px 0}.ux-compare-check{grid-column:1/-1;margin-top:14px}.ux-lab-taskbox{border-left:0;border-top:1px solid #d0dcd4;padding:24px 0}.ux-search-box input{width:0}.ux-search-box .button{padding:14px 20px}.ux-paths nav{gap:15px}.ux-product-nav .ux-return-list{margin-left:0;flex-basis:100%}.ux-test-plan header{display:block}.ux-plan-toolbar{position:static}.ux-test-case{font-size:15px}.ux-table-scroll{max-width:calc(100vw - 40px)}.ux-guide-header button{font-size:13px}.ux-compare-tray>div{flex:none;width:100%}.ux-compare-tray button{white-space:nowrap}}
 @media print {body:has([data-ux-test-plan]) .header,body:has([data-ux-test-plan]) .notice,body:has([data-ux-test-plan]) .footer,.ux-plan-toolbar{display:none!important}.ux-test-case{break-inside:avoid}.ux-test-plan{padding:0}.ux-test-plan h1{font-size:32px}.ux-test-plan .ux-example-links{font-size:12px}}
+/* Task-based grouping: the same hierarchy in navigation, titles and learning. */
+.ux-group-directory {margin:50px 0;border-top:1px solid #ccd8d1;padding-top:32px;scroll-margin-top:100px}
+.ux-group-directory>div {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:26px}
+.ux-group-directory>div>a {display:block;border-top:2px solid #35736a;padding:22px 0;text-decoration:none}
+.ux-group-directory span {font-size:12px;color:#506159}
+.ux-group-directory h3 {font-size:25px;line-height:1.25;letter-spacing:-.03em;margin:16px 0}
+.ux-group-directory p {font-size:15px;line-height:1.65;color:#506159}
+.ux-measure,.ux-related,.ux-lab-related {border-top:1px solid #ccd8d1;margin-top:44px;padding:28px 0}
+.ux-measure p,.ux-related p,.ux-lab-related p {max-width:950px;font-size:16px;line-height:1.7}
+.ux-related nav,.ux-lab-related nav,.ux-platform-links {display:flex;flex-wrap:wrap;gap:14px 24px}
+.ux-related a,.ux-lab-related a,.ux-platform-links a {font-size:14px;text-decoration:underline;text-underline-offset:3px}
+.ux-platform-links {margin:22px 0}
+.ux-breadcrumb {flex-wrap:wrap}
+.ux-lab-directory>div {grid-template-columns:repeat(4,minmax(0,1fr))}
+.ux-needs {border:1px solid #ccd8d1;margin:30px 0;padding:24px;display:flex;flex-wrap:wrap;gap:20px}
+.ux-needs legend {font-weight:600;padding:0 8px}
+.ux-needs p {width:100%;font-size:14px;margin:0;color:#506159}
+.ux-needs label {display:flex;align-items:center;gap:10px;min-height:44px}
+.ux-needs input {width:20px;height:20px;accent-color:#35736a}
+.ux-decision-cards {grid-template-columns:1fr 1fr}
+.ux-decision-cards button,.ux-accessory button,.ux-lab-basket button,.ux-worksheet-grid+button,[data-cro-worksheet] form button {min-height:44px;padding:12px 18px;background:white;border:1px solid #859a8e;font:inherit;cursor:pointer}
+.ux-decision-cards [aria-pressed=true] {background:#295e56;color:white}
+.ux-product-choice {display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:48px;margin-top:40px}
+.ux-product-choice h2 {font-size:32px}
+.ux-product-choice h3 {font-size:21px}
+.ux-product-choice p {font-size:15px;line-height:1.7}
+.ux-facts {display:grid;grid-template-columns:120px 1fr;font-size:15px;line-height:1.7;gap:12px;margin:26px 0}
+.ux-facts dt {font-weight:600}.ux-facts dd {margin:0}
+.ux-policy,.ux-accessory {border-block:1px solid #ccd8d1;padding:18px 0;margin:24px 0}
+.ux-policy summary,.ux-lab-basket summary {min-height:44px;padding:12px 0;cursor:pointer;text-decoration:underline}
+.ux-lab-basket {border:1px solid #ccd8d1;background:#f4f7f3;padding:24px;align-self:start}
+.ux-lab-basket h2 {margin-top:0}.ux-lab-basket dl {display:grid;grid-template-columns:1fr auto;gap:12px}.ux-lab-basket dd {margin:0}
+.ux-lab-basket [data-decision-lines]>div {border-bottom:1px solid #ccd8d1;padding:14px 0}
+.ux-lab-basket [data-decision-lines] button {padding:6px;font-size:13px}
+.ux-lab-basket label {display:block;font-size:14px;margin:12px 0}
+.ux-lab-basket input {width:100%;padding:12px;background:white;border:1px solid #859a8e;font:inherit}
+.ux-lab-basket [aria-invalid=true] {border-color:#a12626}
+[data-cro-worksheet] form {margin:30px 0;padding:24px 0;border-block:1px solid #ccd8d1;display:flex;align-items:center;flex-wrap:wrap;gap:14px}
+[data-cro-worksheet] form select {min-width:0;max-width:100%;padding:14px;background:#fff;border:1px solid #859a8e;font:inherit}
+[data-cro-worksheet] form p {width:100%;font-size:13px;margin:0}
+.ux-worksheet-grid {display:grid;grid-template-columns:1fr 1fr;gap:36px}
+.ux-worksheet-grid label {display:block;font-weight:600;margin:25px 0 10px}
+.ux-worksheet-grid textarea {width:100%;padding:16px;border:1px solid #859a8e;font:inherit;font-size:15px;line-height:1.65;resize:vertical}
+.ux-worksheet-grid aside {background:#f4f7f3;padding:24px;align-self:start;overflow-wrap:anywhere}
+.ux-worksheet-grid aside h2 {font-size:26px;margin-top:0}
+.ux-worksheet-preview section {border-top:1px solid #ccd8d1;padding-top:14px;margin-top:22px}
+.ux-worksheet-grid h3 {font-size:16px}
+.ux-worksheet-grid p {font-size:14px;line-height:1.7;white-space:pre-wrap}
+@media(max-width:1000px) {.ux-group-directory>div,.ux-lab-directory>div{grid-template-columns:1fr 1fr}.ux-product-choice{grid-template-columns:minmax(0,1fr) 290px;gap:24px}}
+@media(max-width:700px) {.ux-group-directory>div,.ux-lab-directory>div,.ux-product-choice,.ux-worksheet-grid{grid-template-columns:1fr}.ux-group-directory{margin:35px 0}.ux-group-directory>div{gap:8px}.ux-product-choice{gap:20px}.ux-decision-cards{grid-template-columns:1fr}.ux-decision-cards button{grid-column:1/-1}.ux-facts{grid-template-columns:95px 1fr}.ux-lab-basket{padding:20px}.ux-worksheet-grid aside{padding:20px}.ux-group-directory h3{font-size:23px}}
+.ux-further {display:inline-block;margin:0 18px 12px 0;font-size:13px;text-decoration:underline}
+.designs-section .section-heading h1 {font-size:clamp(32px,4vw,50px);line-height:1.1;letter-spacing:-.04em;max-width:900px;margin:0 0 20px}
+[data-decision-title] {scroll-margin-top:110px}
+.ux-group-directory>div>a {position:relative}
+.ux-group-directory .ux-group-arrow {position:absolute;right:0;top:20px;font-size:22px;color:#35736a}

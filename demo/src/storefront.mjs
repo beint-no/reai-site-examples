@@ -204,7 +204,7 @@ export function renderDesign(style, store, availability, context) {
 export function renderDesigns(context) {
   return documentHtml(
     "Butikkdesign / Storefront designs",
-    designGallery(context) +
+    designGallery(context, true) +
       `<section class="shell ux-gallery-callout"><h2>${language(context.locale) === "nb" ? "Test mønstrene bak designene." : "Test the patterns behind the designs."}</h2><a class="under-link" href="/ux/">${uxTopics.length} UX-konsepter / ${uxTopics.length} UX concepts ↗</a></section>` +
       newsletter(context),
     context,

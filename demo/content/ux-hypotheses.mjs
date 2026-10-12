@@ -1,0 +1,21 @@
+// Proposed changes, not measured gains. Worksheet fields remain editable.
+export const proposedChanges = {
+  filters:['Vis aktive filtervalg, treffantall og en tydelig nullstilling. Bevar samme variantkombinasjon når kunden går tilbake.','Show applied choices, counts and a clear reset. Preserve the same variant combination on return.'],
+  'mobile-filters':['La kunden velge flere mobilfiltre før Bruk, og forkast bare utkastet ved Avbryt.','Allow several mobile filter choices before Apply and discard only the draft on Cancel.'],
+  search:['Bevar søket ved null treff og tilby relevante kategorier eller hjelpesvar.','Preserve zero-result queries and offer relevant categories or help answers.'],
+  autocomplete:['La tastaturbrukere velge og redigere et forslag før søket sendes.','Let keyboard users select and edit a suggestion before submission.'],
+  'product-lists':['Vis de to egenskapene som avgjør denne kategorien direkte på produktkortet, sammen med pris.','Show the two category-specific decision attributes directly on the card, alongside price.'],
+  variants:['Vis variantvalg og tilgjengelighet ved kjøpsknappen; ikke krev at kunden åpner en skjult liste for å oppdage utsolgte størrelser.','Show variant choices and availability beside purchase; do not require a hidden list to discover sold-out sizes.'],
+  'size-guide':['Legg en målguide ved størrelsesvalget, med relevante mål og forklaring av hvordan de tas.','Place measurements beside size selection, with relevant dimensions and measuring instructions.'],
+  cart:['Oppdater total ved antallsendring og la kunden angre fjerning av en vare.','Update totals with quantity changes and allow undo after removing an item.'],
+  costs:['Forklar fraktkostnad eller hvilke opplysninger som mangler før kunden starter checkout.','Explain shipping cost or missing information before checkout begins.'],
+  'required-fields':['Vis bare de feltene leveringsmåten og kundetypen trenger, og merk valgfrie felt eksplisitt.','Show only fields required by fulfillment and customer type, explicitly marking optional fields.'],
+  errors:['Vis en konkret feltfeil, flytt fokus dit og behold de gyldige opplysningene.','Show a specific field error, move focus there and preserve valid input.'],
+  'product-details':['Erstatt generell produkttekst med seksjoner for bruk, fakta, vedlikehold og begrensninger.','Replace generic copy with sections for use, facts, care and limitations.'],
+  returns:['Plasser en kort vilkårsforklaring og lenke til hele teksten ved produktvalget.','Place a short policy explanation and full-policy link beside product selection.'],
+  ratings:['Vis antallet sammen med reelt gjennomsnitt; bruk en forklaring uten stjerner når ingen vurderinger finnes.','Show the count beside the genuine average; explain the absence of reviews without stars.'],
+  'complementary-products':['Vis bare eksplisitt kompatibelt tilbehør, forklar relevansen og la kunden fortsette uten å velge det.','Show only explicitly compatible accessories, explain their relevance and allow continuation without them.'],
+  promotions:['Skjul kodefeltet bak en tydelig inngang og vis hvilke kurvlinjer som faktisk får rabatt.','Collapse the code entry and show exactly which basket lines receive the discount.'],
+  seo:['Gi en nyttig kategori en unik tittel og stabil URL, og hold sorterings- og filtervarianter ute av sitemap.','Give a useful category a unique title and stable URL, keeping sort and filter variants out of the sitemap.'],
+  performance:['Reduser arbeid på klienten og reserver bildeplass. Mål respons ved filtre og kurv på mobil før og etter.','Reduce client work and reserve image space. Measure mobile filter and basket responsiveness before and after.'],
+};

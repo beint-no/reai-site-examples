@@ -212,8 +212,9 @@ function designTraits(d) {
   };
   return `${d.fixture ? "fixture" : "live"} drawer ${extras[d.slug]}`;
 }
-export function designGallery(c) {
-  return `<section class="shell designs-section" id="designs"><div class="section-heading"><div><h2>${pick(c, "Ti butikkdesign du kan prøve.", "Ten storefront designs to try.")}</h2><p>${pick(c, "Prøv bannere, kolleksjoner, fargevalg, hurtigkjøp og handlekurver. Åtte design bruker live ReAI-data. Famme og Lookbook bruker en isolert motekatalog.", "Try banners, collections, swatches, quick-add and carts. Eight designs use live ReAI data. Famme and Lookbook use an isolated fashion catalog.")}</p></div></div><div class="design-filters" role="group" aria-label="${pick(c, "Filtrer butikkdesign", "Filter storefront designs")}">${[
+export function designGallery(c, standalone = false) {
+  const heading = standalone ? "h1" : "h2";
+  return `<section class="shell designs-section" id="designs"><div class="section-heading"><div><${heading}>${pick(c, "Ti butikkdesign for ulike kjøpsoppgaver.", "Ten storefront designs for different shopping tasks.")}</${heading}><p>${pick(c, "Prøv bannere, kolleksjoner, fargevalg, hurtigkjøp og handlekurver. Åtte design bruker live ReAI-data. Famme og Lookbook bruker en isolert motekatalog.", "Try banners, collections, swatches, quick-add and carts. Eight designs use live ReAI data. Famme and Lookbook use an isolated fashion catalog.")}</p></div></div><div class="design-filters" role="group" aria-label="${pick(c, "Filtrer butikkdesign", "Filter storefront designs")}">${[
     ["all", "Alle", "All"],
     ["live", "Live API", "Live API"],
     ["collections", "Kolleksjoner", "Collections"],
@@ -240,8 +241,8 @@ export function platformExplanation(c) {
       "Butikkdesignet",
       "Storefront design",
       "HTML · CSS · JavaScript",
-      "Velg typografi, bilder, fargevalg og handlekurv. Sju design viser ulike løsninger med den samme publiserte katalogen. Famme og Lookbook viser i tillegg isolerte motedesign.",
-      "Choose typography, photography, swatches and a cart. Seven designs show different approaches using the same published catalog. Famme and Lookbook add isolated fashion designs.",
+      "Velg typografi, bilder, fargevalg og handlekurv. Åtte design viser ulike løsninger med den samme publiserte katalogen. Famme og Lookbook viser i tillegg isolerte motedesign.",
+      "Choose typography, photography, swatches and a cart. Eight designs show different approaches using the same published catalog. Famme and Lookbook add isolated fashion designs.",
       "/#designs",
       "Se designene",
       "Compare the designs",

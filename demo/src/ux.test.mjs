@@ -163,10 +163,10 @@ test("all learning routes are bilingual, static and never call commerce or imply
         html,
         /data-checkout(?:[ =>])|data-start-checkout|data-add-to-cart|name="password"/,
       );
-      if (path !== "/ux/lab/checkout") assert.match(html, /Baymard/);
+      assert.match(html, /<h1>/);
     }
   assert.equal(Object.keys(designTopics).length, 10);
-  assert.equal(uxTopics.flatMap((t) => t.cases).length, 105);
+  assert.equal(uxTopics.flatMap((t) => t.cases).length, 137);
   assert.equal(new Set(uxTopics.map((t) => t.slug)).size, uxTopics.length);
   for (const ids of Object.values(designTopics))
     assert.ok(ids.every((id) => uxTopics.some((t) => t.slug === id)));

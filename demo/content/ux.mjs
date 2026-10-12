@@ -2,7 +2,9 @@
 // No premium guidelines, copied benchmark screenshots, or certification claims.
 import { additionalTopics, learningPaths } from "./ux-extension.mjs";
 import { topicDepth } from "./ux-depth.mjs";
-export { learningPaths };
+import { commerceTopics } from "./ux-commerce.mjs";
+import { topicTitles, uxGroups, groupForTopic } from "./ux-groups.mjs";
+export { learningPaths, uxGroups, groupForTopic };
 const topic = (
   slug,
   stage,
@@ -620,7 +622,8 @@ const baseTopics = [
     ],
   ),
 ];
-export const uxTopics = [...baseTopics.map((t) => ({ ...t, ...topicDepth[t.slug], cases: [...t.cases, ...topicDepth[t.slug].extra] })), ...additionalTopics];
+export const uxTopics = [...baseTopics.map((t) => ({ ...t, ...topicDepth[t.slug], cases: [...t.cases, ...topicDepth[t.slug].extra] })), ...additionalTopics, ...commerceTopics].map(t => ({...t, title: topicTitles[t.slug] || t.title, group: groupForTopic(t.slug).slug}));
+uxTopics.find(t => t.slug === "product-lists").examples.push(["Product decision lab", "/ux/lab/product/"]);
 export const acceptanceCount = uxTopics.reduce((n, t) => n + t.cases.length, 0);
 export const designTopics = {
   starter: ["breadcrumbs", "sorting", "search", "filters", "mobile-filters", "cart", "images", "errors"],
@@ -654,5 +657,8 @@ export const uxRoutes = [
   "/ux/lab/discovery",
   "/ux/lab/compare",
   "/ux/test-plan",
+  "/ux/lab/product",
+  "/ux/worksheet",
+  ...uxGroups.map(g => `/ux/group/${g.slug}`),
   ...uxTopics.map((t) => `/ux/${t.slug}`),
 ];
