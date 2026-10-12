@@ -24,7 +24,7 @@ New hostnames can remain negatively cached by recursive DNS resolvers; compare
 authoritative/public DNS and the workers.dev URL before treating that as a Worker fault.
 
 CI validates source; it holds no production credential and does not deploy.
-Changing the public repo or private template does not redeploy client sites.
+Changing the public repo or public template does not redeploy client sites.
 
 PR builds and preview publishing run on standard hosted GitHub Actions. The central
 preview publisher is the reviewed default-branch workflow in this public repository.
@@ -36,3 +36,18 @@ Preview artifacts record the JavaScript bundle emitted by Wrangler. A .mjs or
 TypeScript source entrypoint may be emitted as .js; the controller resolves that
 bundle rather than assuming the original extension. Multiple sites in one
 customer PR publish independently and keep separate update/removal queues.
+
+## Direct deployment and local previews
+
+With direct Cloudflare access, run npm ci and use npm run deploy:local. Add
+-- --dry-run to check without publishing. Authenticate with Wrangler login or
+CLOUDFLARE_API_TOKEN; set CLOUDFLARE_ACCOUNT_ID for previews.
+
+Use npm run preview:deploy -- design and npm run preview:remove -- design. A
+multi-site repo also takes its site name. Catalog previews require a read-only
+PREVIEW Site credential, supplied using REAI_PREVIEW_CREDENTIAL_FILE (a token
+file outside Git) or REAI_PREVIEW_CREDENTIAL. Use only site:read,
+commerce:catalog:read and commerce:availability:read. Live credentials are refused.
+Local previews block writes, carry noindex and use a separate local- namespace.
+These commands are independent of GitHub Actions. Private repository Actions
+builds still require available private Actions capacity.
