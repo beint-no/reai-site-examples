@@ -27,9 +27,12 @@ import {
 import { uxRoutes } from "../content/ux.mjs";
 import { renderUxBody, designLearning, uxTitle } from "./ux.mjs";
 import { documentHtml } from "./storefront.mjs";
+import { renderMerchantCheckout } from "./merchant-checkout.mjs";
+import { renderFulfillmentScenario } from "./fulfillment-scenario.mjs";
 import { educationalPaths, normalizedPath, pageMetadata, applyPageMetadata, educationalSitemap, publicOrigin } from "./seo.mjs";
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const CHECKOUT_ID = /^[0-9a-f]{32}$/i;
 const headers = {
   "X-Content-Type-Options": "nosniff",
   "Strict-Transport-Security": "max-age=31536000",
@@ -171,7 +174,7 @@ export default {
         return response({ error: "Method not allowed" }, 405, true);
       if (
         request.method === "POST" &&
-        !["/reai/checkout/start", "/reai/newsletter"].includes(path)
+        !["/reai/checkout/start", "/reai/checkout/merchant/start", "/reai/checkout/merchant/options", "/reai/checkout/merchant/prepare", "/reai/newsletter"].includes(path)
       )
         return response({ error: "Not found" }, 404, true);
       if (request.method !== "POST" && path === "/")
@@ -192,6 +195,16 @@ export default {
         ["/scenarios/studio", "/scenarios/supply"].includes(path)
       )
         return finish(renderScenario(path.split("/")[2], context), context);
+      if (request.method !== "POST" && path === "/scenarios/fulfillment")
+        return finish(renderFulfillmentScenario(context), context);
+      if (request.method !== "POST" && path === "/checkout/merchant") {
+        const checkoutId = url.searchParams.get("checkout");
+        if (!checkoutId || !CHECKOUT_ID.test(checkoutId)) return finish(renderMerchantCheckout(context), context);
+        if (!env.REAI_SITE_CREDENTIAL) return response({ error: "Site integration not configured" }, 503, true);
+        const merchantClient = new ReaiSiteClient({ baseUrl: env.REAI_API_BASE_URL || "https://app.reai.no", token: env.REAI_SITE_CREDENTIAL });
+        const checkout = await data(merchantClient.checkoutDetails(checkoutId));
+        return finish(renderMerchantCheckout(context, checkout), context);
+      }
       if (
         request.method !== "POST" &&
         [
@@ -384,6 +397,41 @@ export default {
         )
           throw new Error("Unexpected checkout destination");
         return response(checkout, 200, true);
+      }
+      if (path === "/reai/checkout/merchant/start") {
+        if (request.method !== "POST" || paymentMode === "disabled") return response({ error: "Checkout is not enabled" }, 403, true);
+        if (request.headers.get("Origin") !== url.origin || !request.headers.get("Content-Type")?.startsWith("application/json")) return response({ error: "Same-origin JSON required" }, 403, true);
+        const body = await readBoundedJson(request, 16384);
+        if (!Array.isArray(body?.lines) || body.lines.length < 1 || body.lines.length > 30 || body.lines.some((l) => !UUID.test(l?.variantId) || !Number.isInteger(l.quantity) || l.quantity < 1 || l.quantity > 20)) return response({ error: "Invalid cart" }, 400, true);
+        const key = request.headers.get("Idempotency-Key");
+        if (!key || !UUID.test(key)) return response({ error: "Valid idempotency key required" }, 400, true);
+        const result = await client.createCheckoutSession({
+          lines: body.lines.map((l) => ({ variantId: l.variantId, quantity: l.quantity })),
+          returnUrl: new URL("/checkout/return/", url).href,
+          merchantCheckoutUrl: new URL("/checkout/merchant/", url).href,
+        }, delivery, key);
+        const upstream = result.response;
+        if (!upstream.ok) return response({ error: "Merchant checkout could not be started" }, upstream.status === 409 ? 409 : 502, true);
+        return response(await result.json(), 200, true);
+      }
+      if (path === "/reai/checkout/merchant/options") {
+        if (request.method === "GET") {
+          const checkoutId = url.searchParams.get("checkout");
+          if (!checkoutId || !CHECKOUT_ID.test(checkoutId)) return response({ error: "Invalid checkout" }, 400, true);
+          const result = client.checkoutDeliveryOptions(checkoutId, { customer: {}, includeOtherOptions: true });
+          return response(await data(result), 200, true);
+        }
+        const body = await readBoundedJson(request, 8192);
+        if (!CHECKOUT_ID.test(body?.checkout) || !Number.isInteger(body?.revision) || !body.customer || typeof body.customer !== "object") return response({ error: "Invalid checkout details" }, 400, true);
+        const updated = await data(client.updateCheckout(body.checkout, { revision: body.revision, customer: body.customer }));
+        const options = await data(client.checkoutDeliveryOptions(body.checkout, { customer: body.customer, includeOtherOptions: true }));
+        return response({ ...options, revision: updated.revision }, 200, true);
+      }
+      if (path === "/reai/checkout/merchant/prepare") {
+        const body = await readBoundedJson(request, 4096);
+        if (!CHECKOUT_ID.test(body?.checkout) || !Number.isInteger(body?.revision)) return response({ error: "Invalid checkout details" }, 400, true);
+        const prepared = await data(client.prepareCheckoutPayment(body.checkout, { revision: body.revision }));
+        return response({ paymentUrl: prepared.paymentUrl, revision: prepared.revision }, 200, true);
       }
       if (request.method === "POST")
         return response({ error: "Method not allowed" }, 405, true);

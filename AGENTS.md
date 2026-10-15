@@ -46,7 +46,7 @@ wrangler.jsonc targets only reai-demo-store at https://nettbutikk.reai.no.
 npm run deploy checks and deploys production locally; CI also creates read-only PR previews.
 Set REAI_SITE_CREDENTIAL as a Worker secret. The published field guide at /features/
 explains payments, B2B/EHF, shipping/pickup, discounts, catalog, markets and
-integration; /api/ exercises all nine delivery reads, checkout, newsletter and back-in-stock signup.
+integration; /api/ exercises public delivery reads; hosted and merchant checkout, newsletter and back-in-stock are documented separately.
 /ux/ links research-informed concepts, learning paths and a printable manual test plan to the designs.
 Search, Comparison and Product labs use original fictional catalogs. The Product lab demonstrates decision facts, policy placement, contextual accessories and scoped discounts. Size measurements and delivery dates are explicitly illustrative.
 Public education has unique bilingual metadata, reciprocal locale URLs and a curated sitemap.

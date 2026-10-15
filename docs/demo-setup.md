@@ -90,6 +90,25 @@ Pickup appears only for physical goods. These digital demo products show no
 shipping choices. A real merchant must supply real collection instructions;
 the demo-only method offers no physical fulfillment or collection location.
 
+The public source includes a guarded abandoned-checkout activation check. Run it
+against the Better Integration tenant after verifying the marketing sender; it
+does not guess a Site or overwrite custom copy:
+
+```sh
+node demo/tools/email-flow-options.mjs --tenant-id <authorized-better-integration-tenant>
+node demo/tools/email-flow-options.mjs --tenant-id <authorized-better-integration-tenant> --apply
+```
+
+The enabled flow waits four hours after checkout inactivity, requires current
+customer email consent, suppresses after a completed or authorised purchase and
+observes the checkout lifetime and cooldown. Use `/learn/abandoned-checkout/`
+for the customer test procedure. Never submit a payment to test the flow.
+
+To make pickup visible in a real checkout, publish at least one physical product
+to this Site. Digital test products intentionally show no delivery choices. The public fulfillment lab is fixture-only. When a physical bundle is provisioned on
+the Site, its component definitions and stock come from ReAI; the browser must submit
+the bundle variant ID without expanding it.
+
 ## Connect and publish
 
 Configure the dedicated Site domains to match nettbutikk.reai.no and the actual

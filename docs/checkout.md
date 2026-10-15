@@ -19,6 +19,17 @@ an immutable checkout snapshot. The Worker returns only `checkoutUrl`. The
 shopper opens that URL on ReAI's hosted checkout to provide contact, delivery
 and payment information. The website does not need to collect card details.
 
+## Merchant checkout
+
+A Site can instead send a registered HTTPS `merchantCheckoutUrl` when creating the
+session. ReAI appends the opaque checkout ID to that URL. The merchant page can
+read and update contact details, delivery choices and pickup selection through the
+server-side checkout-session API, then call `prepare-payment` and redirect to the
+returned payment URL. The Site credential stays on the Worker. Use no-store,
+same-origin/origin checks, optimistic revision locking and never log checkout
+details. The demo exposes this pattern at `/checkout/merchant/` and keeps the
+complete hosted flow available beside it.
+
 ## Domains and return paths
 
 The Worker supplies a return URL under its own origin. ReAI validates that
