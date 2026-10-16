@@ -105,9 +105,9 @@ observes the checkout lifetime and cooldown. Use `/learn/abandoned-checkout/`
 for the customer test procedure. Never submit a payment to test the flow.
 
 To make pickup visible in a real checkout, publish at least one physical product
-to this Site. Digital test products intentionally show no delivery choices. The
-bundle demo uses a physical bundle variant whose component definitions and stock
-come from ReAI; the browser submits the bundle variant ID without expanding it.
+to this Site. Digital test products intentionally show no delivery choices. The public fulfillment lab is fixture-only. When a physical bundle is provisioned on
+the Site, its component definitions and stock come from ReAI; the browser must submit
+the bundle variant ID without expanding it.
 
 ## Connect and publish
 
