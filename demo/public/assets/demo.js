@@ -328,6 +328,34 @@ document
     }
   });
 document
+  .querySelector("[data-merchant-checkout]")
+  ?.addEventListener("click", async (e) => {
+    const button = e.currentTarget;
+    const message = document.querySelector("[data-checkout-message]");
+    button.disabled = true;
+    message.textContent = nb ? "Åpner merchant checkout…" : "Opening merchant checkout…";
+    const signature = JSON.stringify(cart);
+    if (signature !== pendingSignature) {
+      pendingSignature = signature;
+      pendingKey = crypto.randomUUID();
+    }
+    try {
+      const response = await fetch("/reai/checkout/merchant/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Idempotency-Key": pendingKey },
+        body: JSON.stringify({ lines: cart }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || (nb ? "Merchant checkout kunne ikke åpnes." : "Merchant checkout could not be opened."));
+      const destination = new URL(data.checkoutUrl);
+      if (destination.protocol !== "https:" || ![location.origin, document.body.dataset.checkoutOrigin || "https://app.reai.no"].includes(destination.origin)) throw new Error("Unexpected checkout destination");
+      window.location.assign(destination.href);
+    } catch (error) {
+      message.textContent = error.message;
+      button.disabled = false;
+    }
+  });
+document
   .querySelector("[data-api-explorer]")
   ?.addEventListener("submit", async (e) => {
     e.preventDefault();

@@ -175,6 +175,10 @@ test("unsafe upstream checkout destination is rejected", async () =>
 test("all field-guide pages are credential-free and use the selected language", async () => {
   for (const slug of [
     "payments",
+    "abandoned-checkout",
+    "merchant-checkout",
+    "json-ld",
+    "bundles-and-pickup",
     "business",
     "shipping",
     "discounts",
@@ -197,6 +201,38 @@ test("all field-guide pages are credential-free and use the selected language", 
     }
   }
 });
+
+test("merchant checkout and fulfillment lab are exposed with explicit boundaries", async () => {
+  const intro = await worker.fetch(new Request("https://nettbutikk.reai.no/checkout/merchant/"), { ASSETS: env.ASSETS }, {});
+  assert.equal(intro.status, 200);
+  assert.match(await intro.text(), /Merchant checkout/);
+  const lab = await worker.fetch(new Request("https://nettbutikk.reai.no/scenarios/fulfillment/?lang=en"), { ASSETS: env.ASSETS }, {});
+  assert.equal(lab.status, 200);
+  const html = await lab.text();
+  assert.match(html, /simulated/i);
+  assert.match(html, /pickup/i);
+});
+
+test("product pages emit JSON-LD from Site API values", async () =>
+  mocked(
+    async () => {
+      const r = await worker.fetch(new Request("https://nettbutikk.reai.no/products/test-betaling/"), env, {});
+      assert.equal(r.status, 200);
+      const html = await r.text();
+      assert.match(html, /application\/ld\+json/);
+      assert.match(html, /"name":"API Product"/);
+      assert.match(html, /"price":1/);
+      assert.match(html, /"priceCurrency":"NOK"/);
+    },
+    async (input) => {
+      const url = new URL(input);
+      if (url.pathname.endsWith("/site")) return site();
+      if (url.pathname.endsWith("/storefront")) return Response.json({ locale: "nb-NO", marketHandle: "default", currency: "NOK", products: [], collections: [] });
+      if (url.pathname.includes("/products/test-betaling")) return Response.json({ title: "API Product", handle: "test-betaling", description: "From API", brand: "API Brand", images: [], variants: [{ id, sku: "API-1", price: 1, options: [] }] });
+      if (url.pathname.endsWith("/availability")) return Response.json({ variants: [{ variantId: id, status: "AVAILABLE" }] });
+      throw new Error(`Unexpected upstream ${url.pathname}`);
+    },
+  ));
 
 test("product-list explorer forwards the selected market/locale through the Site client", async () =>
   mocked(

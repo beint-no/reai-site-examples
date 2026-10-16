@@ -72,5 +72,9 @@ Keep demo learning content and fixture adapters out of generated client sites.
 
 Run npm run check; verify desktop/mobile, all designs, swatches, cart quantities/undo,
 stock scenarios, catalog return context, search suggestions, comparison, sizing, real API reads, newsletter errors and HTTPS redirects before deploy.
+The live cart exposes both complete hosted checkout and merchant-domain checkout;
+the latter is a real Site API session pattern and must only be tested with the
+configured Better Integration Site. The fulfillment scenario remains fixture-only.
+
 Root AGENTS.md owns release policy. Keep operational docs concise and avoid duplicating
 field-guide content in Markdown.

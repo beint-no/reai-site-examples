@@ -20,9 +20,11 @@ instructs browsers to keep using HTTPS for this hostname.
 | /designs/famme/ | Famme-inspired responsive AVIF banners, collection photography and quick-add |
 | /designs/famme/collections/<handle>/ and /designs/famme/products/<handle>/ | Illustrative clothing, search/sort, size availability, swatches and isolated cart |
 | /scenarios/studio/ and /scenarios/supply/ | Isolated physical-product UI fixtures: mixed stock, all available, sold out, backorders and availability changes |
-| /shop/, /products/, /collections/, /cart/ | Live catalog, manual ReAI gift cards, development support and hosted checkout |
-| /features/ and /learn/ | Payments, checkout test checklist, B2B/EHF, shipping/pickup, discounts, catalog, markets, integration, collection membership, full commerce flow, newsletter consent/welcome flows and back-in-stock alerts |
-| /api/ | All nine delivery reads; checkout and newsletter have their own forms; stock alerts are documented separately |
+| /scenarios/fulfillment/ | Safe simulated physical bundle, shipping and pickup lab |
+| /shop/, /products/, /collections/, /cart/ | Live catalog, manual ReAI gift cards, development support and hosted or merchant-domain checkout |
+| /checkout/merchant/ | Merchant-domain checkout page for the live checkout-session pattern; payment still finishes on ReAI/Adyen |
+| /features/ and /learn/ | Payments, abandoned checkout, hosted versus merchant checkout, JSON-LD, bundles/pickup, checkout test checklist, B2B/EHF, shipping/pickup, discounts, catalog, markets, integration, collection membership, full commerce flow, newsletter consent/welcome flows and back-in-stock alerts |
+| /api/ | Public delivery reads; hosted and merchant checkout use server-side Site API sessions; newsletter, analytics and stock alerts have their own boundaries |
 
 Scenario carts use separate storage keys and non-UUID choices. They never call
 checkout or create fulfillment. Live unavailable data produces an error. Studio/Atelier/Supply
