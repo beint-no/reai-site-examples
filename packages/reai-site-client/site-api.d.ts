@@ -58,6 +58,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/site/v1/commerce/cart-quote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Quote a cart with current prices and stock
+         * @description Read-only. Uses checkout pricing and validates the complete requested stock demand. Discounts require an explicit checkout code; no promotion is selected automatically. Returns product totals before shipping. Creates no checkout, customer, order, payment, reservation or tracking event. Works with read-only preview credentials. Never accepts browser prices or discount amounts.
+         */
+        post: operations["cartQuote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/site/v1/commerce/catalog": {
         parameters: {
             query?: never;
@@ -114,7 +134,7 @@ export interface paths {
         head?: never;
         /**
          * Save merchant checkout details
-         * @description Uses optimistic revision locking. Set complete for final contact/address validation. Empty discountCode removes a discount. Changing the address clears delivery selection. Locked payments cannot be edited.
+         * @description Uses optimistic revision locking. Set complete for final contact/address validation. Submit code to apply an explicitly entered discount or gift card; whitespace is ignored and a matching gift card takes precedence. Do not combine code with discountCode or giftCardCode. Omitted fields preserve applied codes. Empty discountCode or giftCardCode removes that specific code. Gift cards are prepaid tender, not a discount; applying a code does not spend its balance. Changing the address clears delivery selection. Locked payments cannot be edited.
          */
         patch: operations["update"];
         trace?: never;
@@ -433,6 +453,7 @@ export interface components {
         };
         SiteAnalyticsBatchDto: {
             events: components["schemas"]["SiteAnalyticsEventDto"][];
+            origin?: string | null;
         };
         SiteAnalyticsEventDto: {
             /** Format: uuid */
@@ -467,6 +488,27 @@ export interface components {
             status: "AVAILABLE" | "OUT_OF_STOCK";
             /** Format: uuid */
             variantId: string;
+        };
+        SiteCartQuoteDto: {
+            currency: string;
+            discount: number;
+            discountCode?: string | null;
+            lines: components["schemas"]["SiteCartQuoteLineDto"][];
+            locale: string;
+            subtotal: number;
+            total: number;
+        };
+        SiteCartQuoteLineDto: {
+            /** Format: int32 */
+            quantity: number;
+            subtotal: number;
+            total: number;
+            unitPrice: number;
+            /** Format: uuid */
+            variantId: string;
+        };
+        SiteCartQuoteReq: {
+            lines: components["schemas"]["SiteCheckoutLineReq"][];
         };
         SiteCatalogRes: {
             /** Format: int32 */
@@ -543,6 +585,9 @@ export interface components {
             editable: boolean;
             /** Format: date-time */
             expiresAt: string;
+            giftCardAmount: number;
+            giftCardCode?: string | null;
+            giftCardRedemptionAvailable: boolean;
             id: string;
             lines: components["schemas"]["SiteCheckoutDetailsLineDto"][];
             locale: string;
@@ -601,6 +646,13 @@ export interface components {
         };
         /** @description Checkout lines already selected by the store or application. Create this request from a trusted backend or Worker, never from the shopper's browser. */
         SiteCheckoutSessionReq: {
+            /**
+             * Format: uuid
+             * @description Optional anonymous browser session UUID for aggregate store analytics. Omit on tracking opt-out; never send customer data.
+             */
+            analyticsSessionId?: string | null;
+            /** @description Optional plain-text message from the shopper, copied to the order comment. Blank means no comment. */
+            comment?: string | null;
             /** @description ISO 3166-1 alpha-2 delivery country within the selected market. Defaults to its first country when omitted. */
             countryCode?: string | null;
             lines: components["schemas"]["SiteCheckoutLineReq"][];
@@ -627,9 +679,11 @@ export interface components {
             vat: number;
         };
         SiteCheckoutUpdateReq: {
+            code?: string | null;
             complete?: boolean;
             customer?: components["schemas"]["SiteCheckoutCustomerDto"] | null;
             discountCode?: string | null;
+            giftCardCode?: string | null;
             optionToken?: string | null;
             pickupToken?: string | null;
             /** Format: int32 */
@@ -709,6 +763,8 @@ export interface components {
             isDefault: boolean;
             locales: string[];
             name: string;
+            /** @description Configured delivery prices in this market currency for storefront shipping information. Excludes store pickup. Country restrictions and optional weight tiers apply; checkout remains authoritative. Free-shipping threshold uses product total after discounts, before gift-card payment. */
+            shippingMethods: components["schemas"]["SiteDeliveryShippingMethodRes"][];
         };
         SiteDeliveryOptionRes: {
             name: string;
@@ -767,6 +823,18 @@ export interface components {
             sourceLocale: string;
             /** @enum {string} */
             status: "enabled" | "disabled";
+        };
+        SiteDeliveryShippingMethodRes: {
+            amount: number;
+            amountAboveWeight?: number | null;
+            /** @description Configured carrier code for shipping information, such as bring, postnord or dhl; null for an unbranded method. */
+            carrier?: string | null;
+            countries: string[];
+            freeFromAmount?: number | null;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            weightThresholdGrams?: number | null;
         };
         SiteDeliveryVariantRes: {
             /** @description Attributes bound to this variant's selected option values. Combine with product-wide attributes when filtering; keep size, price and availability predicates on the same variant. */
@@ -1040,6 +1108,85 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SiteAvailabilityRes"];
+                };
+            };
+            /** @description Bad request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    cartQuote: {
+        parameters: {
+            query?: {
+                market?: string | null;
+                locale?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SiteCartQuoteReq"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteCartQuoteDto"];
                 };
             };
             /** @description Bad request */
