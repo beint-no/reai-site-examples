@@ -89,7 +89,7 @@ export async function exportStorefront(name, destination) {
           $schema: "https://unpkg.com/wrangler/config-schema.json",
           name: `test-reai-${name}`,
           main: "./src/worker.js",
-          compatibility_date: "2026-09-28",
+          compatibility_date: "2026-10-30",
           workers_dev: true,
           assets: {
             directory: "./public",

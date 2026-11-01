@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/wrangler/config-schema.json",
   "name": "local-reai-storefront-template",
   "main": "worker.js",
-  "compatibility_date": "2026-09-28",
+  "compatibility_date": "2026-10-30",
   "workers_dev": false,
   "assets": {
     "directory": "./public",
