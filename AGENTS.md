@@ -92,17 +92,10 @@ are MIT; see ASSETS.md. Famme photographs are a specifically authorized design-t
 exception, owned by Famme and not MIT. Other customer assets must never be added
 to this public repo without explicit permission.
 
-## Automatic PR previews
+## Manual GitHub Actions
 
-Open PRs receive a stable isolated Cloudflare Preview URL, updated on pushes
-and removed on close. `.github/workflows/preview.yml` builds without deployment
-credentials, then requests the trusted preview workflow in beint-no/reai-site-examples through signed
-GitHub Actions OIDC. Cloudflare credentials stay in the central deployment repository.
-The server maps this repository to its assigned Worker, verifies the current PR,
-and provides only a read-only PREVIEW Site credential where catalog access is needed.
-Previews are noindex and reject orders, payments and form submissions.
-Manually dispatch PR previews with a PR number to backfill an already-open PR.
-Register independently created repositories in the server's customer preview registry;
-new repositories created through the e-commerce module are recognized automatically.
-
-The reviewed default-branch storefront-preview.yml also publishes customer previews. Deployment credentials are encrypted GitHub Actions secrets. ReAI verifies signed workflow identity and supplies the current PR, assigned Worker and read-only Site credential. PR artifacts are never executed as CI scripts; publishing uses this repository’s trusted helper.
+Checks, deployment and PR previews run only when explicitly dispatched. Pushes,
+pull requests and merges do not start workflows. Use the repository's local check,
+deployment and preview commands for normal work. A manual PR preview must be
+dispatched again after changes, and after closing a PR to remove it. Preview
+credentials stay in the trusted controller; previews remain read-only and noindex.

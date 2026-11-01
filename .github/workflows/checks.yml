@@ -1,10 +1,7 @@
 name: Checks
 
 on:
-  pull_request:
-    paths: ['demo/**', 'templates/**', 'wrangler.jsonc', 'starter/**', 'packages/**', 'tools/**', 'docs/**', '*.md', 'package*.json', 'tsconfig.json', '.github/workflows/**']
-  push:
-    branches: [main]
+  workflow_dispatch: null
 
 permissions:
   contents: read
