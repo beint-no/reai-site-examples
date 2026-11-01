@@ -217,39 +217,9 @@ export function createReaiStorefrontWorker({
     return result.json();
   }
 
-  async function legacyStorefront(env, cached) {
-    const client = siteClient(env);
-    const catalogResult = await client.catalog(deliveryContext, cached?.etag);
-    const catalogResponse = catalogResult.response;
-    if (catalogResponse.status === 304 && cached) {
-      return { store: cached.store, etag: cached.etag, revalidated: true };
-    }
-    if (!catalogResponse.ok) {
-      throw Object.assign(new Error(`Site API ${catalogResponse.status}`), { status: catalogResponse.status });
-    }
-    const [catalog, list] = await Promise.all([
-      catalogResult.json(),
-      client.collections(deliveryContext).then(siteJson),
-    ]);
-    const collections = await Promise.all((list.collections || []).map(async (collection) => {
-      if (!storefront.HANDLE.test(collection.handle)) return { ...collection, products: [] };
-      try {
-        return await siteJson(await client.collection(collection.handle, deliveryContext));
-      } catch {
-        return { ...collection, products: [] };
-      }
-    }));
-    return {
-      store: { ...catalog, products: catalog.products || [], collections },
-      etag: catalogResponse.headers.get("ETag"),
-      revalidated: false,
-    };
-  }
-
   async function buildStorefront(env, cached) {
     const result = await siteClient(env).storefront(deliveryContext, cached?.etag);
     const response = result.response;
-    if (response.status === 404) return legacyStorefront(env, cached);
     if (response.status === 304 && cached) {
       return { store: cached.store, etag: cached.etag, revalidated: true };
     }

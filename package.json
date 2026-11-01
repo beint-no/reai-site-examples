@@ -22,9 +22,9 @@
     }
   },
   "allowScripts": {
-    "esbuild@0.28.1": true,
+    "esbuild@0.28.2": true,
     "fsevents@2.3.3": true,
-    "workerd@1.20261006.1": true
+    "workerd@1.20261023.1": true
   },
   "scripts": {
     "check": "npm run typecheck && npm run check:client-boundary && npm test && npm run build && npm run check:workers && npm run check:docs && npm run check:contract && npm run check:dependencies",
