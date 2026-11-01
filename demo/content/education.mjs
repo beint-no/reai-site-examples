@@ -1072,6 +1072,15 @@ export const operations = [
     ],
   ],
   [
+    "cart-quote",
+    "POST",
+    "/site/v1/commerce/cart-quote",
+    [
+      "Beregn priser og rabatter uten ordre eller lagerreservasjon",
+      "Quote prices and discounts without an order or inventory reservation",
+    ],
+  ],
+  [
     "checkout",
     "POST",
     "/site/v1/commerce/checkout-sessions",
