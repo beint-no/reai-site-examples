@@ -176,7 +176,12 @@ await management(
   market ? "PUT" : "POST",
   marketBody,
 );
-const products = await management("/api/products");
+const products = [];
+for (let page = 1; ; page++) {
+  const result = await management(`/api/products?page=${page}&pageSize=200`);
+  products.push(...result.items);
+  if (!result.hasNext) break;
+}
 const publications = await management(`${base}/products`);
 await mkdir(local, { recursive: true, mode: 0o700 });
 const result = { siteId: site.id, priceListId: priceList.id, products: [] };
