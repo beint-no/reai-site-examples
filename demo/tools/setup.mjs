@@ -176,13 +176,16 @@ await management(
   market ? "PUT" : "POST",
   marketBody,
 );
-const products = [];
-for (let page = 1; ; page++) {
-  const result = await management(`/api/products?page=${page}&pageSize=200`);
-  products.push(...result.items);
-  if (!result.hasNext) break;
+async function allPages(path) {
+  const items = [];
+  for (let page = 1; ; page++) {
+    const result = await management(`${path}?page=${page}&pageSize=200`);
+    items.push(...result.items);
+    if (!result.hasNext) return items;
+  }
 }
-const publications = await management(`${base}/products`);
+const products = await allPages("/api/products");
+const publications = await allPages(`${base}/products`);
 await mkdir(local, { recursive: true, mode: 0o700 });
 const result = { siteId: site.id, priceListId: priceList.id, products: [] };
 for (const definition of seed.products) {
