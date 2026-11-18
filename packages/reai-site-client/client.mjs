@@ -1,7 +1,6 @@
 // @ts-check
 
 /** @typedef {import("./site-api.d.ts").paths} SiteApiPaths */
-/** @typedef {import("./site-api.d.ts").operations} SiteApiOperations */
 /** @typedef {import("./site-api.d.ts").components["schemas"]["SiteDeliveryRes"]} SiteDelivery */
 /** @typedef {import("./site-api.d.ts").components["schemas"]["SiteStorefrontRes"]} SiteStorefront */
 /** @typedef {import("./site-api.d.ts").components["schemas"]["SiteCatalogRes"]} SiteCatalog */
@@ -125,9 +124,9 @@ export class ReaiSiteClient {
    * @returns {Promise<SiteApiResponse<SiteStorefront>>}
    */
   async storefront(context, ifNoneMatch = null) {
-    /** @type {SiteApiOperations["storefront"]["parameters"]["query"]} */
+    /** @type {SiteApiPaths["/site/v1/commerce/storefront"]["get"]["parameters"]["query"]} */
     const query = context;
-    /** @type {NonNullable<SiteApiOperations["storefront"]["parameters"]["header"]>} */
+    /** @type {NonNullable<SiteApiPaths["/site/v1/commerce/storefront"]["get"]["parameters"]["header"]>} */
     const operationHeaders = ifNoneMatch
       ? { "If-None-Match": ifNoneMatch }
       : {};
@@ -145,9 +144,9 @@ export class ReaiSiteClient {
    * @returns {Promise<SiteApiResponse<SiteCatalog>>}
    */
   async catalog(context, ifNoneMatch = null) {
-    /** @type {SiteApiOperations["catalog"]["parameters"]["query"]} */
+    /** @type {SiteApiPaths["/site/v1/commerce/catalog"]["get"]["parameters"]["query"]} */
     const query = context;
-    /** @type {NonNullable<SiteApiOperations["catalog"]["parameters"]["header"]>} */
+    /** @type {NonNullable<SiteApiPaths["/site/v1/commerce/catalog"]["get"]["parameters"]["header"]>} */
     const operationHeaders = ifNoneMatch
       ? { "If-None-Match": ifNoneMatch }
       : {};
@@ -164,7 +163,7 @@ export class ReaiSiteClient {
    * @returns {Promise<SiteApiResponse<SiteCatalog>>}
    */
   async products(context) {
-    /** @type {SiteApiOperations["products"]["parameters"]["query"]} */
+    /** @type {SiteApiPaths["/site/v1/commerce/products"]["get"]["parameters"]["query"]} */
     const query = context;
     return new SiteApiResponse(await this.#request(PRODUCTS_PATH, query));
   }
@@ -175,9 +174,9 @@ export class ReaiSiteClient {
    * @returns {Promise<SiteApiResponse<SiteProduct>>}
    */
   async product(handle, context) {
-    /** @type {SiteApiOperations["product"]["parameters"]["path"]} */
+    /** @type {SiteApiPaths["/site/v1/commerce/products/{handle}"]["get"]["parameters"]["path"]} */
     const path = { handle };
-    /** @type {SiteApiOperations["product"]["parameters"]["query"]} */
+    /** @type {SiteApiPaths["/site/v1/commerce/products/{handle}"]["get"]["parameters"]["query"]} */
     const query = context;
     return new SiteApiResponse(
       await this.#request(expandPath(PRODUCT_PATH, path), query),
@@ -189,7 +188,7 @@ export class ReaiSiteClient {
    * @returns {Promise<SiteApiResponse<SiteCollections>>}
    */
   async collections(context) {
-    /** @type {SiteApiOperations["collections"]["parameters"]["query"]} */
+    /** @type {SiteApiPaths["/site/v1/commerce/collections"]["get"]["parameters"]["query"]} */
     const query = context;
     return new SiteApiResponse(await this.#request(COLLECTIONS_PATH, query));
   }
@@ -200,9 +199,9 @@ export class ReaiSiteClient {
    * @returns {Promise<SiteApiResponse<SiteCollection>>}
    */
   async collection(handle, context) {
-    /** @type {SiteApiOperations["collection"]["parameters"]["path"]} */
+    /** @type {SiteApiPaths["/site/v1/commerce/collections/{handle}"]["get"]["parameters"]["path"]} */
     const path = { handle };
-    /** @type {SiteApiOperations["collection"]["parameters"]["query"]} */
+    /** @type {SiteApiPaths["/site/v1/commerce/collections/{handle}"]["get"]["parameters"]["query"]} */
     const query = context;
     return new SiteApiResponse(
       await this.#request(expandPath(COLLECTION_PATH, path), query),
@@ -215,7 +214,7 @@ export class ReaiSiteClient {
    * @returns {Promise<SiteApiResponse<SiteAvailabilities>>}
    */
   async availabilities(variantIds, context) {
-    /** @type {SiteApiOperations["availabilities"]["parameters"]["query"]} */
+    /** @type {SiteApiPaths["/site/v1/commerce/availability"]["get"]["parameters"]["query"]} */
     const query = { ...context, variantId: variantIds };
     return new SiteApiResponse(await this.#request(AVAILABILITIES_PATH, query));
   }
@@ -226,9 +225,9 @@ export class ReaiSiteClient {
    * @returns {Promise<SiteApiResponse<SiteAvailability>>}
    */
   async availability(variantId, context) {
-    /** @type {SiteApiOperations["availability"]["parameters"]["path"]} */
+    /** @type {SiteApiPaths["/site/v1/commerce/availability/{variantId}"]["get"]["parameters"]["path"]} */
     const path = { variantId };
-    /** @type {SiteApiOperations["availability"]["parameters"]["query"]} */
+    /** @type {SiteApiPaths["/site/v1/commerce/availability/{variantId}"]["get"]["parameters"]["query"]} */
     const query = context;
     return new SiteApiResponse(
       await this.#request(expandPath(AVAILABILITY_PATH, path), query),
@@ -282,9 +281,9 @@ export class ReaiSiteClient {
    * @returns {Promise<SiteApiResponse<SiteCheckoutSession>>}
    */
   async createCheckoutSession(body, context, idempotencyKey) {
-    /** @type {SiteApiOperations["createCheckoutSession"]["parameters"]["query"]} */
+    /** @type {SiteApiPaths["/site/v1/commerce/checkout-sessions"]["post"]["parameters"]["query"]} */
     const query = context;
-    /** @type {SiteApiOperations["createCheckoutSession"]["parameters"]["header"]} */
+    /** @type {SiteApiPaths["/site/v1/commerce/checkout-sessions"]["post"]["parameters"]["header"]} */
     const operationHeaders = { "Idempotency-Key": idempotencyKey };
     const headers = new Headers({
       ...operationHeaders,
