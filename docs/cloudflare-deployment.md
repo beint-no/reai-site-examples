@@ -26,10 +26,10 @@ authoritative/public DNS and the workers.dev URL before treating that as a Worke
 CI validates source; it holds no production credential and does not deploy.
 Changing the public repo or public template does not redeploy client sites.
 
-PR builds and preview publishing run on standard hosted GitHub Actions. The central
+Dispatch the PR preview workflow with the pull request number to publish or refresh a preview. After the PR closes, dispatch it again to remove the preview. The central
 preview publisher is the reviewed default-branch workflow in this public repository.
 Its deployment credentials are encrypted Actions secrets, not source files. ReAI
-retains the deployment target registry and checks the exact signed workflow identity.
+checks the signed workflow identity and authorizes the assigned Site and Worker. Independent sites keep their preview settings in the Wrangler config reviewed with the PR.
 Customer previews do not depend on private ReAI Actions billing.
 
 Preview artifacts record the JavaScript bundle emitted by Wrangler. A .mjs or
