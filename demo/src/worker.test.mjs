@@ -515,7 +515,39 @@ test("omits HSTS on http://localhost and sets X-Robots-Tag noindex, nofollow on 
   assert.equal(preview.status, 200);
   assert.equal(preview.headers.get("X-Robots-Tag"), "noindex, nofollow");
   assert.equal(preview.headers.get("Strict-Transport-Security"), "max-age=31536000");
+
+  const workersRobots = await worker.fetch(
+    new Request("https://reai-demo-store.example.workers.dev/robots.txt"),
+    { ASSETS: env.ASSETS },
+    {},
+  );
+  assert.equal(workersRobots.status, 200);
+  assert.equal(workersRobots.headers.get("X-Robots-Tag"), "noindex, nofollow");
+  assert.equal(workersRobots.headers.get("Strict-Transport-Security"), "max-age=31536000");
+  assert.equal(await workersRobots.text(), "User-agent: *\nDisallow: /\n");
+
+  const customRobots = await worker.fetch(
+    new Request("https://nettbutikk.reai.no/robots.txt"),
+    { ASSETS: env.ASSETS },
+    {},
+  );
+  assert.equal(customRobots.status, 200);
+  assert.match(await customRobots.text(), /Allow: \//);
 });
+
+test("enforces CHECKOUT_ENABLED=false on demo checkout start", async () =>
+  mocked(
+    async () => {
+      const res = await worker.fetch(
+        request("/reai/checkout/start", { lines: [{ variantId: id, quantity: 1 }] }),
+        { ...env, CHECKOUT_ENABLED: "false" },
+        {},
+      );
+      assert.equal(res.status, 403);
+      assert.equal(res.headers.get("Cache-Control"), "no-store");
+    },
+    async () => site(),
+  ));
 
 test("merchant checkout options and prepare enforce paymentMode, Origin, and Content-Type", async () =>
   mocked(
