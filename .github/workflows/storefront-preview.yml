@@ -21,7 +21,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 26
-      - run: npm install --global --no-fund wrangler@4.156.0
+      - run: npm install --global --no-fund wrangler@4.165.0
       - name: Authorize the current PR preview
         id: authorize
         env:
@@ -34,14 +34,19 @@ jobs:
           ARTIFACT_NAME: ${{ github.event.client_payload.artifact_name }}
         run: |
           node --input-type=module <<'JS'
-          import { writeFile, mkdir } from 'node:fs/promises';
+          import { writeFile } from 'node:fs/promises';
+          const allowedApiBaseUrls = new Set(['https://app.reai.no']);
+          const apiBaseUrl = String(process.env.API_BASE_URL || '').replace(/\/$/, '');
+          if (!allowedApiBaseUrls.has(apiBaseUrl)) {
+            throw new Error('Disallowed API_BASE_URL: ' + apiBaseUrl);
+          }
           const identity = await fetch(process.env.ACTIONS_ID_TOKEN_REQUEST_URL + '&audience=reai-storefront', {
             headers: { Authorization: 'Bearer ' + process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN }
           });
           if (!identity.ok) throw new Error('GitHub identity request failed');
           const { value } = await identity.json();
           console.log('::add-mask::' + value);
-          const response = await fetch(process.env.API_BASE_URL + '/online-store/preview/authorize', {
+          const response = await fetch(apiBaseUrl + '/online-store/preview/authorize', {
             method: 'POST', headers: { Authorization: 'Bearer ' + value, 'Content-Type': 'application/json' },
             body: JSON.stringify({ repositoryId: Number(process.env.REPOSITORY_ID), runId: Number(process.env.SOURCE_RUN_ID),
               attempt: Number(process.env.SOURCE_ATTEMPT), pullRequest: Number(process.env.PULL_REQUEST),
@@ -62,7 +67,7 @@ jobs:
       - name: Create read-only artifact token
         if: steps.authorize.outputs.command == 'publish'
         id: artifact-token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3
         with:
           app-id: ${{ secrets.STOREFRONT_GITHUB_APP_ID }}
           private-key: ${{ secrets.STOREFRONT_GITHUB_PRIVATE_KEY }}

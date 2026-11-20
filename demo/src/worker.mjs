@@ -33,9 +33,12 @@ import { educationalPaths, normalizedPath, pageMetadata, applyPageMetadata, educ
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const CHECKOUT_ID = /^[0-9a-f]{32}$/i;
+const CACHE_FRESH_MS = 60_000;
+const CACHE_SWR_MS = 300_000;
+const CACHE_RETENTION_S = 86_400;
+const CACHE_RETENTION_MS = 86_400_000;
 const headers = {
   "X-Content-Type-Options": "nosniff",
-  "Strict-Transport-Security": "max-age=31536000",
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "X-Robots-Tag": "noindex, follow",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
@@ -54,6 +57,130 @@ function response(body, status = 200, json = false) {
     },
   });
 }
+/** @param {Response} res @param {URL} url */
+function finalizeResponse(res, url) {
+  const next = new Response(res.body, res);
+  if (url.protocol === "https:") {
+    next.headers.set("Strict-Transport-Security", "max-age=31536000");
+  } else {
+    next.headers.delete("Strict-Transport-Security");
+  }
+  if (url.hostname.endsWith(".workers.dev")) {
+    next.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
+  return next;
+}
+function demoCache() {
+  return typeof caches !== "undefined" && caches?.default
+    ? caches.default
+    : null;
+}
+/** @param {string} cacheKey */
+async function readDemoCache(cacheKey) {
+  const store = demoCache();
+  if (!store) return null;
+  try {
+    const cached = await store.match(new Request(cacheKey));
+    if (!cached) return null;
+    return {
+      data: await cached.json(),
+      etag: cached.headers.get("ETag"),
+      cachedAt: Number(cached.headers.get("X-ReAI-Cached-At")) || 0,
+    };
+  } catch (error) {
+    console.error("Demo cache read failed", error);
+    return null;
+  }
+}
+/** @param {string} cacheKey @param {any} value @param {string | null} [etag] */
+async function writeDemoCache(cacheKey, value, etag = null) {
+  const store = demoCache();
+  if (!store) return;
+  try {
+    await store.put(
+      new Request(cacheKey),
+      new Response(JSON.stringify(value), {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          "Cache-Control": `public, max-age=${CACHE_RETENTION_S}`,
+          "X-ReAI-Cached-At": String(Date.now()),
+          ...(etag ? { ETag: etag } : {}),
+        },
+      }),
+    );
+  } catch (error) {
+    console.error("Demo cache write failed", error);
+  }
+}
+/** @param {ReaiSiteClient} client @param {string} baseUrl @param {ExecutionContext} ctx */
+async function getCachedSite(client, baseUrl, ctx) {
+  const host = new URL(baseUrl).host;
+  const cacheKey = `https://reai-demo-cache.invalid/site/${encodeURIComponent(host)}`;
+  const cached = await readDemoCache(cacheKey);
+  const refresh = async () => {
+    const site = await data(client.site());
+    await writeDemoCache(cacheKey, site);
+    return site;
+  };
+  if (cached) {
+    const age = Date.now() - cached.cachedAt;
+    if (age <= CACHE_FRESH_MS) return cached.data;
+    if (age <= CACHE_FRESH_MS + CACHE_SWR_MS && ctx?.waitUntil) {
+      ctx.waitUntil(refresh().catch(console.error));
+      return cached.data;
+    }
+    try {
+      return await refresh();
+    } catch (error) {
+      if (age <= CACHE_RETENTION_MS) {
+        console.error("Demo site refresh failed, serving stale cache", error);
+        return cached.data;
+      }
+      throw error;
+    }
+  }
+  return refresh();
+}
+/** @param {ReaiSiteClient} client @param {string} baseUrl @param {{ market: string, locale: string }} delivery @param {ExecutionContext} ctx */
+async function getCachedStorefront(client, baseUrl, delivery, ctx) {
+  const host = new URL(baseUrl).host;
+  const cacheKey = `https://reai-demo-cache.invalid/storefront/${encodeURIComponent(host)}/${encodeURIComponent(delivery.market)}/${encodeURIComponent(delivery.locale)}`;
+  const cached = await readDemoCache(cacheKey);
+  const refresh = async () => {
+    const result = await client.storefront(delivery, cached?.etag || null);
+    const r = result.response;
+    if (r.status === 304 && cached) {
+      await writeDemoCache(cacheKey, cached.data, cached.etag);
+      return cached.data;
+    }
+    if (!r.ok) {
+      throw Object.assign(new Error("Upstream unavailable"), {
+        status: r.status === 404 ? 404 : 502,
+      });
+    }
+    const payload = await r.json();
+    await writeDemoCache(cacheKey, payload, r.headers.get("ETag"));
+    return payload;
+  };
+  if (cached) {
+    const age = Date.now() - cached.cachedAt;
+    if (age <= CACHE_FRESH_MS) return cached.data;
+    if (age <= CACHE_FRESH_MS + CACHE_SWR_MS && ctx?.waitUntil) {
+      ctx.waitUntil(refresh().catch(console.error));
+      return cached.data;
+    }
+    try {
+      return await refresh();
+    } catch (error) {
+      if (age <= CACHE_RETENTION_MS) {
+        console.error("Demo storefront refresh failed, serving stale cache", error);
+        return cached.data;
+      }
+      throw error;
+    }
+  }
+  return refresh();
+}
 /** @template T @param {Promise<import("../../packages/reai-site-client/client.mjs").SiteApiResponse<T>>} result @returns {Promise<T>} */
 async function data(result) {
   const r = (await result).response;
@@ -71,6 +198,12 @@ export default {
       url.protocol = "https:";
       return Response.redirect(url.href, 308);
     }
+    return finalizeResponse(await handleDemo(request, env, ctx, url), url);
+  },
+};
+
+/** @param {Request} request @param {DemoEnv} env @param {ExecutionContext} ctx @param {URL} url */
+async function handleDemo(request, env, ctx, url) {
     const educational = educationalPaths.includes(normalizedPath(url.pathname));
     const requestedLocale = url.searchParams.get("lang") || (url.pathname.startsWith("/designs/starter") ? url.searchParams.get("locale") : null);
     let locale =
@@ -133,7 +266,7 @@ export default {
             return env.ASSETS.fetch(new Request(assetUrl, assetRequest));
           },
         },
-      });
+      }, ctx);
       if (result.headers.get("content-type")?.includes("text/html")) {
         const markup = (await result.text()).replace(
           /(<body[^>]*>)/,
@@ -201,7 +334,11 @@ export default {
         const checkoutId = url.searchParams.get("checkout");
         if (!checkoutId || !CHECKOUT_ID.test(checkoutId)) return finish(renderMerchantCheckout(context), context);
         if (!env.REAI_SITE_CREDENTIAL) return response({ error: "Site integration not configured" }, 503, true);
-        const merchantClient = new ReaiSiteClient({ baseUrl: env.REAI_API_BASE_URL || "https://app.reai.no", token: env.REAI_SITE_CREDENTIAL });
+        const merchantClient = new ReaiSiteClient({
+          baseUrl: env.REAI_API_BASE_URL || "https://app.reai.no",
+          token: env.REAI_SITE_CREDENTIAL,
+          timeoutMs: 15_000,
+        });
         const checkout = await data(merchantClient.checkoutDetails(checkoutId));
         return finish(renderMerchantCheckout(context, checkout), context);
       }
@@ -249,11 +386,11 @@ export default {
           path.startsWith("/reai/"),
         );
       }
+      const apiBaseUrl = env.REAI_API_BASE_URL || "https://app.reai.no";
       const client = new ReaiSiteClient({
-        baseUrl: env.REAI_API_BASE_URL || "https://app.reai.no",
+        baseUrl: apiBaseUrl,
         token: env.REAI_SITE_CREDENTIAL,
-        fetch: (input, init) =>
-          fetch(input, { ...init, signal: AbortSignal.timeout(10000) }),
+        timeoutMs: 15_000,
       });
       if (path === "/reai/newsletter") {
         if (request.method !== "POST")
@@ -299,7 +436,7 @@ export default {
           );
         return response({ accepted: true }, 200, true);
       }
-      const site = await data(client.site());
+      const site = await getCachedSite(client, apiBaseUrl, ctx);
       const selected =
         site.markets?.find((m) => m.handle === env.DEMO_MARKET) ||
         site.markets?.find((m) => m.isDefault) ||
@@ -415,12 +552,15 @@ export default {
         return response(await result.json(), 200, true);
       }
       if (path === "/reai/checkout/merchant/options") {
+        if (paymentMode === "disabled") return response({ error: "Checkout is not enabled" }, 403, true);
         if (request.method === "GET") {
           const checkoutId = url.searchParams.get("checkout");
           if (!checkoutId || !CHECKOUT_ID.test(checkoutId)) return response({ error: "Invalid checkout" }, 400, true);
           const result = client.checkoutDeliveryOptions(checkoutId, { customer: {}, includeOtherOptions: true });
           return response(await data(result), 200, true);
         }
+        if (request.method !== "POST") return response({ error: "Method not allowed" }, 405, true);
+        if (request.headers.get("Origin") !== url.origin || !request.headers.get("Content-Type")?.startsWith("application/json")) return response({ error: "Same-origin JSON required" }, 403, true);
         const body = await readBoundedJson(request, 8192);
         if (!CHECKOUT_ID.test(body?.checkout) || !Number.isInteger(body?.revision) || !body.customer || typeof body.customer !== "object") return response({ error: "Invalid checkout details" }, 400, true);
         const updated = await data(client.updateCheckout(body.checkout, { revision: body.revision, customer: body.customer }));
@@ -428,6 +568,8 @@ export default {
         return response({ ...options, revision: updated.revision }, 200, true);
       }
       if (path === "/reai/checkout/merchant/prepare") {
+        if (request.method !== "POST" || paymentMode === "disabled") return response({ error: "Checkout is not enabled" }, 403, true);
+        if (request.headers.get("Origin") !== url.origin || !request.headers.get("Content-Type")?.startsWith("application/json")) return response({ error: "Same-origin JSON required" }, 403, true);
         const body = await readBoundedJson(request, 4096);
         if (!CHECKOUT_ID.test(body?.checkout) || !Number.isInteger(body?.revision)) return response({ error: "Invalid checkout details" }, 400, true);
         const prepared = await data(client.prepareCheckoutPayment(body.checkout, { revision: body.revision }));
@@ -476,7 +618,7 @@ export default {
           );
         return response(await data(result), 200, true);
       }
-      const store = await data(client.storefront(delivery));
+      const store = await getCachedStorefront(client, apiBaseUrl, delivery, ctx);
       if (
         ["/designs/studio", "/designs/atelier", "/designs/supply"].includes(
           path,
@@ -597,8 +739,7 @@ export default {
         );
       return result;
     }
-  },
-};
+}
 
 async function readBoundedJson(request, limit) {
   const reader = request.body?.getReader();

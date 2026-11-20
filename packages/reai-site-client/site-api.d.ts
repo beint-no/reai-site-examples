@@ -842,6 +842,7 @@ export interface components {
         SiteDeliveryVariantRes: {
             /** @description Attributes bound to this variant's selected option values. Combine with product-wide attributes when filtering; keep size, price and availability predicates on the same variant. */
             attributes: components["schemas"]["ProductAttributeDto"][];
+            /** @description Null for an ordinary variant. A bundle has its own price and SKU and shares inventory with these components. Component quantities are per bundle; component publication is not required. Use live availability and checkout validation for shared stock. */
             bundle?: components["schemas"]["SiteDeliveryBundleRes"] | null;
             compareAtPrice?: number | null;
             /** Format: uuid */

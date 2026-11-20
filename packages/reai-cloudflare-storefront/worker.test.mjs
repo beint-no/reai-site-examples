@@ -30,7 +30,7 @@ test("validates checkout lines before calling ReAI", async () => {
   });
   const response = await worker.fetch(new Request("https://shop.example/reai/checkout/start", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { Origin: "https://shop.example", "Content-Type": "application/json" },
     body: JSON.stringify({ lines: [{ variantId: "not-a-uuid", quantity: 1 }] }),
   }), { REAI_SITE_TOKEN: "test-token" });
 
@@ -62,7 +62,7 @@ test("adds a same-origin return URL and idempotency key", async (context) => {
   const variantId = "018f3c2e-8b1a-4d3e-9c4f-5a6b7c8d9e0f";
   const response = await worker.fetch(new Request("https://shop.example/reai/checkout/start", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { Origin: "https://shop.example", "Content-Type": "application/json" },
     body: JSON.stringify({ lines: [{ variantId, quantity: 2 }] }),
   }), { REAI_SITE_TOKEN: "test-token" });
 
@@ -101,7 +101,7 @@ test("scopes API routes, checkout returns, and response language to a path-prefi
   const variantId = "018f3c2e-8b1a-4d3e-9c4f-5a6b7c8d9e0f";
   const response = await worker.fetch(new Request("https://shop.example/nb/reai/checkout/start", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { Origin: "https://shop.example", "Content-Type": "application/json" },
     body: JSON.stringify({ lines: [{ variantId, quantity: 1 }] }),
   }), { REAI_SITE_TOKEN: "test-token" });
 
@@ -391,4 +391,123 @@ test("a stalled catalog refresh does not block another request", { timeout: 2000
     stalled.resolve(snapshot());
     await first;
   }
+});
+
+test("enforces CHECKOUT_ENABLED, Origin, Content-Type, body size, and checkoutUrl on /reai/checkout/start", async (context) => {
+  const originalFetch = globalThis.fetch;
+  context.after(() => {
+    globalThis.fetch = originalFetch;
+  });
+  const variantId = "018f3c2e-8b1a-4d3e-9c4f-5a6b7c8d9e0f";
+  const worker = createReaiStorefrontWorker({
+    cacheKey: "checkout-guards",
+    storefront,
+    market: "default",
+    locale: "en",
+  });
+
+  const disabled = await worker.fetch(new Request("https://shop.example/reai/checkout/start", {
+    method: "POST",
+    headers: { Origin: "https://shop.example", "Content-Type": "application/json" },
+    body: JSON.stringify({ lines: [{ variantId, quantity: 1 }] }),
+  }), { REAI_SITE_TOKEN: "test-token", CHECKOUT_ENABLED: "false" });
+  assert.equal(disabled.status, 403);
+
+  const badOrigin = await worker.fetch(new Request("https://shop.example/reai/checkout/start", {
+    method: "POST",
+    headers: { Origin: "https://evil.example", "Content-Type": "application/json" },
+    body: JSON.stringify({ lines: [{ variantId, quantity: 1 }] }),
+  }), { REAI_SITE_TOKEN: "test-token" });
+  assert.equal(badOrigin.status, 403);
+
+  const badType = await worker.fetch(new Request("https://shop.example/reai/checkout/start", {
+    method: "POST",
+    headers: { Origin: "https://shop.example", "Content-Type": "text/plain" },
+    body: JSON.stringify({ lines: [{ variantId, quantity: 1 }] }),
+  }), { REAI_SITE_TOKEN: "test-token" });
+  assert.equal(badType.status, 415);
+
+  const tooLarge = await worker.fetch(new Request("https://shop.example/reai/checkout/start", {
+    method: "POST",
+    headers: { Origin: "https://shop.example", "Content-Type": "application/json" },
+    body: JSON.stringify({ lines: [{ variantId, quantity: 1 }], pad: "x".repeat(20_000) }),
+  }), { REAI_SITE_TOKEN: "test-token" });
+  assert.equal(tooLarge.status, 413);
+
+  globalThis.fetch = async () => new Response(JSON.stringify({ checkoutUrl: "https://evil.example/checkout/session/abc" }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+  const badDest = await worker.fetch(new Request("https://shop.example/reai/checkout/start", {
+    method: "POST",
+    headers: { Origin: "https://shop.example", "Content-Type": "application/json" },
+    body: JSON.stringify({ lines: [{ variantId, quantity: 1 }] }),
+  }), { REAI_SITE_TOKEN: "test-token" });
+  assert.equal(badDest.status, 502);
+});
+
+test("sets HSTS only on HTTPS, noindex on workers.dev, redirects www to canonicalOrigin, avoids caching cold-cache home fallback, and renders unavailable page on 5xx", async (context) => {
+  const originalFetch = globalThis.fetch;
+  context.after(() => {
+    globalThis.fetch = originalFetch;
+  });
+  const detailStorefront = {
+    HANDLE: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+    matchRoute(pathname) {
+      if (pathname === "/") return { type: "home", canonicalPath: "/", valid: true, needsSlash: false };
+      if (pathname === "/products/missing/") return { type: "product", handle: "missing", canonicalPath: "/products/missing/", valid: true, needsSlash: false };
+      return null;
+    },
+    productByHandle: () => null,
+    renderNotFoundPage: () => "NOT_FOUND_PAGE",
+    renderUnavailablePage: () => "UNAVAILABLE_PAGE",
+    renderHomePage: () => "HOME_PAGE",
+  };
+  const worker = createReaiStorefrontWorker({
+    cacheKey: "resilience",
+    storefront: detailStorefront,
+    market: "default",
+    locale: "en",
+    canonicalOrigin: "https://shop.example",
+  });
+
+  // www -> canonical redirect
+  const redirect = await worker.fetch(new Request("https://www.shop.example/products/demo?x=1"), {
+    ASSETS: { fetch: async () => new Response("ok") },
+  });
+  assert.equal(redirect.status, 301);
+  assert.equal(redirect.headers.get("Location"), "https://shop.example/products/demo?x=1");
+  assert.equal(redirect.headers.get("Strict-Transport-Security"), "max-age=31536000");
+
+  // http://localhost has no HSTS
+  const local = await worker.fetch(new Request("http://localhost:8787/reai/catalog"), {});
+  assert.equal(local.headers.get("Strict-Transport-Security"), null);
+
+  // *.workers.dev gets X-Robots-Tag: noindex, nofollow
+  const workersDev = await worker.fetch(new Request("https://test.workers.dev/reai/catalog"), {});
+  assert.equal(workersDev.headers.get("X-Robots-Tag"), "noindex, nofollow");
+
+  // Cold-cache home fallback is not cached (Cache-Control: no-store)
+  globalThis.fetch = async () => new Response("down", { status: 503 });
+  const homeFallback = await worker.fetch(new Request("https://shop.example/"), {
+    REAI_SITE_TOKEN: "test-token",
+    ASSETS: { fetch: async () => new Response("STATIC_HOME", { status: 200 }) },
+  });
+  assert.equal(homeFallback.status, 200);
+  assert.equal(homeFallback.headers.get("Cache-Control"), "no-store");
+  assert.equal(await homeFallback.text(), "STATIC_HOME");
+
+  // Upstream 5xx on product lookup renders renderUnavailablePage (not renderNotFoundPage)
+  globalThis.fetch = async (input) => {
+    const url = new URL(input);
+    if (url.pathname.endsWith("/storefront")) {
+      return Response.json({ catalogVersion: 1, marketId: "m1", marketHandle: "default", locale: "en", currency: "NOK", products: [], collections: [] });
+    }
+    return new Response("upstream error", { status: 503 });
+  };
+  const errPage = await worker.fetch(new Request("https://shop.example/products/missing/"), {
+    REAI_SITE_TOKEN: "test-token",
+  });
+  assert.equal(errPage.status, 502);
+  assert.equal(await errPage.text(), "UNAVAILABLE_PAGE");
 });

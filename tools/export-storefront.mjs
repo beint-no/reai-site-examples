@@ -55,6 +55,10 @@ export async function exportStorefront(name, destination) {
     await cp(path.join(root, "starter/github/preview.yml"), path.join(destination, ".github/workflows/preview.yml"));
     await cp(path.join(root, "starter/github/preview.mjs"), path.join(destination, ".github/preview/preview.mjs"));
     await writeFile(
+      path.join(destination, ".github/dependabot.yml"),
+      `version: 2\nupdates:\n- package-ecosystem: npm\n  directory: /\n  schedule:\n    interval: cron\n    cronjob: 0 4 1 1,7 *\n  groups:\n    npm-development:\n      patterns:\n      - '*'\n  open-pull-requests-limit: 5\n- package-ecosystem: github-actions\n  directory: /\n  schedule:\n    interval: cron\n    cronjob: 0 4 1 1,7 *\n  groups:\n    github-actions:\n      patterns:\n      - '*'\n  open-pull-requests-limit: 5\n`,
+    );
+    await writeFile(
       path.join(destination, ".gitignore"),
       "node_modules/\n.dev.vars\n.wrangler/\n.preview/\n.DS_Store\n",
     );
@@ -66,16 +70,21 @@ export async function exportStorefront(name, destination) {
           private: true,
           type: "module",
           engines: { node: ">=26" },
+          allowScripts: {
+            "esbuild@0.28.2": true,
+            "fsevents@2.3.3": true,
+            "workerd@1.20261118.1": true,
+          },
           scripts: {
             dev: "wrangler dev",
             check:
-              "node --check src/worker.js && node --check public/store.js && node --check public/assets/catalog-filters.js && node --check public/assets/catalog-context.js && node --check public/assets/cart-controls.js && node --test src/*.test.js",
+              "node --check src/worker.js && node --check public/store.js && node --check public/assets/catalog-filters.js && node --check public/assets/catalog-context.js && node --check public/assets/cart-controls.js && node --test src/*.test.js packages/reai-site-client/*.test.mjs && wrangler deploy --dry-run",
             deploy: "npm run check && wrangler deploy",
             "deploy:local": "node tools/worker.mjs deploy",
             "preview:deploy": "node tools/worker.mjs preview",
             "preview:remove": "node tools/worker.mjs remove",
           },
-          devDependencies: { wrangler: "4.156.0" },
+          devDependencies: { wrangler: "4.165.0" },
           overrides: { sharp: "0.35.5" },
         },
         null,
@@ -89,8 +98,9 @@ export async function exportStorefront(name, destination) {
           $schema: "https://unpkg.com/wrangler/config-schema.json",
           name: `test-reai-${name}`,
           main: "./src/worker.js",
-          compatibility_date: "2026-10-30",
+          compatibility_date: "2026-11-18",
           workers_dev: true,
+          observability: { enabled: true },
           assets: {
             directory: "./public",
             binding: "ASSETS",

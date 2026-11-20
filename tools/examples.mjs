@@ -18,7 +18,6 @@ export async function build(name) {
   for (const file of [
     "catalog-filter-data.js",
     "catalog-filters.js",
-    "catalog-context.js",
     "cart-controls.js",
   ]) {
     await cp(
