@@ -37,12 +37,11 @@ origin against the Site's preview/active domains. Configure them before testing
 on a new hostname. A new Cloudflare preview URL does not automatically become
 an allowed checkout return origin.
 
-The starter returns to `/checkout/complete`. Its browser script clears the cart
-when the return page is reached after the browser started a checkout. That
-client-side marker is a UX signal, not proof of payment. Do not use a success
-page visit to issue goods or mark an order paid; ReAI's order/payment state is
-that authority. Failed and abandoned checkouts must not be treated as orders
-merely because a user navigates to a return page manually.
+The starter returns to `/checkout/complete`. A return redirect is not proof of
+payment and does not clear the cart automatically. Do not use a success page
+visit to issue goods or mark an order paid; ReAI's order/payment state is that
+authority. Failed and abandoned checkouts must not be treated as orders merely
+because a user navigates to a return page manually.
 
 ## Shipping
 

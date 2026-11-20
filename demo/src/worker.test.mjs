@@ -497,3 +497,149 @@ test("starter design uses the real implementation, prefixes its paths and disabl
             collections: [],
           }),
   ));
+
+test("omits HSTS on http://localhost and sets X-Robots-Tag noindex, nofollow on workers.dev", async () => {
+  const local = await worker.fetch(
+    new Request("http://localhost:8787/health"),
+    { ASSETS: env.ASSETS },
+    {},
+  );
+  assert.equal(local.status, 200);
+  assert.equal(local.headers.get("Strict-Transport-Security"), null);
+
+  const preview = await worker.fetch(
+    new Request("https://reai-demo-store.example.workers.dev/features/"),
+    { ASSETS: env.ASSETS },
+    {},
+  );
+  assert.equal(preview.status, 200);
+  assert.equal(preview.headers.get("X-Robots-Tag"), "noindex, nofollow");
+  assert.equal(preview.headers.get("Strict-Transport-Security"), "max-age=31536000");
+});
+
+test("merchant checkout options and prepare enforce paymentMode, Origin, and Content-Type", async () =>
+  mocked(
+    async () => {
+      const checkout = "0123456789abcdef0123456789abcdef";
+      assert.equal(
+        (
+          await worker.fetch(
+            request("/reai/checkout/merchant/options", {
+              checkout,
+              revision: 1,
+              customer: { email: "qa@example.test" },
+            }),
+            { ...env, DEMO_CHECKOUT_ENABLED: "false" },
+            {},
+          )
+        ).status,
+        403,
+      );
+      assert.equal(
+        (
+          await worker.fetch(
+            request(
+              "/reai/checkout/merchant/options",
+              { checkout, revision: 1, customer: { email: "qa@example.test" } },
+              { Origin: "https://evil.invalid" },
+            ),
+            env,
+            {},
+          )
+        ).status,
+        403,
+      );
+      assert.equal(
+        (
+          await worker.fetch(
+            request("/reai/checkout/merchant/prepare", {
+              checkout,
+              revision: 1,
+            }),
+            { ...env, DEMO_CHECKOUT_ENABLED: "false" },
+            {},
+          )
+        ).status,
+        403,
+      );
+      assert.equal(
+        (
+          await worker.fetch(
+            request(
+              "/reai/checkout/merchant/prepare",
+              { checkout, revision: 1 },
+              { "Content-Type": "text/plain" },
+            ),
+            env,
+            {},
+          )
+        ).status,
+        403,
+      );
+    },
+    async () => site(),
+  ));
+
+test("caches site and storefront reads with Cloudflare Cache API and ETag SWR", async (context) => {
+  const originalCaches = globalThis.caches;
+  const originalNow = Date.now;
+  context.after(() => {
+    globalThis.caches = originalCaches;
+    Date.now = originalNow;
+  });
+  let now = 1_000_000;
+  Date.now = () => now;
+  const memory = new Map();
+  globalThis.caches = {
+    default: {
+      async match(req) {
+        return memory.get(req.url)?.clone();
+      },
+      async put(req, res) {
+        memory.set(req.url, res.clone());
+      },
+    },
+  };
+  const calls = [];
+  await mocked(
+    async () => {
+      const first = await worker.fetch(
+        new Request("https://nettbutikk.reai.no/shop/"),
+        env,
+        {},
+      );
+      assert.equal(first.status, 200);
+      assert.equal(calls.length, 2);
+
+      const second = await worker.fetch(
+        new Request("https://nettbutikk.reai.no/shop/"),
+        env,
+        {},
+      );
+      assert.equal(second.status, 200);
+      assert.equal(calls.length, 2);
+
+      now += 61_000;
+      const bg = [];
+      const stale = await worker.fetch(
+        new Request("https://nettbutikk.reai.no/shop/"),
+        env,
+        { waitUntil: (p) => bg.push(p) },
+      );
+      assert.equal(stale.status, 200);
+      await Promise.all(bg);
+      assert.ok(calls.some((c) => c.ifNoneMatch === 'W/"demo-v1"'));
+    },
+    async (input, init) => {
+      const u = String(input);
+      calls.push({ url: u, ifNoneMatch: init?.headers?.get("If-None-Match") });
+      if (u.endsWith("/site")) return site();
+      if (init?.headers?.get("If-None-Match") === 'W/"demo-v1"')
+        return new Response(null, { status: 304 });
+      return Response.json(
+        { locale: "nb-NO", currency: "NOK", products: [], collections: [] },
+        { headers: { ETag: 'W/"demo-v1"' } },
+      );
+    },
+  );
+});

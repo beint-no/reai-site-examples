@@ -38,6 +38,29 @@ test("exports a standalone site without a parent dependency or demo catalog", as
     );
     const assets = await readdir(path.join(destination, "public/assets"));
     assert.ok(!assets.some((name) => /checkout-lab|ux-notes|fashion/.test(name)));
+    const catalogContext = await readFile(
+      path.join(destination, "public/assets/catalog-context.js"),
+      "utf8",
+    );
+    assert.doesNotMatch(catalogContext, /famme|designs\//);
+    const pkg = JSON.parse(
+      await readFile(path.join(destination, "package.json"), "utf8"),
+    );
+    assert.equal(pkg.devDependencies.wrangler, "4.165.0");
+    assert.equal(pkg.allowScripts["workerd@1.20261118.1"], true);
+    assert.match(pkg.scripts.check, /packages\/reai-site-client\/\*\.test\.mjs/);
+    assert.match(pkg.scripts.check, /wrangler deploy --dry-run/);
+    const wrangler = JSON.parse(
+      await readFile(path.join(destination, "wrangler.jsonc"), "utf8"),
+    );
+    assert.equal(wrangler.compatibility_date, "2026-11-18");
+    assert.deepEqual(wrangler.observability, { enabled: true });
+    const dependabot = await readFile(
+      path.join(destination, ".github/dependabot.yml"),
+      "utf8",
+    );
+    assert.match(dependabot, /cronjob: 0 4 1 1,7 \*/);
+    assert.match(dependabot, /patterns:\n\s+- '\*'/);
     assert.match(worker, /newsletter\/subscribe/);
     assert.match(worker, /stock\/subscribe/);
     assert.ok(

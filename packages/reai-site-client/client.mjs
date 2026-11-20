@@ -11,8 +11,13 @@
 /** @typedef {import("./site-api.d.ts").components["schemas"]["SiteAvailabilitiesRes"]} SiteAvailabilities */
 /** @typedef {import("./site-api.d.ts").components["schemas"]["SiteCheckoutSessionReq"]} SiteCheckoutSessionRequest */
 /** @typedef {import("./site-api.d.ts").components["schemas"]["SiteCheckoutSessionRes"]} SiteCheckoutSession */
+/** @typedef {import("./site-api.d.ts").components["schemas"]["SiteCartQuoteReq"]} SiteCartQuoteRequest */
+/** @typedef {import("./site-api.d.ts").components["schemas"]["SiteCartQuoteDto"]} SiteCartQuote */
+/** @typedef {import("./site-api.d.ts").components["schemas"]["SiteAnalyticsBatchDto"]} SiteAnalyticsBatch */
 /** @typedef {{ market: string, locale: string }} DeliveryContext */
-/** @typedef {{ baseUrl?: string, token: string, fetch?: typeof globalThis.fetch }} SiteApiClientOptions */
+/** @typedef {{ baseUrl?: string, token: string, fetch?: typeof globalThis.fetch, timeoutMs?: number }} SiteApiClientOptions */
+
+const DEFAULT_TIMEOUT_MS = 15_000;
 
 /** @type {keyof SiteApiPaths} */
 const SITE_PATH = "/site/v1/site";
@@ -33,7 +38,11 @@ const AVAILABILITIES_PATH = "/site/v1/commerce/availability";
 /** @type {keyof SiteApiPaths} */
 const AVAILABILITY_PATH = "/site/v1/commerce/availability/{variantId}";
 /** @type {keyof SiteApiPaths} */
+const CART_QUOTE_PATH = "/site/v1/commerce/cart-quote";
+/** @type {keyof SiteApiPaths} */
 const CHECKOUT_PATH = "/site/v1/commerce/checkout-sessions";
+/** @type {keyof SiteApiPaths} */
+const ANALYTICS_EVENTS_PATH = "/site/v1/analytics/events";
 
 /** @type {keyof SiteApiPaths} */
 const NEWSLETTER_PATH = "/site/v1/newsletter/subscriptions";
@@ -86,6 +95,11 @@ export class ReaiSiteClient {
     if (!this.#token) throw new TypeError("token is required");
     const fetchImpl = options.fetch || globalThis.fetch.bind(globalThis);
     this.#fetch = (input, init) => fetchImpl(input, init);
+    const timeoutMs = options.timeoutMs === undefined ? DEFAULT_TIMEOUT_MS : options.timeoutMs;
+    if (timeoutMs !== 0 && (!Number.isFinite(timeoutMs) || timeoutMs < 0)) {
+      throw new RangeError("timeoutMs must be a non-negative finite number");
+    }
+    this.#timeoutMs = timeoutMs;
   }
 
   /** @type {string} */
@@ -94,6 +108,8 @@ export class ReaiSiteClient {
   #token;
   /** @type {typeof globalThis.fetch} */
   #fetch;
+  /** @type {number} */
+  #timeoutMs;
 
   /**
    * @param {string} pathname
@@ -110,7 +126,12 @@ export class ReaiSiteClient {
     const headers = new Headers(init.headers);
     headers.set("Accept", "application/json");
     headers.set("Authorization", `Bearer ${this.#token}`);
-    return this.#fetch(url.href, { ...init, headers });
+    const signal =
+      init.signal ??
+      (this.#timeoutMs > 0 && typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function"
+        ? AbortSignal.timeout(this.#timeoutMs)
+        : undefined);
+    return this.#fetch(url.href, signal ? { ...init, headers, signal } : { ...init, headers });
   }
 
   /** @returns {Promise<SiteApiResponse<SiteDelivery>>} */
@@ -317,6 +338,37 @@ export class ReaiSiteClient {
   async subscribeStock(body) {
     return new SiteApiResponse(
       await this.#request(STOCK_SUBSCRIPTION_PATH, undefined, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }),
+    );
+  }
+
+  /**
+   * @param {SiteCartQuoteRequest} body
+   * @param {DeliveryContext} [context]
+   * @returns {Promise<SiteApiResponse<SiteCartQuote>>}
+   */
+  async cartQuote(body, context) {
+    /** @type {SiteApiPaths["/site/v1/commerce/cart-quote"]["post"]["parameters"]["query"]} */
+    const query = context;
+    return new SiteApiResponse(
+      await this.#request(CART_QUOTE_PATH, query, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }),
+    );
+  }
+
+  /**
+   * @param {SiteAnalyticsBatch} body
+   * @returns {Promise<SiteApiResponse<void>>}
+   */
+  async recordAnalyticsEvents(body) {
+    return new SiteApiResponse(
+      await this.#request(ANALYTICS_EVENTS_PATH, undefined, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

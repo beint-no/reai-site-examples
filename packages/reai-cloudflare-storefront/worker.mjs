@@ -8,15 +8,22 @@ import { ReaiSiteClient } from "../reai-site-client/client.mjs";
 
 const STATIC_ASSET = /\.(?:avif|css|eot|gif|ico|jpe?g|js|json|map|mp4|ogg|otf|png|svg|ttf|webm|webp|woff2?)$/i;
 const VARIANT_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const IDEMPOTENCY_KEY = /^[A-Za-z0-9._-]{8,128}$/;
 const MARKET_HANDLE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const STOREFRONT_FRESH_MILLISECONDS = 60_000;
 const STOREFRONT_STALE_WHILE_REVALIDATE_MILLISECONDS = 300_000;
 const STOREFRONT_CACHE_RETENTION_SECONDS = 86_400;
+const MAX_CHECKOUT_BODY_BYTES = 16_384;
 
 const defaultMessages = {
   invalidJson: "Invalid JSON.",
   invalidLineCount: "The cart must contain between 1 and 100 lines.",
   invalidLine: "The cart contains an invalid variant or quantity.",
+  invalidOrigin: "Invalid origin.",
+  invalidContentType: "Expected application/json.",
+  bodyTooLarge: "Request body is too large.",
+  invalidIdempotencyKey: "Invalid Idempotency-Key.",
+  checkoutDisabled: "Checkout is disabled.",
   notConfigured: "The Site API is not configured.",
   invalidProductHandle: "Invalid product handle.",
   invalidCollectionHandle: "Invalid collection handle.",
@@ -30,6 +37,11 @@ export const norwegianMessages = {
   invalidJson: "Ugyldig JSON.",
   invalidLineCount: "Handlekurven må inneholde mellom 1 og 100 linjer.",
   invalidLine: "Handlekurven inneholder en ugyldig variant eller et ugyldig antall.",
+  invalidOrigin: "Ugyldig opprinnelse.",
+  invalidContentType: "Forventet application/json.",
+  bodyTooLarge: "Forespørselen er for stor.",
+  invalidIdempotencyKey: "Ugyldig Idempotency-Key.",
+  checkoutDisabled: "Kassen er deaktivert.",
   notConfigured: "Site API er ikke konfigurert.",
   invalidProductHandle: "Ugyldig produkthåndtak.",
   invalidCollectionHandle: "Ugyldig samlingshåndtak.",
@@ -92,6 +104,7 @@ function stripPathPrefix(pathname, pathPrefix) {
  *   locale: string,
  *   market: string,
  *   pathPrefix?: string,
+ *   canonicalOrigin?: string | null,
  *   beforeRequest?: ((context: BeforeRequestContext) => Response | null | Promise<Response | null>) | null,
  * }} options
  */
@@ -104,12 +117,14 @@ export function createReaiStorefrontWorker({
   locale,
   market,
   pathPrefix: configuredPathPrefix = "",
+  canonicalOrigin = null,
   beforeRequest = null,
 }) {
   if (!cacheKey) throw new TypeError("cacheKey is required");
   if (!storefront?.HANDLE || !storefront?.matchRoute) throw new TypeError("storefront helpers are required");
   if (typeof locale !== "string" || !locale.trim()) throw new TypeError("locale is required");
   if (typeof market !== "string" || !market.trim()) throw new TypeError("market is required");
+  const canonicalUrl = canonicalOrigin ? new URL(canonicalOrigin) : null;
 
   const messages = { ...defaultMessages, ...messageOverrides };
   const pathPrefix = normalizePathPrefix(configuredPathPrefix);
@@ -166,15 +181,56 @@ export function createReaiStorefrontWorker({
     }), env),
   });
 
-  async function checkoutRequest(request, url, env) {
-    let body;
+  async function readBoundedJson(request, limit) {
+    const reader = request.body?.getReader();
+    if (!reader) return { status: 400, error: messages.invalidJson };
+    const chunks = [];
+    let length = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      length += value.byteLength;
+      if (length > limit) {
+        await reader.cancel();
+        return { status: 413, error: messages.bodyTooLarge };
+      }
+      chunks.push(value);
+    }
+    const bytes = new Uint8Array(length);
+    let offset = 0;
+    for (const chunk of chunks) {
+      bytes.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
     try {
-      body = await request.json();
+      return { body: JSON.parse(new TextDecoder().decode(bytes)) };
     } catch {
-      return { error: jsonResponse({ error: messages.invalidJson }, 400, env) };
+      return { status: 400, error: messages.invalidJson };
+    }
+  }
+
+  async function checkoutRequest(request, url, env) {
+    if (env.CHECKOUT_ENABLED === "false") {
+      return { error: jsonResponse({ error: messages.checkoutDisabled }, 403, env) };
+    }
+    if (request.headers.get("Origin") !== url.origin) {
+      return { error: jsonResponse({ error: messages.invalidOrigin }, 403, env) };
+    }
+    if (!request.headers.get("Content-Type")?.toLowerCase().startsWith("application/json")) {
+      return { error: jsonResponse({ error: messages.invalidContentType }, 415, env) };
+    }
+    const rawKey = request.headers.get("Idempotency-Key");
+    if (rawKey !== null && !IDEMPOTENCY_KEY.test(rawKey)) {
+      return { error: jsonResponse({ error: messages.invalidIdempotencyKey }, 400, env) };
     }
 
-    if (!Array.isArray(body.lines) || body.lines.length < 1 || body.lines.length > 100) {
+    const parsed = await readBoundedJson(request, MAX_CHECKOUT_BODY_BYTES);
+    if ("error" in parsed) {
+      return { error: jsonResponse({ error: parsed.error }, parsed.status, env) };
+    }
+    const body = parsed.body;
+
+    if (!Array.isArray(body?.lines) || body.lines.length < 1 || body.lines.length > 100) {
       return { error: jsonResponse({ error: messages.invalidLineCount }, 400, env) };
     }
 
@@ -191,7 +247,7 @@ export function createReaiStorefrontWorker({
       lines,
       returnUrl: new URL(publicPath(checkoutReturnPath), url.origin).href,
     };
-    return { body: checkoutBody };
+    return { body: checkoutBody, idempotencyKey: rawKey || crypto.randomUUID() };
   }
 
   function siteClient(env) {
@@ -201,6 +257,7 @@ export function createReaiStorefrontWorker({
     return new ReaiSiteClient({
       baseUrl: siteBaseUrl(env),
       token: env.REAI_SITE_TOKEN,
+      timeoutMs: 15_000,
     });
   }
 
@@ -282,7 +339,7 @@ export function createReaiStorefrontWorker({
       age <= STOREFRONT_FRESH_MILLISECONDS + STOREFRONT_STALE_WHILE_REVALIDATE_MILLISECONDS &&
       executionContext?.waitUntil
     ) {
-      executionContext.waitUntil(refreshStorefront(env, cached));
+      executionContext.waitUntil(refreshStorefront(env, cached).catch(console.error));
       return { store: cached.store, cacheStatus: "STALE" };
     }
     try {
@@ -420,12 +477,43 @@ export function createReaiStorefrontWorker({
     } else if (request.method === "POST" && route === "/reai/checkout/start") {
       const checkout = await checkoutRequest(request, url, env);
       if (checkout.error) return checkout.error;
-      upstreamResult = client.createCheckoutSession(
-        checkout.body,
-        deliveryContext,
-        request.headers.get("Idempotency-Key") || crypto.randomUUID(),
-      );
-      cacheControl = "no-store";
+      try {
+        const result = await client.createCheckoutSession(
+          checkout.body,
+          deliveryContext,
+          checkout.idempotencyKey,
+        );
+        const upstream = result.response;
+        const responseHeaders = securityHeaders(new Headers(), env);
+        responseHeaders.set("Content-Type", upstream.headers.get("Content-Type") || "application/json; charset=utf-8");
+        responseHeaders.set("Cache-Control", "no-store");
+        responseHeaders.set("Content-Language", canonicalLocale);
+        if (!upstream.ok) {
+          return new Response(upstream.body, {
+            status: upstream.status,
+            statusText: upstream.statusText,
+            headers: responseHeaders,
+          });
+        }
+        const payload = await result.json();
+        const destination = new URL(payload?.checkoutUrl);
+        const expectedBase = new URL(siteBaseUrl(env));
+        if (
+          destination.origin !== expectedBase.origin
+          || destination.protocol !== expectedBase.protocol
+          || !/^\/checkout\/session\/[^/]+$/.test(destination.pathname)
+        ) {
+          throw new Error("Invalid checkout destination");
+        }
+        return new Response(JSON.stringify(payload), {
+          status: upstream.status,
+          statusText: upstream.statusText,
+          headers: responseHeaders,
+        });
+      } catch (error) {
+        console.error("Site API checkout request failed", error);
+        return jsonResponse({ error: messages.temporarilyUnavailable }, 502, env);
+      }
     } else if (["GET", "POST"].includes(request.method)) {
       return jsonResponse({ error: messages.routeNotFound }, 404, env);
     } else {
@@ -469,7 +557,22 @@ export function createReaiStorefrontWorker({
       cacheStatus = cached.cacheStatus;
     } catch (error) {
       console.error("Storefront snapshot failed", error);
-      if (route.type === "home") return null;
+      if (route.type === "home") {
+        if (env.ASSETS?.fetch) {
+          const fallback = await env.ASSETS.fetch(request);
+          if (fallback.ok) {
+            const headers = securityHeaders(new Headers(fallback.headers), env);
+            headers.set("Content-Language", canonicalLocale);
+            headers.set("Cache-Control", "no-store");
+            return new Response(fallback.body, {
+              status: fallback.status,
+              statusText: fallback.statusText,
+              headers,
+            });
+          }
+        }
+        return htmlResponse(storefront.renderUnavailablePage(null, renderContext, route.canonicalPath || "/"), env, 502);
+      }
       if (route.type === "sitemap") return jsonResponse({ error: messages.temporarilyUnavailable }, 502, env);
       return htmlResponse(storefront.renderUnavailablePage(null, renderContext, route.canonicalPath || "/"), env, 502);
     }
@@ -492,7 +595,11 @@ export function createReaiStorefrontWorker({
           const detail = await siteJson(await siteClient(env).collection(route.handle, deliveryContext));
           store = { ...store, collections: [...store.collections, detail] };
         } catch (error) {
-          return htmlResponse(storefront.renderNotFoundPage(store, renderContext, route.canonicalPath), env, error.status === 404 ? 404 : 502);
+          if (error.status === 404) {
+            return htmlResponse(storefront.renderNotFoundPage(store, renderContext, route.canonicalPath), env, 404);
+          }
+          console.error("Collection lookup failed", error);
+          return htmlResponse(storefront.renderUnavailablePage(store, renderContext, route.canonicalPath), env, 502);
         }
       }
       const response = htmlResponse(storefront.renderCollectionPage(store, route.handle, renderContext), env);
@@ -507,7 +614,11 @@ export function createReaiStorefrontWorker({
         try {
           product = await siteJson(await siteClient(env).product(route.handle, deliveryContext));
         } catch (error) {
-          return htmlResponse(storefront.renderNotFoundPage(store, renderContext, route.canonicalPath), env, error.status === 404 ? 404 : 502);
+          if (error.status === 404) {
+            return htmlResponse(storefront.renderNotFoundPage(store, renderContext, route.canonicalPath), env, 404);
+          }
+          console.error("Product lookup failed", error);
+          return htmlResponse(storefront.renderUnavailablePage(store, renderContext, route.canonicalPath), env, 502);
         }
       }
       const availability = await variantAvailability(env, product.variants);
@@ -519,18 +630,41 @@ export function createReaiStorefrontWorker({
     return null;
   }
 
+  function finalizeResponse(response, request, url) {
+    const headers = new Headers(response.headers);
+    if (url.protocol === "https:") {
+      headers.set("Strict-Transport-Security", "max-age=31536000");
+    }
+    if (url.hostname.endsWith(".workers.dev")) {
+      headers.set("X-Robots-Tag", "noindex, nofollow");
+    }
+    return new Response(request.method === "HEAD" ? null : response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
+  }
+
   return {
     async fetch(request, env, executionContext) {
       const url = new URL(request.url);
+      if (canonicalUrl && url.hostname.toLowerCase() === `www.${canonicalUrl.hostname.toLowerCase()}`) {
+        return finalizeResponse(
+          Response.redirect(`${canonicalUrl.origin}${url.pathname}${url.search}`, 301),
+          request,
+          url,
+        );
+      }
       const earlyResponse = await beforeRequest?.({ request, env, url, renderContext });
-      if (earlyResponse) return earlyResponse;
+      if (earlyResponse) return finalizeResponse(earlyResponse, request, url);
       const storefrontPath = stripPathPrefix(url.pathname, pathPrefix);
-      if (storefrontPath?.startsWith("/reai/")) return siteApiResponse(request, env, url, executionContext);
+      if (storefrontPath?.startsWith("/reai/")) {
+        return finalizeResponse(await siteApiResponse(request, env, url, executionContext), request, url);
+      }
 
       const rendered = await renderCommerce(request, env, url, executionContext);
       if (rendered) {
-        if (request.method === "HEAD") return new Response(null, { status: rendered.status, headers: rendered.headers });
-        return rendered;
+        return finalizeResponse(rendered, request, url);
       }
 
       const response = await env.ASSETS.fetch(request);
@@ -547,11 +681,15 @@ export function createReaiStorefrontWorker({
             : "public, max-age=300, stale-while-revalidate=3600",
       );
 
-      return new Response(response.body, {
-        status: response.status,
-        statusText: response.statusText,
-        headers,
-      });
+      return finalizeResponse(
+        new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers,
+        }),
+        request,
+        url,
+      );
     },
   };
 }
