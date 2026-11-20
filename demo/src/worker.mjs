@@ -1,5 +1,5 @@
 // @ts-check
-/** @typedef {{ REAI_SITE_CREDENTIAL?: string, REAI_API_BASE_URL?: string, DEMO_MARKET?: string, DEMO_CHECKOUT_ENABLED?: string, DEMO_PAYMENT_MODE?: string, DEMO_MERCHANT_NAME?: string, DEMO_MERCHANT_ORG_NUMBER?: string, DEMO_PREVIEW?: string, ASSETS: Fetcher }} DemoEnv */
+/** @typedef {{ REAI_SITE_CREDENTIAL?: string, REAI_API_BASE_URL?: string, DEMO_MARKET?: string, DEMO_CHECKOUT_ENABLED?: string, CHECKOUT_ENABLED?: string, DEMO_PAYMENT_MODE?: string, DEMO_MERCHANT_NAME?: string, DEMO_MERCHANT_ORG_NUMBER?: string, DEMO_PREVIEW?: string, ASSETS: Fetcher }} DemoEnv */
 import { ReaiSiteClient } from "../../packages/reai-site-client/client.mjs";
 import { storeContent as starterContent } from "../../starter/src/store-content.js";
 import starter from "../../starter/src/worker.js";
@@ -217,6 +217,7 @@ async function handleDemo(request, env, ctx, url) {
     const paymentMode =
       ["test", "live"].includes(env.DEMO_PAYMENT_MODE || "") &&
       env.DEMO_CHECKOUT_ENABLED === "true" &&
+      String(env.CHECKOUT_ENABLED || "").trim().toLowerCase() !== "false" &&
       (env.DEMO_PAYMENT_MODE !== "live" || !!env.DEMO_MERCHANT_NAME?.trim())
         ? env.DEMO_PAYMENT_MODE
         : "disabled";
@@ -295,10 +296,23 @@ async function handleDemo(request, env, ctx, url) {
         200,
         true,
       );
-    if (url.pathname === "/robots.txt")
-      return new Response(`User-agent: *\nAllow: /\nSitemap: ${publicOrigin}/sitemap.xml\n`, {
-        headers: { ...headers, "Content-Type": "text/plain" },
-      });
+    if (url.pathname === "/robots.txt") {
+      const disallowAll = url.hostname.endsWith(".workers.dev");
+      return new Response(
+        request.method === "HEAD"
+          ? null
+          : disallowAll
+            ? "User-agent: *\nDisallow: /\n"
+            : `User-agent: *\nAllow: /\nSitemap: ${publicOrigin}/sitemap.xml\n`,
+        {
+          headers: {
+            ...headers,
+            "Content-Type": "text/plain; charset=utf-8",
+            ...(disallowAll ? { "X-Robots-Tag": "noindex, nofollow" } : {}),
+          },
+        },
+      );
+    }
     if (url.pathname === "/sitemap.xml")
       return new Response(request.method === "HEAD" ? null : educationalSitemap(), { headers: { ...headers, "Content-Type": "application/xml; charset=utf-8" } });
     const path = normalizedPath(url.pathname);

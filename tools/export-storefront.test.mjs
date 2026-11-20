@@ -55,6 +55,9 @@ test("exports a standalone site without a parent dependency or demo catalog", as
     );
     assert.equal(wrangler.compatibility_date, "2026-11-18");
     assert.deepEqual(wrangler.observability, { enabled: true });
+    assert.equal(wrangler.previews?.vars?.CHECKOUT_ENABLED, "false");
+    assert.match(worker, /CHECKOUT_ENABLED/);
+    assert.match(worker, /Disallow: \//);
     const dependabot = await readFile(
       path.join(destination, ".github/dependabot.yml"),
       "utf8",

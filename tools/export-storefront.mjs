@@ -107,7 +107,7 @@ export async function exportStorefront(name, destination) {
             run_worker_first: true,
           },
           vars: { REAI_API_BASE_URL: "https://app.reai.no" },
-          previews: { vars: { REAI_API_BASE_URL: "https://app.reai.no", REAI_MANAGED_PREVIEWS: "true", REAI_PREVIEW_API_BASE_URL: "https://app.reai.no" } },
+          previews: { vars: { REAI_API_BASE_URL: "https://app.reai.no", REAI_MANAGED_PREVIEWS: "true", REAI_PREVIEW_API_BASE_URL: "https://app.reai.no", CHECKOUT_ENABLED: "false" } },
         },
         null,
         2,
