@@ -16,7 +16,7 @@ export async function configureDemoCommerce(management, options) {
   const base = `/api/sites/${site.id}/commerce`;
   const commerce = await management(base);
   const markets = await management(`${base}/markets`);
-  const defaults = markets.filter((market) => market.handle === 'default' && market.enabled && market.isDefault);
+  const defaults = markets.filter((market) => market.handle === 'default' && market.enabled && market.default);
   if (defaults.length !== 1 || !defaults[0].countries.includes('NO'))
     throw new Error('Expected the enabled Norwegian default demo market.');
   const market = defaults[0];

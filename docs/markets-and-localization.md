@@ -7,7 +7,7 @@ text does not inherently mean NOK.
 
 `GET /site/v1/site` describes available markets, their currencies, default
 locales, supported locales and countries. The beginner starter selects the
-market marked `isDefault`, falling back to the first configured market, and
+market marked `default`, falling back to the first configured market, and
 uses that market's default locale. If there is no market, it renders an
 unavailable state.
 

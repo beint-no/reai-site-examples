@@ -102,7 +102,7 @@ globalThis.fetch = async (input, init) => {
           handle: "default",
           locales: ["nb-NO", "en"],
           defaultLocale: "nb-NO",
-          isDefault: true,
+          default: true,
           currency: "NOK",
         },
       ],

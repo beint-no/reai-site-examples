@@ -113,7 +113,7 @@ test("Live designs use published prices and availability; Index respects collect
               handle: "default",
               defaultLocale: "en",
               locales: ["en"],
-              isDefault: true,
+              default: true,
             },
           ],
         });
