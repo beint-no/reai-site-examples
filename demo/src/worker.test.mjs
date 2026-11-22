@@ -37,7 +37,7 @@ const site = () =>
         handle: "default",
         defaultLocale: "nb-NO",
         locales: ["nb-NO", "en"],
-        isDefault: true,
+        default: true,
       },
     ],
   });
@@ -486,7 +486,7 @@ test("starter design uses the real implementation, prefixes its paths and disabl
                 handle: "default",
                 defaultLocale: "nb-NO",
                 locales: ["nb-NO"],
-                isDefault: true,
+                default: true,
               },
             ],
           })

@@ -453,7 +453,7 @@ async function handleDemo(request, env, ctx, url) {
       const site = await getCachedSite(client, apiBaseUrl, ctx);
       const selected =
         site.markets?.find((m) => m.handle === env.DEMO_MARKET) ||
-        site.markets?.find((m) => m.isDefault) ||
+        site.markets?.find((m) => m.default) ||
         site.markets?.[0];
       if (!selected)
         throw Object.assign(new Error("Market not configured"), {

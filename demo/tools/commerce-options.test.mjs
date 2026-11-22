@@ -13,7 +13,7 @@ function fixture(methods = [{ id: 'carrier', name: 'Bring', amount: 69, carrier:
       return structuredClone(commerce);
     }
     if (route === '/api/sites') return [{ id: 'site', name: 'ReAI sin test-nettbutikk', status: 'enabled', activeDomain: 'nettbutikk.reai.no', previewDomain: 'reai-demo-store.respiro.workers.dev' }];
-    if (route.endsWith('/markets')) return [{ id: 'market', handle: 'default', enabled: true, isDefault: true, countries: ['NO'] }];
+    if (route.endsWith('/markets')) return [{ id: 'market', handle: 'default', enabled: true, default: true, countries: ['NO'] }];
     return structuredClone(commerce);
   };
   return { management, writes, commerce };

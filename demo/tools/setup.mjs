@@ -169,7 +169,7 @@ const marketBody = {
   locales: ["nb-NO", "en"],
   countries: ["NO"],
   enabled: true,
-  isDefault: true,
+  default: true,
 };
 await management(
   `${base}/commerce/markets${market ? "/" + market.id : ""}`,
