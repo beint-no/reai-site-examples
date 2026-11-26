@@ -1306,9 +1306,13 @@ async function handle(request, env, url, ctx) {
         ...(body.name?.trim() ? { name: body.name.trim() } : {}),
         ...(body.locale ? { locale: body.locale } : {}),
       };
+      // Only a passed Turnstile check vouches for a person; otherwise ReAI asks the address to confirm by email.
       const result = await (stock
         ? client.subscribeStock({ ...input, variantId: body.variantId })
-        : client.subscribeNewsletter(input));
+        : client.subscribeNewsletter({
+            ...input,
+            ...(env.TURNSTILE_SECRET_KEY ? { humanVerified: true } : {}),
+          }));
       if (!result.response.ok)
         return json(
           { error: "Signup is temporarily unavailable" },

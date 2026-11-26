@@ -452,9 +452,11 @@ async function handleDemo(request, env, ctx, url) {
           );
         if (await humanCheckFailed(request, env.TURNSTILE_SECRET_KEY, body.turnstileToken, "newsletter"))
           return response({ error: "Signup verification failed" }, 403, true);
+        // Only a passed Turnstile check vouches for a person; otherwise ReAI asks the address to confirm by email.
         const result = await client.subscribeNewsletter({
           email: body.email.trim(),
           consent: true,
+          ...(env.TURNSTILE_SECRET_KEY ? { humanVerified: true } : {}),
         });
         if (!result.response.ok)
           return response(
