@@ -19,6 +19,7 @@ export async function build(name) {
     "catalog-filter-data.js",
     "catalog-filters.js",
     "cart-controls.js",
+    "turnstile.js",
   ]) {
     await cp(
       path.join(root, "demo/public/assets", file),

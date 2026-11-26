@@ -50,7 +50,10 @@ never substitute for unavailable live data. Product photographs on design pages
 illustrate layouts, not physical goods for sale. seed/catalog.json is operator input.
 
 Newsletter signup requires an unchecked consent box and newsletter:subscribe;
-show the Site owner and link privacy. New consent may queue a configured welcome
+show the Site owner and link privacy. Signup forms (here and in the starter design)
+carry the public Turnstile key; with the Worker secret TURNSTILE_SECRET_KEY set, the
+Worker rejects signups without a valid token (starter/src/turnstile.js), and
+NEWSLETTER_RATE_LIMIT throttles repeats. Bots otherwise use them for subscription bombing. New consent may queue a configured welcome
 flow; signup creates no coupon. Back-in-stock signup has separate one-notification
 consent and requires an enabled merchant flow. Never promise unconfigured emails.
 The offline preview records no consent and accepts no payments.

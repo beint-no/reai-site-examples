@@ -1,8 +1,10 @@
 // @ts-check
-/** @typedef {{ REAI_SITE_CREDENTIAL?: string, REAI_API_BASE_URL?: string, DEMO_MARKET?: string, DEMO_CHECKOUT_ENABLED?: string, CHECKOUT_ENABLED?: string, DEMO_PAYMENT_MODE?: string, DEMO_MERCHANT_NAME?: string, DEMO_MERCHANT_ORG_NUMBER?: string, DEMO_PREVIEW?: string, ASSETS: Fetcher }} DemoEnv */
+/** @typedef {{ REAI_SITE_CREDENTIAL?: string, REAI_API_BASE_URL?: string, DEMO_MARKET?: string, DEMO_CHECKOUT_ENABLED?: string, CHECKOUT_ENABLED?: string, DEMO_PAYMENT_MODE?: string, DEMO_MERCHANT_NAME?: string, DEMO_MERCHANT_ORG_NUMBER?: string, DEMO_PREVIEW?: string, TURNSTILE_SECRET_KEY?: string, NEWSLETTER_RATE_LIMIT?: { limit(options: { key: string }): Promise<{ success: boolean }> }, ASSETS: Fetcher }} DemoEnv */
 import { ReaiSiteClient } from "../../packages/reai-site-client/client.mjs";
 import { storeContent as starterContent } from "../../starter/src/store-content.js";
 import starter from "../../starter/src/worker.js";
+import { humanCheckFailed } from "../../starter/src/turnstile.js";
+import { TURNSTILE_SITE_KEY } from "./showcase.mjs";
 import {
   HANDLE,
   learningRoutes,
@@ -43,7 +45,7 @@ const headers = {
   "X-Robots-Tag": "noindex, follow",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
   "Content-Security-Policy":
-    "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https://app.reai.no https://app-test.reai.no data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
+    "default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; style-src 'self'; img-src 'self' https://app.reai.no https://app-test.reai.no data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
 };
 function response(body, status = 200, json = false) {
   return new Response(json ? JSON.stringify(body) : body, {
@@ -250,9 +252,12 @@ async function handleDemo(request, env, ctx, url) {
       const result = await starter.fetch(new Request(target, request), {
         REAI_API_BASE_URL: env.REAI_API_BASE_URL,
         REAI_SITE_CREDENTIAL: env.REAI_SITE_CREDENTIAL,
+        TURNSTILE_SECRET_KEY: env.TURNSTILE_SECRET_KEY,
+        NEWSLETTER_RATE_LIMIT: env.NEWSLETTER_RATE_LIMIT,
         STOREFRONT_BASE_PATH: starterBase,
         STOREFRONT_CONTENT: {
           ...starterContent,
+          turnstileSiteKey: TURNSTILE_SITE_KEY,
           legalName: "Better Integration",
           organizationNumber: "935733944",
           contactEmail: "post+owner@reai.no",
@@ -414,9 +419,16 @@ async function handleDemo(request, env, ctx, url) {
           !request.headers.get("Content-Type")?.startsWith("application/json")
         )
           return response({ error: "Same-origin JSON required" }, 403, true);
+        if (env.NEWSLETTER_RATE_LIMIT) {
+          const { success } = await env.NEWSLETTER_RATE_LIMIT.limit({
+            key: `newsletter:${url.host}:${request.headers.get("CF-Connecting-IP") || "local"}`,
+          });
+          if (!success)
+            return response({ error: "Please wait a moment before signing up again" }, 429, true);
+        }
         let body;
         try {
-          body = await readBoundedJson(request, 2048);
+          body = await readBoundedJson(request, 4096);
         } catch (e) {
           return response({ error: "Invalid signup" }, e.status || 400, true);
         }
@@ -438,6 +450,8 @@ async function handleDemo(request, env, ctx, url) {
             503,
             true,
           );
+        if (await humanCheckFailed(request, env.TURNSTILE_SECRET_KEY, body.turnstileToken, "newsletter"))
+          return response({ error: "Signup verification failed" }, 403, true);
         const result = await client.subscribeNewsletter({
           email: body.email.trim(),
           consent: true,

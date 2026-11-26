@@ -4,6 +4,7 @@ import {
   rememberCartFocus,
   restoreCartFocus,
 } from "./assets/cart-controls.js";
+import { humanToken, spendHumanToken } from "./assets/turnstile.js";
 const CART_KEY = "reai-storefront-cart-v1";
 const CHECKOUT_KEY = "reai-storefront-checkout-key-v1";
 const SESSION_KEY = "reai-storefront-session-v1";
@@ -597,6 +598,7 @@ document
       button.disabled = true;
       status.textContent = text.signingUp;
       try {
+        const turnstileToken = await humanToken(form);
         const response = await fetch(
           route(
             form.hasAttribute("data-stock-signup")
@@ -614,9 +616,11 @@ document
               ...(form.hasAttribute("data-stock-signup")
                 ? { variantId: form.elements.variantId.value }
                 : {}),
+              ...(turnstileToken ? { turnstileToken } : {}),
             }),
           },
         );
+        spendHumanToken(form);
         const result = await response.json();
         if (!response.ok || result.accepted !== true)
           throw new Error("Signup unavailable");

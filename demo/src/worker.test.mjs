@@ -358,7 +358,7 @@ test("newsletter rejects missing consent, cross-origin writes and oversized bodi
           {
             email: "test@example.com",
             consent: true,
-            padding: "x".repeat(3000),
+            padding: "x".repeat(5000),
           },
           {},
           413,

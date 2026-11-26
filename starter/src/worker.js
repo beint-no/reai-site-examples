@@ -1,6 +1,7 @@
 import { ReaiSiteClient } from "../../packages/reai-site-client/client.mjs";
 import { storeContent } from "./store-content.js";
 import { language, ui } from "./ui-copy.js";
+import { humanCheckFailed } from "./turnstile.js";
 import {
   renderCatalogFilters,
   renderCatalogTools,
@@ -35,7 +36,7 @@ const CACHE_RETENTION_MS = 86_400_000;
 const SECURITY_HEADERS = {
   "x-content-type-options": "nosniff",
   "content-security-policy":
-    "default-src 'none'; style-src 'self'; font-src 'self'; script-src 'self'; connect-src 'self'; img-src 'self' https: data:; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
+    "default-src 'none'; style-src 'self'; font-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; connect-src 'self'; img-src 'self' https: data:; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
   "referrer-policy": "strict-origin-when-cross-origin",
   "permissions-policy": "camera=(), microphone=(), geolocation=()",
 };
@@ -157,11 +158,17 @@ function card(product, store) {
   </article>`;
 }
 
+function humanCheckAttributes(config, action) {
+  return config.turnstileSiteKey
+    ? ` data-turnstile="${escapeHtml(config.turnstileSiteKey)}" data-turnstile-action="${action}"`
+    : "";
+}
+
 function newsletter(site, store) {
   const config = store.content || storeContent;
   if (config.newsletterEnabled === false || !site) return "";
   const t = ui(store.locale);
-  return `<section class="shell newsletter" aria-labelledby="newsletter-title"><div><h2 id="newsletter-title">${t.newsletterTitle}</h2><p>${t.newsletterText}</p></div><form data-newsletter><label for="newsletter-email">${t.email}</label><div class="newsletter-fields"><input id="newsletter-email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="${t.emailPlaceholder}"><button class="button" type="submit">${t.subscribe}</button></div><label class="newsletter-consent"><input type="checkbox" name="consent" required><span>${t.newsletterConsent} ${escapeHtml(config.legalName || site.name)}. <a href="/policies/privacy">${t.privacy}</a></span></label><label class="newsletter-trap" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label><p data-newsletter-status role="status"></p></form></section>`;
+  return `<section class="shell newsletter" aria-labelledby="newsletter-title"><div><h2 id="newsletter-title">${t.newsletterTitle}</h2><p>${t.newsletterText}</p></div><form data-newsletter${humanCheckAttributes(config, "newsletter")}><label for="newsletter-email">${t.email}</label><div class="newsletter-fields"><input id="newsletter-email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="${t.emailPlaceholder}"><button class="button" type="submit">${t.subscribe}</button></div><label class="newsletter-consent"><input type="checkbox" name="consent" required><span>${t.newsletterConsent} ${escapeHtml(config.legalName || site.name)}. <a href="/policies/privacy">${t.privacy}</a></span></label><label class="newsletter-trap" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label><p data-newsletter-status role="status"></p></form></section>`;
 }
 
 function cartContents(store) {
@@ -561,7 +568,7 @@ function productPage(site, store, product, requestedVariant) {
   const unavailable = variants.filter((variant) => variant.outOfStock);
   const notification =
     config.stockNotificationsEnabled && unavailable.length
-      ? `<form data-stock-signup class="stock-signup"><h2>${t.stockSignupTitle}</h2><label>${t.options}<select name="variantId">${unavailable.map((variant) => `<option value="${escapeHtml(variant.id)}">${escapeHtml(variant.options.map((o) => `${o.name}: ${o.value}`).join(" · ") || t.standard)}</option>`).join("")}</select></label><label>${t.email}<input name="email" type="email" autocomplete="email" maxlength="254" required></label><label class="newsletter-consent"><input name="consent" type="checkbox" required><span>${t.stockConsent}</span></label><a class="text-link" href="/policies/privacy">${t.privacy}</a><button class="button" type="submit">${t.notifyMe}</button><p data-newsletter-status role="status"></p></form>`
+      ? `<form data-stock-signup class="stock-signup"${humanCheckAttributes(config, "stock")}><h2>${t.stockSignupTitle}</h2><label>${t.options}<select name="variantId">${unavailable.map((variant) => `<option value="${escapeHtml(variant.id)}">${escapeHtml(variant.options.map((o) => `${o.name}: ${o.value}`).join(" · ") || t.standard)}</option>`).join("")}</select></label><label>${t.email}<input name="email" type="email" autocomplete="email" maxlength="254" required></label><label class="newsletter-consent"><input name="consent" type="checkbox" required><span>${t.stockConsent}</span></label><a class="text-link" href="/policies/privacy">${t.privacy}</a><button class="button" type="submit">${t.notifyMe}</button><p data-newsletter-status role="status"></p></form>`
       : "";
   store.metaDescription = product.seoDescription || product.description;
   const canonical = canonicalHref(
@@ -1260,7 +1267,14 @@ async function handle(request, env, url, ctx) {
         return json({ error: "Signup unavailable" }, 404);
       if (env.STOREFRONT_SIGNUP_ENABLED === "false")
         return json({ error: "Signup unavailable in preview" }, 503);
-      const body = await boundedJson(request, 2048);
+      if (env.NEWSLETTER_RATE_LIMIT) {
+        const { success } = await env.NEWSLETTER_RATE_LIMIT.limit({
+          key: `signup:${url.host}:${request.headers.get("CF-Connecting-IP") || "local"}`,
+        });
+        if (!success)
+          return json({ error: "Please wait a moment before signing up again" }, 429);
+      }
+      const body = await boundedJson(request, 4096);
       if (
         typeof body?.email !== "string" ||
         body.email.length > 254 ||
@@ -1277,6 +1291,15 @@ async function handle(request, env, url, ctx) {
           400,
         );
       if (body.website) return json({ accepted: true });
+      if (
+        await humanCheckFailed(
+          request,
+          env.TURNSTILE_SECRET_KEY,
+          body.turnstileToken,
+          stock ? "stock" : "newsletter",
+        )
+      )
+        return json({ error: "Signup verification failed" }, 403);
       const input = {
         email: body.email.trim(),
         consent: true,
