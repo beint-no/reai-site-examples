@@ -229,7 +229,7 @@ test("newsletter rejects missing consent, cross-origin, invalid email and oversi
     [{ email: "qa@example.test", consent: false }, {}, 400],
     [{ email: "invalid", consent: true }, {}, 400],
     [
-      { email: "qa@example.test", consent: true, extra: "x".repeat(3000) },
+      { email: "qa@example.test", consent: true, extra: "x".repeat(5000) },
       {},
       400,
     ],

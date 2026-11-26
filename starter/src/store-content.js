@@ -8,6 +8,9 @@ export const storeContent = {
   newsletterEnabled: true,
   // Enable only after configuring the merchant's ReAI back-in-stock flow.
   stockNotificationsEnabled: false,
+  // Public Cloudflare Turnstile site key for signup forms. Set it together with
+  // the Worker secret TURNSTILE_SECRET_KEY; the Worker then rejects unverified signups.
+  turnstileSiteKey: "",
   nb: {
     tagline: "Se utvalget og finn det du trenger.",
     heroEyebrow: "Velkommen til butikken",

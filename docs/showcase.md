@@ -45,7 +45,8 @@ real payments and unpaid invoice orders.
 Newsletter signup forwards only email and explicit consent through newsletter:subscribe.
 New consent can queue a configured welcome flow; signup creates no discount and
 discloses no customer identity. Optional stock alerts require a configured flow and
-separate one-notification consent. An offline preview cannot record consent. The merchant handles consent withdrawal.
+separate one-notification consent. Signups need a Cloudflare Turnstile token once
+the Worker secret TURNSTILE_SECRET_KEY is set. An offline preview cannot record consent. The merchant handles consent withdrawal.
 
 Run npm run demo for the offline catalog, or npm run dev with an ignored .dev.vars
 Site credential for real reads. Run npm run check before release. Check mobile and

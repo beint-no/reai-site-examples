@@ -906,3 +906,9 @@ button.button { border: 0; cursor: pointer; font-family: inherit; }
 }
 .product-navigation {display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-bottom:24px}
 .product-card[id] {scroll-margin-top:100px}
+.turnstile-widget {
+  max-width: 100%;
+}
+.turnstile-widget:empty {
+  display: none;
+}

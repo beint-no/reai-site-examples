@@ -2504,3 +2504,4 @@ body {
     font-size: 12px;
   }
 }
+.turnstile-widget{max-width:100%}.turnstile-widget:empty{display:none}

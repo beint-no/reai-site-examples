@@ -48,43 +48,47 @@
           "'": "&#39;",
         })[c],
     );
-  document
-    .querySelector("[data-newsletter]")
-    ?.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const form = event.currentTarget,
-        button = form.querySelector("button"),
-        message = form.querySelector("[data-newsletter-message]");
-      if (!form.reportValidity()) return;
-      button.disabled = true;
-      message.textContent = text("Lagrer samtykket…", "Recording consent…");
-      const fields = new FormData(form);
-      try {
-        const response = await fetch("/reai/newsletter", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: fields.get("email"),
-            consent: fields.get("consent") === "on",
-            website: fields.get("website"),
-          }),
-        });
-        const result = await response.json();
-        if (!response.ok || result.accepted !== true) throw new Error();
-        message.textContent = text(
-          "Takk! Samtykket er registrert hos Better Integration. Ingen e-post sendes automatisk.",
-          "Thank you! Consent is recorded with Better Integration. No email is sent automatically.",
-        );
-        form.reset();
-      } catch {
-        message.textContent = text(
-          "Påmeldingen kunne ikke lagres. Prøv igjen senere. Lokal forhåndsvisning lagrer ikke samtykke.",
-          "Signup could not be recorded. Try again later. Offline preview does not record consent.",
-        );
-      } finally {
-        button.disabled = false;
-      }
-    });
+  const signup = document.querySelector("[data-newsletter]");
+  const turnstile = signup && import("/assets/turnstile.js");
+  signup?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget,
+      button = form.querySelector("button"),
+      message = form.querySelector("[data-newsletter-message]");
+    if (!form.reportValidity()) return;
+    button.disabled = true;
+    message.textContent = text("Lagrer samtykket…", "Recording consent…");
+    const fields = new FormData(form);
+    try {
+      const { humanToken, spendHumanToken } = await turnstile;
+      const turnstileToken = await humanToken(form);
+      const response = await fetch("/reai/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: fields.get("email"),
+          consent: fields.get("consent") === "on",
+          website: fields.get("website"),
+          ...(turnstileToken ? { turnstileToken } : {}),
+        }),
+      });
+      spendHumanToken(form);
+      const result = await response.json();
+      if (!response.ok || result.accepted !== true) throw new Error();
+      message.textContent = text(
+        "Takk! Samtykket er registrert hos Better Integration. Ingen e-post sendes automatisk.",
+        "Thank you! Consent is recorded with Better Integration. No email is sent automatically.",
+      );
+      form.reset();
+    } catch {
+      message.textContent = text(
+        "Påmeldingen kunne ikke lagres. Prøv igjen senere. Lokal forhåndsvisning lagrer ikke samtykke.",
+        "Signup could not be recorded. Try again later. Offline preview does not record consent.",
+      );
+    } finally {
+      button.disabled = false;
+    }
+  });
   const page = document.querySelector("[data-scenario]");
   if (!page) return;
   const style = page.dataset.scenario,
