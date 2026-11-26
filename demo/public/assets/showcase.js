@@ -76,8 +76,8 @@
       const result = await response.json();
       if (!response.ok || result.accepted !== true) throw new Error();
       message.textContent = text(
-        "Takk! Samtykket er registrert hos Better Integration. Ingen e-post sendes automatisk.",
-        "Thank you! Consent is recorded with Better Integration. No email is sent automatically.",
+        "Takk! Hvis vi trenger å bekrefte adressen, får du en e-post med en lenke.",
+        "Thank you! If we need to confirm your address, you'll get an email with a link.",
       );
       form.reset();
     } catch {
